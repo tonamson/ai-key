@@ -27,6 +27,7 @@ import { PlansModule } from './plans/plans.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { ReferralModule } from './referral/referral.module';
 import { OrdersModule } from './orders/orders.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { OrdersModule } from './orders/orders.module';
     CouponsModule,
     ReferralModule,
     OrdersModule,
+    SubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [
