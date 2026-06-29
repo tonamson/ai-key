@@ -28,6 +28,7 @@ import { CouponsModule } from './coupons/coupons.module';
 import { ReferralModule } from './referral/referral.module';
 import { OrdersModule } from './orders/orders.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { ProxyModule } from './proxy/proxy.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
     ReferralModule,
     OrdersModule,
     SubscriptionsModule,
+    ProxyModule,
   ],
   controllers: [AppController],
   providers: [
