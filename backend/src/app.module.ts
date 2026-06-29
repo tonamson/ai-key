@@ -24,6 +24,7 @@ import { ReferralCode } from './referral/referral-code.entity';
 import { Order } from './orders/order.entity';
 import { KeySubscription } from './subscriptions/key-subscription.entity';
 import { PlansModule } from './plans/plans.module';
+import { CouponsModule } from './coupons/coupons.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { PlansModule } from './plans/plans.module';
     NotificationsModule,
     NineRouterModule,
     PlansModule,
+    CouponsModule,
   ],
   controllers: [AppController],
   providers: [
