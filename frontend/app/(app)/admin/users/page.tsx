@@ -155,10 +155,8 @@ function UsersTab({ roles }: { roles: Role[] }) {
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="size-7 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <MoreHorizontal className="size-4" />
-                      </Button>
+                    <DropdownMenuTrigger className="size-7 inline-flex items-center justify-center rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent">
+                      <MoreHorizontal className="size-4" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-40">
                       <DropdownMenuItem onClick={() => toggleActive(u)}>
