@@ -6,33 +6,36 @@ import { TrendingUp, DollarSign, Zap, ShoppingCart } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { statsApi, StatsSummary, RevenuePoint, TokenPoint } from '@/lib/api/admin.service';
 
-type Granularity = 'day' | 'week' | 'month';
-type Range = '7d' | '30d' | '90d' | 'custom';
+type Preset = '7d' | '30d' | 'monthly' | 'custom';
 
-const RANGES: { label: string; value: Range }[] = [
-  { label: '7 ngày', value: '7d' },
-  { label: '30 ngày', value: '30d' },
-  { label: '90 ngày', value: '90d' },
+const PRESETS: { label: string; value: Preset }[] = [
+  { label: '7 ngày gần nhất', value: '7d' },
+  { label: '30 ngày gần nhất', value: '30d' },
+  { label: 'Theo tháng', value: 'monthly' },
   { label: 'Tùy chọn', value: 'custom' },
-];
-
-const GRAN: { label: string; value: Granularity }[] = [
-  { label: 'Theo ngày', value: 'day' },
-  { label: 'Theo tuần', value: 'week' },
-  { label: 'Theo tháng', value: 'month' },
 ];
 
 function fmt(n: number) { return new Intl.NumberFormat('vi-VN').format(n); }
 function fmtK(n: number) { return n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n); }
 
-function rangeToFromTo(range: Range, customFrom: string, customTo: string): [string, string] {
+function presetToParams(preset: Preset, customFrom: string, customTo: string): { from: string; to: string; granularity: 'day' | 'month' } | null {
+  if (preset === 'custom') {
+    if (!customFrom || !customTo) return null;
+    return { from: new Date(customFrom).toISOString(), to: new Date(customTo + 'T23:59:59').toISOString(), granularity: 'day' };
+  }
   const to = new Date();
   to.setHours(23, 59, 59, 999);
-  if (range === 'custom') return [customFrom, customTo];
+  if (preset === 'monthly') {
+    const from = new Date(to);
+    from.setMonth(from.getMonth() - 11);
+    from.setDate(1);
+    from.setHours(0, 0, 0, 0);
+    return { from: from.toISOString(), to: to.toISOString(), granularity: 'month' };
+  }
   const from = new Date(to);
-  from.setDate(from.getDate() - (range === '7d' ? 7 : range === '30d' ? 30 : 90));
+  from.setDate(from.getDate() - (preset === '7d' ? 7 : 30));
   from.setHours(0, 0, 0, 0);
-  return [from.toISOString(), to.toISOString()];
+  return { from: from.toISOString(), to: to.toISOString(), granularity: 'day' };
 }
 
 function StatCard({ label, value, sub, icon: Icon, color }: { label: string; value: string; sub?: string; icon: any; color: string }) {
@@ -65,8 +68,7 @@ const CustomTooltip = ({ active, payload, label, type }: any) => {
 };
 
 export default function StatsPage() {
-  const [range, setRange] = useState<Range>('30d');
-  const [gran, setGran] = useState<Granularity>('day');
+  const [preset, setPreset] = useState<Preset>('30d');
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
   const [summary, setSummary] = useState<StatsSummary | null>(null);
@@ -75,27 +77,32 @@ export default function StatsPage() {
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
-    const [from, to] = rangeToFromTo(range, customFrom, customTo);
-    if (!from || !to) return;
+    const params = presetToParams(preset, customFrom, customTo);
+    if (!params) return;
+    const { from, to, granularity } = params;
     setLoading(true);
     try {
       const [s, r, t] = await Promise.all([
         statsApi.summary(from, to),
-        statsApi.revenue(from, to, gran),
+        statsApi.revenue(from, to, granularity),
         statsApi.tokens(from, to),
       ]);
       setSummary(s);
       setRevenueData(r.map(d => ({
         ...d,
-        period: new Date(d.period).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: gran === 'month' ? '2-digit' : undefined }),
+        period: new Date(d.period).toLocaleDateString('vi-VN', {
+          day: granularity === 'day' ? '2-digit' : undefined,
+          month: '2-digit',
+          year: granularity === 'month' ? '2-digit' : undefined,
+        }),
       })));
       setTokenData(t.map(d => ({
         ...d,
-        hour: new Date(d.hour).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }),
+        hour: new Date(d.hour).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }),
       })));
     } catch (e) { toast.error((e as Error).message); }
     finally { setLoading(false); }
-  }, [range, gran, customFrom, customTo]);
+  }, [preset, customFrom, customTo]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -109,18 +116,15 @@ export default function StatsPage() {
 
         {/* Filters */}
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Range */}
           <div className="flex gap-1 p-1 bg-muted rounded-lg">
-            {RANGES.map(r => (
-              <button key={r.value} onClick={() => setRange(r.value)}
-                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${range === r.value ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
-                {r.label}
+            {PRESETS.map(p => (
+              <button key={p.value} onClick={() => setPreset(p.value)}
+                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${preset === p.value ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                {p.label}
               </button>
             ))}
           </div>
-
-          {/* Custom date */}
-          {range === 'custom' && (
+          {preset === 'custom' && (
             <div className="flex items-center gap-1.5 text-sm">
               <input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)}
                 className="border rounded-md px-2 py-1 h-8 text-sm bg-background" />
@@ -129,16 +133,6 @@ export default function StatsPage() {
                 className="border rounded-md px-2 py-1 h-8 text-sm bg-background" />
             </div>
           )}
-
-          {/* Granularity */}
-          <div className="flex gap-1 p-1 bg-muted rounded-lg">
-            {GRAN.map(g => (
-              <button key={g.value} onClick={() => setGran(g.value)}
-                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${gran === g.value ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
-                {g.label}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
