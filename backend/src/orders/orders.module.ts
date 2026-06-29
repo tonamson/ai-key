@@ -8,6 +8,7 @@ import { PlansModule } from '../plans/plans.module';
 import { CouponsModule } from '../coupons/coupons.module';
 import { ReferralModule } from '../referral/referral.module';
 import { NineRouterModule } from '../nine-router/nine-router.module';
+import { WalletModule } from '../wallet/wallet.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { NineRouterModule } from '../nine-router/nine-router.module';
     CouponsModule,
     ReferralModule,
     NineRouterModule,
+    WalletModule,
   ],
   controllers: [OrdersController, OrdersAdminController],
   providers: [OrdersService],

@@ -1,0 +1,26 @@
+# IDE / tools
+.claude/
+.cursor/
+.cursorrules
+.kiro/
+.mcp.json
+.opencode.json
+.playwright-mcp/
+.serena/
+.supergraph-env
+.windsurfrules
+.code-review-graph/
+
+# Screenshots / test artifacts
+*.png
+*.jpg
+
+# Env files
+.env
+.env.local
+.env.production
+
+# Node
+node_modules/
+dist/
+.next/

@@ -7,6 +7,7 @@ import { User } from '../users/user.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
+import { RecaptchaService } from './recaptcha.service';
 import { ReferralModule } from '../referral/referral.module';
 
 @Module({
@@ -23,7 +24,7 @@ import { ReferralModule } from '../referral/referral.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, RecaptchaService],
   exports: [AuthService],
 })
 export class AuthModule {}

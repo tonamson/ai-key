@@ -106,18 +106,25 @@ export interface Order { id: string; userId: string; user?: AdminUser; planId: s
 export const orderApi = {
   listAdmin: () => apiClient.get<Order[]>('/admin/orders').then(r => r.data),
   listMine: () => apiClient.get<Order[]>('/orders/my').then(r => r.data),
-  create: (data: { planId: string; couponCode?: string; referralCode?: string }) =>
+  create: (data: { planId: string; couponCode?: string; useWallet?: boolean }) =>
     apiClient.post<{ order: Order; vietQRUrl: string }>('/orders', data).then(r => r.data),
   confirm: (id: string) => apiClient.patch<Order>(`/admin/orders/${id}/confirm`).then(r => r.data),
 };
 
 // ─── Subscriptions ───────────────────────────────────────────────────────────
-export interface KeySubscription { id: string; nineRouterKey: string; tokenQuota: number; tokenUsed: number; startsAt: string; expiresAt: string; isActive: boolean; order?: { plan?: Plan }; }
+export interface KeySubscription { id: string; nineRouterKey: string; nineRouterKeyMasked?: string; tokenQuota: number; tokenUsed: number; startsAt: string; expiresAt: string; isActive: boolean; order?: { plan?: Plan }; }
 export const subscriptionApi = {
   listMine: () => apiClient.get<KeySubscription[]>('/subscriptions/my').then(r => r.data),
 };
 
 // ─── Referral ────────────────────────────────────────────────────────────────
+export interface WalletTransaction { id: string; amount: number; type: string; description: string | null; orderId: string | null; createdAt: string; }
+
+export const walletApi = {
+  getMe: () => apiClient.get<{ balance: number; history: WalletTransaction[] }>('/wallet/me').then(r => r.data),
+  adminHistory: (userId: string) => apiClient.get<WalletTransaction[]>(`/admin/wallet/${userId}/history`).then(r => r.data),
+};
+
 export const referralApi = {
   getMyCode: () => apiClient.get<{ code: string; totalEarned: number }>('/referral/my-code').then(r => r.data),
 };

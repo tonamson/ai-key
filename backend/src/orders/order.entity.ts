@@ -16,6 +16,7 @@ export class Order {
   @Column({ type: 'varchar', nullable: true }) referralCode: string | null;
   @Column({ type: 'decimal', precision: 12, scale: 0 }) originalPrice: number;
   @Column({ type: 'decimal', precision: 12, scale: 0, default: 0 }) discountAmount: number;
+  @Column({ type: 'decimal', precision: 12, scale: 0, default: 0 }) walletUsed: number;
   @Column({ type: 'decimal', precision: 12, scale: 0 }) finalPrice: number;
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING }) status: OrderStatus;
   @Column({ type: 'timestamptz', nullable: true }) paidAt: Date | null;

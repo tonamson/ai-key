@@ -22,14 +22,18 @@ describe('SubscriptionsService', () => {
     jest.clearAllMocks();
   });
 
-  it('deductTokens adds inputTokens + outputTokens to tokenUsed', async () => {
-    const sub = { id: '1', tokenQuota: 1000000, tokenUsed: 100, isActive: true } as any;
+  it('deductTokens adds inputTokens + outputTokens to tokenUsed and returns QuotaInfo', async () => {
+    const sub = {
+      id: '1', tokenQuota: 1000000, tokenUsed: 100, tokenUsedPeriod: 0,
+      periodStartsAt: new Date(Date.now() - 1000), isActive: true,
+    } as any;
     mockRepo.findOne.mockResolvedValue(sub);
     mockRepo.save.mockImplementation((v: any) => v);
 
-    const remaining = await service.deductTokens('1', 500, 300);
+    const quota = await service.deductTokens('1', 500, 300);
 
     expect(mockRepo.save).toHaveBeenCalledWith(expect.objectContaining({ tokenUsed: 900 }));
-    expect(remaining).toBe(999100);
+    expect(quota.remainingTotal).toBe(999100);
+    expect(quota.resetAt).toBeInstanceOf(Date);
   });
 });

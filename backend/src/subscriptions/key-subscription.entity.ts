@@ -13,9 +13,19 @@ export class KeySubscription {
   @Column() nineRouterKey: string;
   @Column({ type: 'bigint' }) tokenQuota: number;
   @Column({ type: 'bigint', default: 0 }) tokenUsed: number;
+  @Column({ type: 'bigint', default: 0 }) tokenUsedPeriod: number;
   @Column({ type: 'timestamptz' }) startsAt: Date;
+  @Column({ type: 'timestamptz' }) periodStartsAt: Date;
   @Column({ type: 'timestamptz' }) expiresAt: Date;
   @Column({ default: true }) isActive: boolean;
   @CreateDateColumn() createdAt: Date;
   @UpdateDateColumn() updatedAt: Date;
+
+  /** Next reset time = periodStartsAt + windowMs, rolling forward until > now */
+  periodResetAt(windowMs: number): Date {
+    let t = this.periodStartsAt.getTime();
+    const now = Date.now();
+    while (t <= now) t += windowMs;
+    return new Date(t);
+  }
 }

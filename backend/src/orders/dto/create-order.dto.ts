@@ -1,7 +1,7 @@
-import { IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateOrderDto {
   @IsUUID() planId: string;
   @IsOptional() @IsString() couponCode?: string;
-  @IsOptional() @IsString() referralCode?: string;
+  @IsOptional() @IsBoolean() useWallet?: boolean;
 }

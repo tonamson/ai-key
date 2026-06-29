@@ -7,6 +7,7 @@ import { PlansService } from '../plans/plans.service';
 import { CouponsService } from '../coupons/coupons.service';
 import { ReferralService } from '../referral/referral.service';
 import { NineRouterService } from '../nine-router/nine-router.service';
+import { WalletService } from '../wallet/wallet.service';
 import { DiscountType } from '../coupons/coupon.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 
@@ -21,6 +22,7 @@ export class OrdersService {
     private readonly coupons: CouponsService,
     private readonly referral: ReferralService,
     private readonly nineRouter: NineRouterService,
+    private readonly wallet: WalletService,
   ) {}
 
   async createOrder(userId: string, dto: CreateOrderDto) {
@@ -42,18 +44,41 @@ export class OrdersService {
       discountAmount = Math.min(discountAmount, originalPrice);
     }
 
-    const finalPrice = originalPrice - discountAmount;
+    // Tính số dư ví có thể dùng
+    let walletUsed = 0;
+    if (dto.useWallet) {
+      const balance = await this.wallet.getBalance(userId);
+      walletUsed = Math.min(balance, originalPrice - discountAmount);
+      walletUsed = Math.max(0, walletUsed);
+    }
+
+    const finalPrice = Math.max(0, originalPrice - discountAmount - walletUsed);
     const order = await this.orderRepo.save(this.orderRepo.create({
       userId,
       planId: plan.id,
       couponId,
-      referralCode: dto.referralCode ?? null,
       originalPrice,
       discountAmount,
+      walletUsed,
       finalPrice,
     }));
 
-    const vietQRUrl = `${VIETQR_BASE}?amount=${finalPrice}&addInfo=AIKEY-${order.id}`;
+    // Trừ ví ngay khi tạo đơn (lock số dư)
+    if (walletUsed > 0) {
+      await this.wallet.spendForOrder(userId, walletUsed, order.id);
+    }
+
+    const vietQRUrl = finalPrice > 0
+      ? `${VIETQR_BASE}?amount=${finalPrice}&addInfo=AIKEY-${order.id.slice(0, 8)}`
+      : '';
+
+    // Ví cover 100% — confirm ngay không cần QR
+    if (finalPrice === 0) {
+      await this.confirmOrder(order.id);
+      const confirmed = await this.orderRepo.findOne({ where: { id: order.id } });
+      return { order: confirmed!, vietQRUrl: '' };
+    }
+
     return { order, vietQRUrl };
   }
 
@@ -78,6 +103,7 @@ export class OrdersService {
       tokenQuota: order.plan.tokenQuota,
       startsAt: now,
       expiresAt,
+      periodStartsAt: now,
     }));
 
     order.status = OrderStatus.PAID;
@@ -87,11 +113,12 @@ export class OrdersService {
     await this.orderRepo.save(order);
 
     if (order.couponId) {
-      await this.coupons.update(order.couponId, { usedCount: () => `"usedCount" + 1` } as any).catch(() => {});
+      await this.coupons.incrementUsed(order.couponId).catch(() => {});
     }
 
-    if (order.referralCode) {
-      await this.referral.creditCommission(order.referralCode, Number(order.finalPrice)).catch(() => {});
+    // Hoa hồng chỉ tính trên tiền QR thật (finalPrice), không tính phần trả bằng ví
+    if (order.user.referredBy && Number(order.finalPrice) > 0) {
+      await this.referral.creditCommission(order.user.referredBy, Number(order.finalPrice), order.id, this.wallet).catch(() => {});
     }
 
     return order;

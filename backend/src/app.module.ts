@@ -18,6 +18,7 @@ import { ActivityLog } from './activity-log/activity-log.entity';
 import { Notification } from './notifications/notification.entity';
 import { NotificationsModule } from './notifications/notifications.module';
 import { NineRouterModule } from './nine-router/nine-router.module';
+import { EmailModule } from './email/email.module';
 import { Plan } from './plans/plan.entity';
 import { Coupon } from './coupons/coupon.entity';
 import { ReferralCode } from './referral/referral-code.entity';
@@ -28,7 +29,11 @@ import { CouponsModule } from './coupons/coupons.module';
 import { ReferralModule } from './referral/referral.module';
 import { OrdersModule } from './orders/orders.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
-import { ProxyModule } from './proxy/proxy.module';
+import { ClaudeProxyModule } from './claude-proxy/claude-proxy.module';
+import { SystemConfigModule } from './system-config/system-config.module';
+import { WalletModule } from './wallet/wallet.module';
+import { SystemConfig } from './system-config/system-config.entity';
+import { WalletTransaction } from './wallet/wallet-transaction.entity';
 
 @Module({
   imports: [
@@ -38,7 +43,7 @@ import { ProxyModule } from './proxy/proxy.module';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         url: config.getOrThrow('DATABASE_URL'),
-        entities: [User, Role, ActivityLog, Notification, Plan, Coupon, ReferralCode, Order, KeySubscription],
+        entities: [User, Role, ActivityLog, Notification, Plan, Coupon, ReferralCode, Order, KeySubscription, SystemConfig, WalletTransaction],
         migrations: ['dist/database/migrations/*.js'],
         migrationsRun: true,
         synchronize: false,
@@ -52,12 +57,15 @@ import { ProxyModule } from './proxy/proxy.module';
     UploadModule,
     NotificationsModule,
     NineRouterModule,
+    EmailModule,
     PlansModule,
     CouponsModule,
     ReferralModule,
     OrdersModule,
     SubscriptionsModule,
-    ProxyModule,
+    ClaudeProxyModule,
+    SystemConfigModule,
+    WalletModule,
   ],
   controllers: [AppController],
   providers: [

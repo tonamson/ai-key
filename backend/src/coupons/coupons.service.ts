@@ -25,6 +25,10 @@ export class CouponsService {
     return this.repo.save(coupon);
   }
 
+  incrementUsed(id: string) {
+    return this.repo.increment({ id }, 'usedCount', 1);
+  }
+
   async validate(code: string): Promise<Coupon> {
     const coupon = await this.repo.findOne({ where: { code } });
     if (!coupon || !coupon.isActive) throw new BadRequestException('Mã giảm giá không hợp lệ');

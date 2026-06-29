@@ -6,7 +6,7 @@ export class ReferralController {
   constructor(private readonly service: ReferralService) {}
 
   @Get('my-code')
-  getMyCode(@Request() req: any) {
-    return this.service.getMyCode(req.user.sub);
+  async getMyCode(@Request() req: any) {
+    return this.service.getOrCreate(req.user.id);
   }
 }

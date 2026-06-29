@@ -28,12 +28,17 @@ export class AuthService {
     return new OTPAuth.TOTP({ issuer: 'AI Key', label: email, secret, digits: 6, period: 30 });
   }
 
-  async register(email: string, password: string, name: string) {
+  async register(email: string, password: string, name: string, referredBy?: string) {
     const exists = await this.users.findOneBy({ email });
     if (exists) throw new ConflictException('Email đã được sử dụng');
     const hashed = await bcrypt.hash(password, 10);
-    const saved = await this.users.save(this.users.create({ email, password: hashed, name }));
-    // generate referral code in background (non-blocking)
+    // Validate referral code trước khi lưu
+    let validRef: string | null = null;
+    if (referredBy) {
+      const ref = await this.referral.findByCode(referredBy.trim().toUpperCase());
+      if (ref) validRef = ref.code;
+    }
+    const saved = await this.users.save(this.users.create({ email, password: hashed, name, referredBy: validRef }));
     this.referral.generateCode(saved.id).catch(() => {});
     const user = await this.users.findOne({ where: { id: saved.id }, relations: { roleDetail: true } });
     return this.issueTokens(user!);

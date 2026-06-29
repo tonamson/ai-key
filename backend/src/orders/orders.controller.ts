@@ -9,12 +9,12 @@ export class OrdersController {
 
   @Post()
   create(@Request() req: any, @Body() dto: CreateOrderDto) {
-    return this.service.createOrder(req.user.sub, dto);
+    return this.service.createOrder(req.user.id, dto);
   }
 
   @Get('my')
   findMine(@Request() req: any) {
-    return this.service.findMine(req.user.sub);
+    return this.service.findMine(req.user.id);
   }
 }
 

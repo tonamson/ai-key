@@ -29,7 +29,8 @@ describe('ReferralService', () => {
     mockRepo.findOne.mockResolvedValue(ref);
     mockRepo.save.mockResolvedValue({ ...ref, totalEarned: 35000 });
 
-    await service.creditCommission('ABC12345', 350000);
+    const mockWallet = { creditCommission: jest.fn().mockResolvedValue(undefined) } as any;
+    await service.creditCommission('ABC12345', 350000, 'order-id', mockWallet);
 
     expect(mockRepo.save).toHaveBeenCalledWith(
       expect.objectContaining({ totalEarned: 35000 })
