@@ -132,3 +132,16 @@ export const notificationApi = {
   adminCreate: (data: { userId?: string; type: NotificationType; title: string; body?: string; link?: string }) =>
     apiClient.post<Notification>('/admin/notifications', data).then(r => r.data),
 };
+
+export interface StatsSummary { orders: number; revenue: number; inputTokens: number; outputTokens: number; }
+export interface RevenuePoint { period: string; orders: number; revenue: number; }
+export interface TokenPoint { hour: string; input: number; output: number; }
+
+export const statsApi = {
+  summary: (from: string, to: string) =>
+    apiClient.get<StatsSummary>('/admin/stats/summary', { params: { from, to } }).then(r => r.data),
+  revenue: (from: string, to: string, granularity: 'day' | 'week' | 'month') =>
+    apiClient.get<RevenuePoint[]>('/admin/stats/revenue', { params: { from, to, granularity } }).then(r => r.data),
+  tokens: (from: string, to: string) =>
+    apiClient.get<TokenPoint[]>('/admin/stats/tokens', { params: { from, to } }).then(r => r.data),
+};

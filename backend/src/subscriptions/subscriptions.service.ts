@@ -42,6 +42,10 @@ export class SubscriptionsService {
     return this.repo.findOne({ where: { nineRouterKey, isActive: true } });
   }
 
+  findById(id: string): Promise<KeySubscription | null> {
+    return this.repo.findOne({ where: { id } });
+  }
+
   getQuotaInfo(sub: KeySubscription): QuotaInfo {
     const limitTotal = Number(sub.tokenQuota);
     const limitPeriod = Math.floor(limitTotal / 720); // ~1 month / 720 hours

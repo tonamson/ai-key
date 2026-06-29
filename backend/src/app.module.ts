@@ -34,6 +34,8 @@ import { SystemConfigModule } from './system-config/system-config.module';
 import { WalletModule } from './wallet/wallet.module';
 import { SystemConfig } from './system-config/system-config.entity';
 import { WalletTransaction } from './wallet/wallet-transaction.entity';
+import { TokenUsageLog } from './stats/token-usage-log.entity';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -44,7 +46,7 @@ import { WalletTransaction } from './wallet/wallet-transaction.entity';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         url: config.getOrThrow('DATABASE_URL'),
-        entities: [User, Role, ActivityLog, Notification, Plan, Coupon, ReferralCode, Order, KeySubscription, SystemConfig, WalletTransaction],
+        entities: [User, Role, ActivityLog, Notification, Plan, Coupon, ReferralCode, Order, KeySubscription, SystemConfig, WalletTransaction, TokenUsageLog],
         migrations: ['dist/database/migrations/*.js'],
         migrationsRun: true,
         synchronize: false,
@@ -66,6 +68,7 @@ import { WalletTransaction } from './wallet/wallet-transaction.entity';
     ClaudeProxyModule,
     SystemConfigModule,
     WalletModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -45,8 +45,8 @@ export const useAuthStore = create<AuthState>()(
       updateProfile: async (payload) => {
         set({ isLoading: true });
         try {
-          const user = await authService.updateProfile(payload);
-          set({ user, isLoading: false });
+          const updated = await authService.updateProfile(payload);
+          set((s) => ({ user: { ...s.user!, ...updated }, isLoading: false }));
         } catch (e) {
           set({ isLoading: false });
           throw e;

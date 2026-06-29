@@ -1,6 +1,7 @@
 import { ForbiddenException, HttpException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { QuotaInfo, SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { KeySubscription } from '../subscriptions/key-subscription.entity';
+import { StatsService } from '../stats/stats.service';
 
 const NINE_ROUTER_BASE = process.env.NINE_ROUTER_URL ?? 'http://103.172.78.21:20128/v1';
 
@@ -13,7 +14,7 @@ export interface ForwardResult {
 
 @Injectable()
 export class ClaudeProxyService {
-  constructor(private readonly subs: SubscriptionsService) {}
+  constructor(private readonly subs: SubscriptionsService, private readonly stats: StatsService) {}
 
   private parseUsage(body: any): { input: number; output: number } {
     const usage = body?.usage;
@@ -52,6 +53,7 @@ export class ClaudeProxyService {
     const quota = input + output > 0
       ? await this.subs.deductTokens(sub.id, input, output).catch(() => this.subs.getQuotaInfo(sub))
       : this.subs.getQuotaInfo(sub);
+    if (input + output > 0) this.stats.logTokenUsage(sub.id, sub.userId, input, output).catch(() => {});
 
     return { body: json, isStream: false, quota, sub };
   }
@@ -77,7 +79,9 @@ export class ClaudeProxyService {
       output = Math.max(output, u.output_tokens ?? u.completion_tokens ?? 0);
     }
     if (input + output > 0) {
+      const sub = await this.subs.findById(subId).catch(() => null);
       await this.subs.deductTokens(subId, input, output).catch(() => {});
+      if (sub) this.stats.logTokenUsage(subId, sub.userId, input, output).catch(() => {});
     }
   }
 }

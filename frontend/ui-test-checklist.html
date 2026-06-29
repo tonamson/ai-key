@@ -574,6 +574,43 @@ const PLAYWRIGHT_RESULTS = {
   "11::1::2":{done:true,note:"✅ Sau confirm: hoa hồng cộng vào ví người giới thiệu"},
   // Cross-cutting
   "16::0::0":{done:true,note:"✅ Mobile 375px: sidebar ẩn, layout 2 cột, không cắt chữ"},
+  // --- Session 2026-06-29 (session 2) ---
+  // BUG FIX: updateProfile ghi đè user thiếu roleKey → sidebar admin mất
+  // Fix: auth.store.ts merge user thay vì replace
+  // Profile — Mật khẩu tab
+  "2::1::0":{done:true,note:"✅ required + minLength=6 chặn submit khi rỗng"},
+  "2::1::1":{done:true,note:"✅ toast 'Mật khẩu xác nhận không khớp' khi new≠confirm, không gọi API"},
+  "2::1::2":{done:true,note:"✅ Đổi mật khẩu đúng → toast 'Đổi mật khẩu thành công'"},
+  "2::1::3":{done:true,note:"✅ Cập nhật tên → PATCH /auth/profile → toast 'Đã lưu thay đổi'"},
+  // 2FA setup
+  "1::0::0":{done:true,note:"✅ Click Thiết lập 2FA → QR code hiển thị + OTP input"},
+  "1::0::1":{done:true,note:"✅ OTP sai → toast 'Mã xác thực không đúng', QR còn, 2FA vẫn tắt"},
+  // Buy — Bước 2 Coupon
+  "5::1::0":{done:true,note:"✅ Coupon input rỗng → nút Áp dụng disabled"},
+  "5::1::1":{done:true,note:"✅ Coupon sai → toast 'Mã giảm giá không hợp lệ', coupon=null"},
+  "5::1::2":{done:true,note:"✅ Coupon PLAYWRIGHT10 hợp lệ → toast 'Mã hợp lệ', giá 350k→315k (giảm 35k 10%)"},
+  // Admin pages — load check
+  "11::0::0":{done:true,note:"✅ 5 đơn load đúng"},
+  "12::0::0":{done:true,note:"✅ Admin subscriptions load đúng, list + phân trang"},
+  "13::0::0":{done:true,note:"✅ Admin coupons load đúng (1 mã PLAYWRIGHT10)"},
+  "14::0::0":{done:true,note:"✅ Admin referrals load: tổng hoa hồng 65.000đ, transactions đúng"},
+  "15::0::0":{done:true,note:"✅ Admin master-keys load: 10 keys, masked"},
+  // Admin Notifications
+  "16::0::1":{done:true,note:"✅ Tạo notification tiêu đề rỗng → toast 'Tiêu đề không được để trống'"},
+  "16::0::2":{done:true,note:"✅ Tạo notification hợp lệ → toast 'Đã tạo thông báo'"},
+  // Admin Config
+  "17::0::0":{done:true,note:"✅ Config load đúng (referral_commission_percent=10, v.v.)"},
+  "17::0::2":{done:true,note:"✅ Click edit → inline input, Enter/Lưu → toast 'Đã lưu'"},
+  // Admin Activity Logs
+  "18::0::0":{done:true,note:"✅ 948 bản ghi, phân trang, filter Nhân viên/Hành động hiển thị"},
+  // Admin Plans
+  "10::0::0":{done:true,note:"✅ Tạo plan: tên required, validity false khi rỗng → chặn submit"},
+  "10::0::2":{done:true,note:"✅ Bật plan (isActive=true) → plan xuất hiện tại GET /plans public"},
+  "10::0::3":{done:true,note:"✅ Sửa plan → toast 'Cập nhật thành công'"},
+  "10::0::7":{done:true,note:"✅ GET /plans public chỉ trả isActive=true (khi tắt trả [])"},
+  // Admin Roles (tab trong admin/users)
+  "9::0::0":{done:true,note:"✅ Tab Vai trò & Nhóm trong /admin/users: 3 vai trò (Admin/CSKH/User)"},
+  // BUG: /admin/roles là 404 — sidebar link sai, roles nằm trong tab /admin/users
 };
 const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
 let state = Object.keys(PLAYWRIGHT_RESULTS).length && !Object.keys(saved).length
