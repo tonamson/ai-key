@@ -26,6 +26,7 @@ import { KeySubscription } from './subscriptions/key-subscription.entity';
 import { PlansModule } from './plans/plans.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { ReferralModule } from './referral/referral.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ReferralModule } from './referral/referral.module';
     PlansModule,
     CouponsModule,
     ReferralModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [
