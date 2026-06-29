@@ -4,6 +4,7 @@ import { User } from '../users/user.entity';
 export enum WalletTxType {
   COMMISSION = 'commission',   // hoa hồng từ F1 mua QR
   SPEND      = 'spend',        // dùng ví mua key
+  REFUND     = 'refund',       // hoàn ví khi đơn bị huỷ/hết hạn
   ADMIN_ADD  = 'admin_add',    // admin nạp
   ADMIN_SUB  = 'admin_sub',    // admin trừ
 }

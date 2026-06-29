@@ -16,6 +16,11 @@ export class OrdersController {
   findMine(@Request() req: any) {
     return this.service.findMine(req.user.id);
   }
+
+  @Patch(':id/cancel')
+  cancel(@Request() req: any, @Param('id') id: string) {
+    return this.service.cancelOrder(id, { userId: req.user.id });
+  }
 }
 
 @RequirePermission('admin:all')

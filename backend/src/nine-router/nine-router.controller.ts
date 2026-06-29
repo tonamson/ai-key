@@ -3,7 +3,7 @@ import { NineRouterService } from './nine-router.service';
 import { RequirePermission } from '../auth/decorators/roles.decorator';
 
 @RequirePermission('admin:all')
-@Controller('admin/nine-router/keys')
+@Controller('admin/master-keys')
 export class NineRouterController {
   constructor(private readonly svc: NineRouterService) {}
 

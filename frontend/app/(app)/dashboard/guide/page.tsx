@@ -99,7 +99,7 @@ export default function GuidePage() {
           <h2 className="font-semibold">Cài đặt Claude Code</h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Mở file <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">~/.claude/settings.json</code> và paste nội dung sau. Thay <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">ANTHROPIC_AUTH_TOKEN</code> bằng key thật của bạn ở trang <a href="/dashboard/keys" className="text-primary underline">Keys của tôi</a>:
+          Mở file <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">~/.claude/settings.json</code> và paste nội dung sau. Thay <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">ANTHROPIC_AUTH_TOKEN</code> bằng key thật của bạn ở trang <a href="/dashboard/my-keys" className="text-primary underline">Keys của tôi</a>:
         </p>
         <CodeBlock code={SETTINGS_JSON} />
         <p className="text-sm text-muted-foreground">Lưu file và khởi động lại Claude Code là xong — cấu hình này tự động load mỗi lần mở.</p>

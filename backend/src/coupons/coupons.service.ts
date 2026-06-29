@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Coupon } from './coupon.entity';
 
 @Injectable()
@@ -25,8 +25,9 @@ export class CouponsService {
     return this.repo.save(coupon);
   }
 
-  incrementUsed(id: string) {
-    return this.repo.increment({ id }, 'usedCount', 1);
+  /** Hoàn lại 1 lượt khi đơn bị huỷ/không confirm. */
+  releaseUse(id: string) {
+    return this.repo.decrement({ id }, 'usedCount', 1);
   }
 
   async validate(code: string): Promise<Coupon> {
@@ -34,6 +35,24 @@ export class CouponsService {
     if (!coupon || !coupon.isActive) throw new BadRequestException('Mã giảm giá không hợp lệ');
     if (coupon.expiresAt && coupon.expiresAt < new Date()) throw new BadRequestException('Mã giảm giá đã hết hạn');
     if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) throw new BadRequestException('Mã giảm giá đã hết lượt sử dụng');
+    return coupon;
+  }
+
+  /**
+   * Validate + giữ chỗ 1 lượt một cách atomic (conditional UPDATE chống race vượt maxUses).
+   * Trả về coupon đã reserve. Phải gọi releaseUse nếu đơn không hoàn tất.
+   */
+  async validateAndReserve(code: string, manager?: EntityManager): Promise<Coupon> {
+    const repo = manager ? manager.getRepository(Coupon) : this.repo;
+    const coupon = await this.validate(code);
+    // Tăng usedCount chỉ khi vẫn còn lượt (maxUses null = không giới hạn)
+    const res = await repo.createQueryBuilder()
+      .update(Coupon)
+      .set({ usedCount: () => 'usedCount + 1' })
+      .where('id = :id AND (maxUses IS NULL OR usedCount < maxUses)', { id: coupon.id })
+      .execute();
+    if (!res.affected) throw new BadRequestException('Mã giảm giá đã hết lượt sử dụng');
+    coupon.usedCount += 1;
     return coupon;
   }
 }

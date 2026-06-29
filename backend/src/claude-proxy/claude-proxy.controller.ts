@@ -49,12 +49,18 @@ export class ClaudeProxyController {
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
       const reader = (result.body as { body: ReadableStream }).body.getReader();
+      const decoder = new TextDecoder();
+      let captured = '';
       const pump = async () => {
         while (true) {
           const { done, value } = await reader.read();
-          if (done) { res.end(); break; }
+          if (done) break;
+          captured += decoder.decode(value, { stream: true });
           res.write(Buffer.from(value));
         }
+        // Trừ token sau khi stream xong, trước khi đóng kết nối
+        await this.service.finalizeStream(result.sub.id, captured).catch(() => {});
+        res.end();
       };
       pump().catch(() => res.end());
       return;

@@ -1,7 +1,7 @@
 import { Controller, Get, Request } from '@nestjs/common';
 import { ReferralService } from './referral.service';
 
-@Controller('referral')
+@Controller('referrals')
 export class ReferralController {
   constructor(private readonly service: ReferralService) {}
 

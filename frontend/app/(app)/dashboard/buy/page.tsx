@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Check, ChevronRight, Clock, Coins, Loader2, Sparkles, Tag, Copy, CheckCircle2, ArrowLeft, Wallet } from 'lucide-react';
+import { Check, ChevronRight, Clock, Coins, Loader2, Sparkles, Tag, Copy, CheckCircle2, ArrowLeft, Wallet, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -289,8 +289,8 @@ function StepPayment({ order, vietQRUrl }: { order: Order; vietQRUrl: string }) 
           <div className="flex items-center justify-between py-2">
             <span className="text-sm text-muted-foreground">Nội dung CK</span>
             <div className="flex items-center gap-1.5">
-              <code className="text-xs bg-muted px-2 py-1 rounded font-mono">AIKEY-{order.id.slice(0, 8)}</code>
-              <CopyBtn text={`AIKEY-${order.id}`} id="content" />
+              <code className="text-xs bg-muted px-2 py-1 rounded font-mono">AIKEY{order.id.replace(/-/g, '').slice(0, 8)}</code>
+              <CopyBtn text={`AIKEY${order.id.replace(/-/g, '').slice(0, 8)}`} id="content" />
             </div>
           </div>
         </div>
@@ -323,11 +323,15 @@ export default function BuyPage() {
   const [vietQRUrl, setVietQRUrl] = useState('');
   const [walletBalance, setWalletBalance] = useState(0);
   const [useWallet, setUseWallet] = useState(false);
+  const [renewId, setRenewId] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     planApi.listPublic().then(setPlans).catch(e => toast.error(e.message));
     walletApi.getMe().then(r => setWalletBalance(r.balance)).catch(() => {});
+    // Đọc ?renew=<subId> để gia hạn đúng key cũ (giữ key, cộng dồn hạn + quota)
+    const renew = new URLSearchParams(window.location.search).get('renew');
+    if (renew) setRenewId(renew);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, []);
 
@@ -350,6 +354,7 @@ export default function BuyPage() {
         planId: selectedPlan.id,
         couponCode: coupon ? couponCode.trim() : undefined,
         useWallet: useWallet && walletBalance > 0,
+        renewSubscriptionId: renewId ?? undefined,
       });
       setOrder(res.order);
       setVietQRUrl(res.vietQRUrl);
@@ -362,7 +367,7 @@ export default function BuyPage() {
           if (found?.status === 'paid') {
             clearInterval(pollRef.current!);
             toast.success('Thanh toán thành công!');
-            router.push('/dashboard/keys');
+            router.push('/dashboard/my-keys');
           }
         } catch { /* ignore */ }
       }, 5000);
@@ -378,9 +383,16 @@ export default function BuyPage() {
     <div className="space-y-2 pb-10">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Mua key API</h1>
-        <p className="text-muted-foreground mt-1">Chọn gói phù hợp, thanh toán nhanh qua QR</p>
+        <h1 className="text-2xl font-bold tracking-tight">{renewId ? 'Gia hạn key' : 'Mua key API'}</h1>
+        <p className="text-muted-foreground mt-1">{renewId ? 'Chọn gói để cộng thêm hạn dùng & quota vào key hiện tại' : 'Chọn gói phù hợp, thanh toán nhanh qua QR'}</p>
       </div>
+
+      {renewId && (
+        <div className="mb-4 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2.5 text-sm text-primary flex items-center gap-2">
+          <RefreshCw className="size-4 shrink-0" />
+          Bạn đang gia hạn key cũ — key giữ nguyên, thời hạn và quota của gói sẽ được cộng dồn.
+        </div>
+      )}
 
       <Steps current={step} />
 

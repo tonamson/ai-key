@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { WalletTransaction, WalletTxType } from './wallet-transaction.entity';
 import { User } from '../users/user.entity';
 
@@ -42,22 +42,42 @@ export class WalletService {
     });
   }
 
-  /** Trừ ví khi dùng để mua key, trả về số thực tế trừ được */
-  async spendForOrder(userId: string, requestAmount: number, orderId: string): Promise<number> {
-    const balance = await this.getBalance(userId);
-    const spend = Math.min(requestAmount, balance);
-    if (spend <= 0) return 0;
-    await this.dataSource.transaction(async em => {
-      const u = await em.findOneOrFail(User, { where: { id: userId } });
-      const current = Number(u.walletBalance);
-      if (current < spend) throw new BadRequestException('Số dư ví không đủ');
-      await em.decrement(User, { id: userId }, 'walletBalance', spend);
+  /**
+   * Trừ đúng `amount` khỏi ví một cách atomic (conditional UPDATE chống race/double-spend).
+   * Trả về true nếu trừ thành công, false nếu số dư không đủ. Không tự "trừ được bao nhiêu hay bấy nhiêu"
+   * vì caller đã chốt finalPrice dựa trên amount này.
+   */
+  async spendForOrder(userId: string, amount: number, orderId: string, manager?: EntityManager): Promise<boolean> {
+    if (amount <= 0) return true;
+    const run = async (em: EntityManager): Promise<boolean> => {
+      // Atomic: chỉ trừ khi đủ số dư. affected=0 nghĩa là không đủ.
+      const res = await em.createQueryBuilder()
+        .update(User)
+        .set({ walletBalance: () => 'walletBalance - :amount' })
+        .where('id = :userId AND walletBalance >= :amount', { userId, amount })
+        .setParameter('amount', amount)
+        .execute();
+      if (!res.affected) return false;
       await em.save(WalletTransaction, em.create(WalletTransaction, {
-        userId, amount: -spend, type: WalletTxType.SPEND,
+        userId, amount: -amount, type: WalletTxType.SPEND,
         description: 'Thanh toán đơn hàng bằng ví', orderId,
       }));
-    });
-    return spend;
+      return true;
+    };
+    return manager ? run(manager) : this.dataSource.transaction(run);
+  }
+
+  /** Hoàn tiền ví (đơn bị huỷ/hết hạn). Atomic cộng lại đúng amount. */
+  async refund(userId: string, amount: number, orderId: string, manager?: EntityManager): Promise<void> {
+    if (amount <= 0) return;
+    const run = async (em: EntityManager) => {
+      await em.increment(User, { id: userId }, 'walletBalance', amount);
+      await em.save(WalletTransaction, em.create(WalletTransaction, {
+        userId, amount, type: WalletTxType.REFUND,
+        description: 'Hoàn tiền đơn hàng bị huỷ', orderId,
+      }));
+    };
+    return manager ? run(manager) : this.dataSource.transaction(run);
   }
 
   /** Admin nạp/trừ thủ công */

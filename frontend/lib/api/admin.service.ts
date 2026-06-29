@@ -55,19 +55,6 @@ export interface Notification {
   title: string; body?: string; link?: string; isRead: boolean; createdAt: string;
 }
 
-// Upload
-export const uploadApi = {
-  images: async (files: File[]): Promise<{ url: string }[]> => {
-    const form = new FormData();
-    files.forEach(f => form.append('files', f));
-    const res = await apiClient.post<{ filename: string; path: string; size: number }[]>(
-      '/upload/images', form, { headers: { 'Content-Type': 'multipart/form-data' } },
-    );
-    const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
-    return res.data.map(r => ({ url: `${base}${r.path}` }));
-  },
-};
-
 // ─── 9Router Keys ────────────────────────────────────────────────────────────
 export interface NineRouterKey {
   id: string; name: string; key: string;
@@ -75,10 +62,10 @@ export interface NineRouterKey {
 }
 
 export const nineRouterApi = {
-  list: () => apiClient.get<NineRouterKey[]>('/admin/nine-router/keys').then(r => r.data),
-  create: (name: string) => apiClient.post<NineRouterKey>('/admin/nine-router/keys', { name }).then(r => r.data),
-  update: (id: string, isActive: boolean) => apiClient.put<NineRouterKey>(`/admin/nine-router/keys/${id}`, { isActive }).then(r => r.data),
-  remove: (id: string) => apiClient.delete(`/admin/nine-router/keys/${id}`).then(r => r.data),
+  list: () => apiClient.get<NineRouterKey[]>('/admin/master-keys').then(r => r.data),
+  create: (name: string) => apiClient.post<NineRouterKey>('/admin/master-keys', { name }).then(r => r.data),
+  update: (id: string, isActive: boolean) => apiClient.put<NineRouterKey>(`/admin/master-keys/${id}`, { isActive }).then(r => r.data),
+  remove: (id: string) => apiClient.delete(`/admin/master-keys/${id}`).then(r => r.data),
 };
 
 // ─── Plans ──────────────────────────────────────────────────────────────────
@@ -102,19 +89,21 @@ export const couponApi = {
 };
 
 // ─── Orders ──────────────────────────────────────────────────────────────────
-export interface Order { id: string; userId: string; user?: AdminUser; planId: string; plan?: Plan; couponId?: string; referralCode?: string; originalPrice: number; discountAmount: number; finalPrice: number; status: 'pending' | 'paid' | 'cancelled'; paidAt?: string; nineRouterKey?: string; createdAt: string; }
+export interface Order { id: string; userId: string; user?: AdminUser; planId: string; plan?: Plan; couponId?: string; referralCode?: string; originalPrice: number; discountAmount: number; finalPrice: number; status: 'pending' | 'paid' | 'cancelled'; paidAt?: string; nineRouterKey?: string; renewSubscriptionId?: string | null; createdAt: string; }
 export const orderApi = {
   listAdmin: () => apiClient.get<Order[]>('/admin/orders').then(r => r.data),
   listMine: () => apiClient.get<Order[]>('/orders/my').then(r => r.data),
-  create: (data: { planId: string; couponCode?: string; useWallet?: boolean }) =>
+  create: (data: { planId: string; couponCode?: string; useWallet?: boolean; renewSubscriptionId?: string }) =>
     apiClient.post<{ order: Order; vietQRUrl: string }>('/orders', data).then(r => r.data),
   confirm: (id: string) => apiClient.patch<Order>(`/admin/orders/${id}/confirm`).then(r => r.data),
+  cancel: (id: string) => apiClient.patch<void>(`/orders/${id}/cancel`).then(r => r.data),
 };
 
 // ─── Subscriptions ───────────────────────────────────────────────────────────
 export interface KeySubscription { id: string; nineRouterKey: string; nineRouterKeyMasked?: string; tokenQuota: number; tokenUsed: number; startsAt: string; expiresAt: string; isActive: boolean; order?: { plan?: Plan }; }
 export const subscriptionApi = {
   listMine: () => apiClient.get<KeySubscription[]>('/subscriptions/my').then(r => r.data),
+  refreshKey: (id: string) => apiClient.post<KeySubscription>(`/subscriptions/${id}/refresh-key`).then(r => r.data),
 };
 
 // ─── Referral ────────────────────────────────────────────────────────────────
@@ -126,7 +115,7 @@ export const walletApi = {
 };
 
 export const referralApi = {
-  getMyCode: () => apiClient.get<{ code: string; totalEarned: number }>('/referral/my-code').then(r => r.data),
+  getMyCode: () => apiClient.get<{ code: string; totalEarned: number }>('/referrals/my-code').then(r => r.data),
 };
 
 export const notificationApi = {

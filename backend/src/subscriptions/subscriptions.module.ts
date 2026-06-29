@@ -3,9 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { KeySubscription } from './key-subscription.entity';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionsController, SubscriptionsAdminController } from './subscriptions.controller';
+import { NineRouterModule } from '../nine-router/nine-router.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([KeySubscription])],
+  imports: [TypeOrmModule.forFeature([KeySubscription]), NineRouterModule],
   controllers: [SubscriptionsController, SubscriptionsAdminController],
   providers: [SubscriptionsService],
   exports: [SubscriptionsService],

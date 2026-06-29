@@ -1,7 +1,9 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { SystemConfigService } from './system-config.service';
+import { RequirePermission } from '../auth/decorators/roles.decorator';
 
-@Controller('admin/system-config')
+@RequirePermission('settings:manage')
+@Controller('admin/config')
 export class SystemConfigController {
   constructor(private readonly svc: SystemConfigService) {}
 

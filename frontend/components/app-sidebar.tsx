@@ -19,6 +19,8 @@ import {
   BookOpen,
   Settings2,
   TrendingUp,
+  Tag,
+  PackageSearch,
 } from "lucide-react";
 import {
   Sidebar,
@@ -46,21 +48,38 @@ const MAIN_NAV = [
   { href: "/dashboard", label: "Tổng quan", icon: Home, exact: true },
   { href: "/dashboard/profile", label: "Hồ sơ cá nhân", icon: UserCircle },
   { href: "/dashboard/buy", label: "Mua key", icon: ShoppingCart },
-  { href: "/dashboard/keys", label: "Keys của tôi", icon: Key },
+  { href: "/dashboard/my-keys", label: "Keys của tôi", icon: Key },
   { href: "/dashboard/guide", label: "Hướng dẫn", icon: BookOpen },
 ];
 
-const ADMIN_NAV = [
-  { href: "/admin/users", label: "Người dùng", icon: Users },
-  { href: "/admin/groups", label: "Nhóm", icon: Building2 },
-  { href: "/admin/roles", label: "Vai trò", icon: Shield },
-  { href: "/admin/activity-logs", label: "Nhật ký", icon: ScrollText },
-  { href: "/admin/notifications", label: "Thông báo", icon: Bell },
-  { href: "/admin/keys", label: "API Keys 9Router", icon: KeyRound },
-  { href: "/admin/orders", label: "Đơn hàng", icon: ShoppingCart },
-  { href: "/admin/subscriptions", label: "API Keys", icon: Key },
-  { href: "/admin/referrals", label: "Hoa hồng", icon: TrendingUp },
-  { href: "/admin/config", label: "Cấu hình", icon: Settings2 },
+const ADMIN_NAV_GROUPS = [
+  {
+    label: "Người dùng",
+    items: [
+      { href: "/admin/users", label: "Người dùng", icon: Users },
+      { href: "/admin/groups", label: "Nhóm người dùng", icon: Building2 },
+      { href: "/admin/roles", label: "Vai trò & Quyền", icon: Shield },
+    ],
+  },
+  {
+    label: "Kinh doanh",
+    items: [
+      { href: "/admin/orders", label: "Đơn hàng", icon: ShoppingCart },
+      { href: "/admin/subscriptions", label: "Key người dùng", icon: Key },
+      { href: "/admin/plans", label: "Gói dịch vụ", icon: PackageSearch },
+      { href: "/admin/coupons", label: "Mã giảm giá", icon: Tag },
+      { href: "/admin/referrals", label: "Hoa hồng giới thiệu", icon: TrendingUp },
+    ],
+  },
+  {
+    label: "Hệ thống",
+    items: [
+      { href: "/admin/master-keys", label: "Master Keys (9Router)", icon: KeyRound },
+      { href: "/admin/notifications", label: "Thông báo", icon: Bell },
+      { href: "/admin/activity-logs", label: "Nhật ký hoạt động", icon: ScrollText },
+      { href: "/admin/config", label: "Cấu hình hệ thống", icon: Settings2 },
+    ],
+  },
 ];
 
 function NavItem({
@@ -131,16 +150,16 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {canAccessAdmin(user?.roleKey ?? null) && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Quản trị</SidebarGroupLabel>
+        {canAccessAdmin(user?.roleKey ?? null) && ADMIN_NAV_GROUPS.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarMenu>
-              {ADMIN_NAV.map((item) => (
+              {group.items.map((item) => (
                 <NavItem key={item.href} {...item} />
               ))}
             </SidebarMenu>
           </SidebarGroup>
-        )}
+        ))}
       </SidebarContent>
 
       <SidebarFooter>

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ActivityLogInterceptor } from './activity-log/activity-log.interceptor';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,7 +12,6 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { RolesModule } from './roles/roles.module';
 import { AdminUsersModule } from './admin/users/admin-users.module';
 import { ActivityLogModule } from './activity-log/activity-log.module';
-import { UploadModule } from './upload/upload.module';
 import { User } from './users/user.entity';
 import { Role } from './roles/role.entity';
 import { ActivityLog } from './activity-log/activity-log.entity';
@@ -38,6 +38,7 @@ import { WalletTransaction } from './wallet/wallet-transaction.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -54,7 +55,6 @@ import { WalletTransaction } from './wallet/wallet-transaction.entity';
     RolesModule,
     AdminUsersModule,
     ActivityLogModule,
-    UploadModule,
     NotificationsModule,
     NineRouterModule,
     EmailModule,

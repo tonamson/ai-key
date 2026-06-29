@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ReferralService } from './referral.service';
 import { ReferralCode } from './referral-code.entity';
+import { SystemConfigService } from '../system-config/system-config.service';
 
 describe('ReferralService', () => {
   let service: ReferralService;
@@ -12,12 +13,14 @@ describe('ReferralService', () => {
     create: jest.fn(),
     save: jest.fn(),
   };
+  const mockSystemConfig = { getNumber: jest.fn().mockResolvedValue(10) };
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
         ReferralService,
         { provide: getRepositoryToken(ReferralCode), useValue: mockRepo },
+        { provide: SystemConfigService, useValue: mockSystemConfig },
       ],
     }).compile();
     service = module.get(ReferralService);

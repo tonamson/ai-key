@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { KeySubscription } from './key-subscription.entity';
+import { OrderStatus } from '../orders/order.entity';
+import { NineRouterService } from '../nine-router/nine-router.service';
 
 // Hourly window in ms — rolling from key creation time
 const PERIOD_WINDOW_MS = 60 * 60 * 1000;
@@ -16,11 +18,14 @@ export interface QuotaInfo {
 
 @Injectable()
 export class SubscriptionsService {
-  constructor(@InjectRepository(KeySubscription) private readonly repo: Repository<KeySubscription>) {}
+  constructor(
+    @InjectRepository(KeySubscription) private readonly repo: Repository<KeySubscription>,
+    private readonly nineRouter: NineRouterService,
+  ) {}
 
   findMine(userId: string) {
     return this.repo.find({
-      where: { userId, isActive: true },
+      where: { userId, isActive: true, order: { status: OrderStatus.PAID } },
       relations: { order: { plan: true } },
       order: { expiresAt: 'DESC' },
     });
@@ -67,6 +72,16 @@ export class SubscriptionsService {
     return this.repo.save(sub);
   }
 
+  async refreshKey(id: string, userId: string) {
+    const sub = await this.repo.findOne({ where: { id, userId, isActive: true } });
+    if (!sub) throw new NotFoundException('Subscription không tồn tại');
+    await this.nineRouter.deleteKey(sub.nineRouterKeyId).catch(() => {});
+    const { id: keyId, key: keyValue } = await this.nineRouter.createKey('user');
+    sub.nineRouterKeyId = keyId;
+    sub.nineRouterKey = keyValue;
+    return this.repo.save(sub);
+  }
+
   async resetPeriod(id: string) {
     const sub = await this.repo.findOne({ where: { id } });
     if (!sub) throw new NotFoundException('Subscription không tồn tại');
@@ -76,28 +91,29 @@ export class SubscriptionsService {
   }
 
   async deductTokens(id: string, inputTokens: number, outputTokens: number): Promise<QuotaInfo> {
-    const sub = await this.repo.findOne({ where: { id } });
-    if (!sub) throw new NotFoundException('Subscription không tồn tại');
-
     const delta = inputTokens + outputTokens;
-    const now = Date.now();
+    // Atomic read-modify-write với row lock — chống lost update khi nhiều request song song.
+    return this.repo.manager.transaction(async em => {
+      const sub = await em.findOne(KeySubscription, { where: { id }, lock: { mode: 'pessimistic_write' } });
+      if (!sub) throw new NotFoundException('Subscription không tồn tại');
 
-    // Roll period window forward if expired
-    let windowStart = sub.periodStartsAt.getTime();
-    let rolled = false;
-    while (windowStart + PERIOD_WINDOW_MS <= now) {
-      windowStart += PERIOD_WINDOW_MS;
-      rolled = true;
-    }
-    if (rolled) {
-      sub.periodStartsAt = new Date(windowStart);
-      sub.tokenUsedPeriod = 0;
-    }
+      const now = Date.now();
+      let windowStart = sub.periodStartsAt.getTime();
+      let rolled = false;
+      while (windowStart + PERIOD_WINDOW_MS <= now) {
+        windowStart += PERIOD_WINDOW_MS;
+        rolled = true;
+      }
+      if (rolled) {
+        sub.periodStartsAt = new Date(windowStart);
+        sub.tokenUsedPeriod = 0;
+      }
 
-    sub.tokenUsed = Number(sub.tokenUsed) + delta;
-    sub.tokenUsedPeriod = Number(sub.tokenUsedPeriod) + delta;
-    await this.repo.save(sub);
+      sub.tokenUsed = Number(sub.tokenUsed) + delta;
+      sub.tokenUsedPeriod = Number(sub.tokenUsedPeriod) + delta;
+      await em.save(sub);
 
-    return this.getQuotaInfo(sub);
+      return this.getQuotaInfo(sub);
+    });
   }
 }

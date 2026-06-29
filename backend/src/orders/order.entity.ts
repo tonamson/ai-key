@@ -20,6 +20,8 @@ export class Order {
   @Column({ type: 'decimal', precision: 12, scale: 0 }) finalPrice: number;
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING }) status: OrderStatus;
   @Column({ type: 'timestamptz', nullable: true }) paidAt: Date | null;
+  @Column({ type: 'timestamptz', nullable: true }) expiresAt: Date | null;
+  @Column({ type: 'uuid', nullable: true }) renewSubscriptionId: string | null;
   @Column({ type: 'varchar', nullable: true }) nineRouterKeyId: string | null;
   @Column({ type: 'varchar', nullable: true }) nineRouterKey: string | null;
   @CreateDateColumn() createdAt: Date;

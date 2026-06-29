@@ -1,10 +1,15 @@
-import { Body, Controller, Get, Param, Patch, Post, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Request, ForbiddenException } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
 import { RequirePermission } from '../auth/decorators/roles.decorator';
 
 @Controller('subscriptions')
 export class SubscriptionsController {
   constructor(private readonly service: SubscriptionsService) {}
+
+  @Post(':id/refresh-key')
+  refreshKey(@Param('id') id: string, @Request() req: any) {
+    return this.service.refreshKey(id, req.user.id);
+  }
 
   @Get('my')
   async findMine(@Request() req: any) {

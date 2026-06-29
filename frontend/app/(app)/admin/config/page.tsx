@@ -11,7 +11,7 @@ import apiClient from '@/lib/api/client';
 interface SystemConfig { id: string; key: string; value: string; name: string; description: string | null; updatedAt: string; }
 
 async function fetchConfigs(): Promise<SystemConfig[]> {
-  return apiClient.get<SystemConfig[]>('/admin/system-config').then(r => r.data);
+  return apiClient.get<SystemConfig[]>('/admin/config').then(r => r.data);
 }
 
 export default function SystemConfigPage() {
@@ -32,7 +32,7 @@ export default function SystemConfigPage() {
   async function save(id: string) {
     setSaving(id);
     try {
-      const updated = await apiClient.patch<SystemConfig>(`/admin/system-config/${id}`, { value: editing[id] }).then(r => r.data);
+      const updated = await apiClient.patch<SystemConfig>(`/admin/config/${id}`, { value: editing[id] }).then(r => r.data);
       setConfigs(cs => cs.map(c => c.id === id ? updated : c));
       cancelEdit(id);
       toast.success('Đã lưu');

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store/auth.store';
-import { canAccessAdmin, getRoleLabel } from '@/lib/role-keys';
+import { canAccessAdmin } from '@/lib/role-keys';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { subscriptionApi, orderApi, adminUserApi, referralApi, walletApi } from '@/lib/api/admin.service';
@@ -119,6 +119,7 @@ export default function DashboardPage() {
   const [referral, setReferral] = useState<{ code: string; totalEarned: number } | null>(null);
   const [walletBalance, setWalletBalance] = useState(0);
   const [adminStats, setAdminStats] = useState<any | null>(null);
+  const [copiedRef, setCopiedRef] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -295,7 +296,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">API Keys của tôi</h2>
           {(subs?.length ?? 0) > 0 && (
-            <Link href="/dashboard/keys" className="text-xs text-primary hover:underline flex items-center gap-1">
+            <Link href="/dashboard/my-keys" className="text-xs text-primary hover:underline flex items-center gap-1">
               Quản lý <ChevronRight className="size-3" />
             </Link>
           )}
@@ -402,9 +403,10 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">Hoa hồng nhận được</p>
             <p className="text-xl font-bold text-emerald-600">+{fmtVND(referral.totalEarned)}</p>
             <button
-              onClick={() => { navigator.clipboard.writeText(referral.code); }}
+              onClick={() => { navigator.clipboard.writeText(referral.code); setCopiedRef(true); setTimeout(() => setCopiedRef(false), 2000); }}
               className="flex items-center gap-1.5 text-xs text-primary hover:underline ml-auto">
-              <Copy className="size-3" />Copy mã
+              {copiedRef ? <CheckCircle2 className="size-3 text-green-500" /> : <Copy className="size-3" />}
+              {copiedRef ? 'Đã copy!' : 'Copy mã'}
             </button>
           </div>
         </section>
