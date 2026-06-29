@@ -25,6 +25,7 @@ import { Order } from './orders/order.entity';
 import { KeySubscription } from './subscriptions/key-subscription.entity';
 import { PlansModule } from './plans/plans.module';
 import { CouponsModule } from './coupons/coupons.module';
+import { ReferralModule } from './referral/referral.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { CouponsModule } from './coupons/coupons.module';
     NineRouterModule,
     PlansModule,
     CouponsModule,
+    ReferralModule,
   ],
   controllers: [AppController],
   providers: [
