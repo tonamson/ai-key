@@ -1,7 +1,8 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { StatsService, Granularity } from './stats.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RequirePermission } from '../roles/permissions.decorator';
+import type { Granularity } from './stats.service';
+import { StatsService } from './stats.service';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { RequirePermission } from '../auth/decorators/roles.decorator';
 
 @UseGuards(JwtAuthGuard)
 @RequirePermission('admin:all')
