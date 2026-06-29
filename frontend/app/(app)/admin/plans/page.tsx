@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useConfirm } from '@/hooks/use-confirm';
 import { toast } from 'sonner';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ import { planApi, Plan } from '@/lib/api/admin.service';
 const EMPTY = { name: '', tokenQuota: 21000000, durationDays: 30, price: 350000, isActive: true };
 
 export default function PlansPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [dialog, setDialog] = useState(false);
   const [editing, setEditing] = useState<Plan | null>(null);
@@ -41,7 +43,7 @@ export default function PlansPage() {
   }
 
   async function handleRemove(p: Plan) {
-    if (!confirm(`Ẩn gói "${p.name}"?`)) return;
+    if (!await confirm({ title: 'Ẩn gói dịch vụ', description: `Ẩn gói "${p.name}"? Người dùng sẽ không thể mua gói này nữa.`, confirmLabel: 'Ẩn gói', variant: 'default' })) return;
     try { await planApi.remove(p.id); toast.success('Đã ẩn'); load(); }
     catch (e) { toast.error((e as Error).message); }
   }
@@ -110,6 +112,7 @@ export default function PlansPage() {
           </form>
         </DialogContent>
       </Dialog>
+      {ConfirmDialog}
     </div>
   );
 }

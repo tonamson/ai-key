@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useConfirm } from '@/hooks/use-confirm';
 import { toast } from 'sonner';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ import { couponApi, Coupon } from '@/lib/api/admin.service';
 const EMPTY = { code: '', discountType: 'percent' as 'percent' | 'fixed', discountValue: 10, maxUses: '', expiresAt: '', isActive: true };
 
 export default function CouponsPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [dialog, setDialog] = useState(false);
   const [editing, setEditing] = useState<Coupon | null>(null);
@@ -42,7 +44,7 @@ export default function CouponsPage() {
   }
 
   async function handleRemove(c: Coupon) {
-    if (!confirm(`Ẩn mã "${c.code}"?`)) return;
+    if (!await confirm({ title: 'Ẩn mã giảm giá', description: `Ẩn mã "${c.code}"? Mã này sẽ không thể sử dụng được nữa.`, confirmLabel: 'Ẩn mã', variant: 'default' })) return;
     try { await couponApi.remove(c.id); toast.success('Đã ẩn'); load(); }
     catch (e) { toast.error((e as Error).message); }
   }
@@ -118,6 +120,7 @@ export default function CouponsPage() {
           </form>
         </DialogContent>
       </Dialog>
+      {ConfirmDialog}
     </div>
   );
 }

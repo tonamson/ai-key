@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useConfirm } from '@/hooks/use-confirm';
 import { toast } from 'sonner';
 import { Copy, Plus, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { nineRouterApi, NineRouterKey } from '@/lib/api/admin.service';
 
 export default function KeysPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
   const [keys, setKeys] = useState<NineRouterKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialog, setDialog] = useState(false);
@@ -48,7 +50,7 @@ export default function KeysPage() {
   }
 
   async function handleDelete(k: NineRouterKey) {
-    if (!confirm(`Xoá key "${k.name}"?`)) return;
+    if (!await confirm({ title: 'Xoá API Key', description: `Xoá key "${k.name}"?\nHành động này không thể hoàn tác.`, confirmLabel: 'Xoá key' })) return;
     try { await nineRouterApi.remove(k.id); toast.success('Đã xoá'); load(); }
     catch (e) { toast.error((e as Error).message); }
   }
@@ -146,6 +148,7 @@ export default function KeysPage() {
           </form>
         </DialogContent>
       </Dialog>
+      {ConfirmDialog}
     </div>
   );
 }

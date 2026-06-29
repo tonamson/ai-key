@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { adminUserApi, roleApi, AdminUser, Role } from '@/lib/api/admin.service';
+import { useConfirm } from '@/hooks/use-confirm';
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 interface Group { name: string; roles: Role[]; }
@@ -224,6 +225,7 @@ function RoleRow({ role, onEdit, onDelete }: { role: Role; onEdit: (r: Role) => 
 }
 
 function RolesTab({ roles, onRolesChange }: { roles: Role[]; onRolesChange: () => void }) {
+  const { confirm, ConfirmDialog } = useConfirm();
   const [roleDialog, setRoleDialog] = useState(false);
   const [editing, setEditing] = useState<Role | null>(null);
   const [form, setForm] = useState(ROLE_EMPTY);
@@ -260,7 +262,7 @@ function RolesTab({ roles, onRolesChange }: { roles: Role[]; onRolesChange: () =
   }
 
   async function handleRoleDelete(r: Role) {
-    if (!confirm(`Xoá vai trò "${r.name}"?`)) return;
+    if (!await confirm({ title: 'Xoá vai trò', description: `Xoá vai trò "${r.name}"?\nHành động này không thể hoàn tác.`, confirmLabel: 'Xoá' })) return;
     try { await roleApi.remove(r.id); toast.success('Đã xoá'); onRolesChange(); }
     catch (e) { toast.error((e as Error).message); }
   }
@@ -325,7 +327,7 @@ function RolesTab({ roles, onRolesChange }: { roles: Role[]; onRolesChange: () =
   }
 
   async function handleGroupDelete(g: Group) {
-    if (!confirm(`Xoá nhóm "${g.name}"?\nCác vai trò trong nhóm sẽ không còn thuộc nhóm nào.`)) return;
+    if (!await confirm({ title: 'Xoá nhóm', description: `Xoá nhóm "${g.name}"?\nCác vai trò trong nhóm sẽ không còn thuộc nhóm nào.`, confirmLabel: 'Xoá nhóm' })) return;
     setSaving(true);
     try {
       await Promise.all(g.roles.map(r => roleApi.update(r.id, { group: undefined })));
@@ -443,6 +445,8 @@ function RolesTab({ roles, onRolesChange }: { roles: Role[]; onRolesChange: () =
           </form>
         </DialogContent>
       </Dialog>
+
+      {ConfirmDialog}
 
       {/* Assign roles to group dialog */}
       <Dialog open={!!assignDialog} onOpenChange={o => !o && setAssignDialog(null)}>

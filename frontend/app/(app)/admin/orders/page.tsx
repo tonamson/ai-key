@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useConfirm } from '@/hooks/use-confirm';
 import { toast } from 'sonner';
 import { CheckCircle, Copy } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,7 @@ const STATUS_LABELS: Record<string, { label: string; variant: 'default' | 'secon
 };
 
 export default function OrdersPage() {
+  const { confirm, ConfirmDialog } = useConfirm();
   const [orders, setOrders] = useState<Order[]>([]);
   const [confirming, setConfirming] = useState<string | null>(null);
 
@@ -22,7 +24,7 @@ export default function OrdersPage() {
   useEffect(() => { load(); }, []);
 
   async function handleConfirm(o: Order) {
-    if (!confirm(`Xác nhận thanh toán đơn #${o.id.slice(0, 8)}?`)) return;
+    if (!await confirm({ title: 'Xác nhận thanh toán', description: `Xác nhận đã nhận tiền cho đơn #${o.id.slice(0, 8)}?\nHệ thống sẽ kích hoạt key cho khách hàng ngay lập tức.`, confirmLabel: 'Xác nhận', variant: 'default' })) return;
     setConfirming(o.id);
     try {
       await orderApi.confirm(o.id);
@@ -85,6 +87,7 @@ export default function OrdersPage() {
           </TableBody>
         </Table>
       </div>
+      {ConfirmDialog}
     </div>
   );
 }
