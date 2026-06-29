@@ -149,7 +149,7 @@ export default function GuidePage() {
   const [codeTab, setCodeTab] = useState<'curl' | 'sdk'>('curl');
 
   return (
-    <div className="max-w-2xl space-y-10">
+    <div className="space-y-10">
 
       {/* Header */}
       <div className="space-y-1">
