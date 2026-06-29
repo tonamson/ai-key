@@ -138,7 +138,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Chung</SidebarGroupLabel>
+          <SidebarGroupLabel>Tổng quan</SidebarGroupLabel>
           <SidebarMenu>
             {MAIN_NAV.map((item) => (
               <NavItem key={item.href} {...item} />
