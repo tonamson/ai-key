@@ -5,8 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  Building2,
-  Shield,
   ScrollText,
   Bell,
   UserCircle,
@@ -56,9 +54,7 @@ const ADMIN_NAV_GROUPS = [
   {
     label: "Người dùng",
     items: [
-      { href: "/admin/users", label: "Người dùng", icon: Users },
-      { href: "/admin/groups", label: "Nhóm người dùng", icon: Building2 },
-      { href: "/admin/roles", label: "Vai trò & Quyền", icon: Shield },
+      { href: "/admin/users", label: "Người dùng & Phân quyền", icon: Users },
     ],
   },
   {
