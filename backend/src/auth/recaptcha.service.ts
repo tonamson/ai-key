@@ -10,7 +10,6 @@ export class RecaptchaService {
 
   constructor(config: ConfigService) {
     this.secret = config.getOrThrow('RECAPTCHA_SECRET_KEY');
-    console.log('captcha key', this.secret)
   }
 
   async verify(token: string, action?: string): Promise<void> {

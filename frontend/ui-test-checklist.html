@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI Test Checklist — ai-key</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font: 15px/1.5 system-ui, sans-serif; margin: 0; background: #f6f7f9; color: #1a1a1a; }
+  @media (prefers-color-scheme: dark) { body { background: #15171a; color: #e6e6e6; } header, .group, .flow { background: #1e2126 !important; border-color: #2c2f36 !important; } .flow > h3, .group > h2 { background:#23262c !important; } input[type=text] { background:#15171a; color:#e6e6e6; border-color:#2c2f36; } .tag { border-color:#2c2f36; } }
+  header { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid #e2e4e8; padding: 16px 20px; }
+  h1 { margin: 0 0 8px; font-size: 18px; }
+  .bar { height: 8px; border-radius: 4px; background: #e2e4e8; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: #2ea043; width: 0; transition: width .2s; }
+  .meta { display: flex; gap: 16px; align-items: center; margin-top: 8px; font-size: 13px; color: #888; flex-wrap: wrap; }
+  main { max-width: 1060px; margin: 0 auto; padding: 20px; }
+  .group { background: #fff; border: 1px solid #e2e4e8; border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+  .group > h2 { margin: 0; font-size: 15px; padding: 12px 16px; background: #fafbfc; border-bottom: 1px solid #e2e4e8; display: flex; gap: 10px; align-items: center; }
+  .badge { font: 11px ui-monospace, monospace; padding: 1px 7px; border-radius: 10px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+  .badge.admin { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+  .badge.api { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
+  .flow { margin: 0; border-bottom: 1px solid #eee; }
+  .flow > h3 { margin: 0; font-size: 13px; font-weight: 600; padding: 9px 16px; background: #fcfcfd; color:#555; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .flow > h3 .route { font: 11px ui-monospace, monospace; color: #999; font-weight: 400; }
+  .item { display: flex; gap: 10px; padding: 8px 16px 8px 28px; border-top: 1px solid #f4f5f6; align-items: flex-start; }
+  .item input[type=checkbox] { margin-top: 3px; width: 16px; height: 16px; flex: none; cursor: pointer; }
+  .item.done label { text-decoration: line-through; opacity: .5; }
+  label { cursor: pointer; flex: 1; }
+  .tag { font: 11px ui-monospace, monospace; padding: 0 6px; border: 1px solid #d8dbe0; border-radius: 4px; margin-right: 6px; vertical-align: 1px; white-space: nowrap; }
+  .tag.ok { color:#1a7f37; border-color:#aceebb; background:#eafff0; }
+  .tag.fail { color:#cf222e; border-color:#ffcecb; background:#fff0ef; }
+  .tag.val { color:#9a6700; border-color:#f5e3a6; background:#fff8e6; }
+  .tag.perm { color:#6b21a8; border-color:#e9d5ff; background:#faf5ff; }
+  .tag.api { color:#0369a1; border-color:#bae6fd; background:#e0f2fe; }
+  @media (prefers-color-scheme: dark){ .tag.ok{background:#0d2818;} .tag.fail{background:#2a1413;} .tag.val{background:#2a2410;} .tag.perm{background:#1e1227;} .tag.api{background:#0a1e2e;} }
+  input[type=text] { width: 100%; margin-top: 4px; padding: 4px 8px; border: 1px solid #e2e4e8; border-radius: 6px; font-size: 13px; }
+  button { font: inherit; padding: 6px 12px; border: 1px solid #d0d3d8; border-radius: 6px; background: #fff; cursor: pointer; }
+  button:hover { background: #f0f1f3; }
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .filter-bar button { padding: 3px 10px; font-size: 12px; }
+  .filter-bar button.active { background: #0969da; color: #fff; border-color: #0969da; }
+  .group.hidden { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>UI Test Checklist — ai-key (Full Coverage)</h1>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="meta">
+    <span id="count">0 / 0</span>
+    <span>
+      <span class="tag ok">OK</span>happy path &nbsp;
+      <span class="tag fail">FAIL</span>error case &nbsp;
+      <span class="tag val">VAL</span>validate &nbsp;
+      <span class="tag perm">PERM</span>permission &nbsp;
+      <span class="tag api">API</span>verify API response
+    </span>
+    <button onclick="reset()">Reset tất cả</button>
+    <span style="margin-left:auto;font-size:12px">Tự lưu (localStorage)</span>
+  </div>
+  <div class="filter-bar">
+    <button class="active" onclick="filter('all',this)">Tất cả</button>
+    <button onclick="filter('Auth',this)">Auth</button>
+    <button onclick="filter('User',this)">User</button>
+    <button onclick="filter('Admin',this)">Admin</button>
+    <button onclick="filter('Referral',this)">Hoa hồng</button>
+    <button onclick="filter('Cross',this)">Cross-cutting</button>
+    <button id="btn-undone" onclick="filterUndone(this)">Chưa tick</button>
+  </div>
+</header>
+<main id="app"></main>
+
+<script>
+const T = { ok:'ok', fail:'fail', val:'val', perm:'perm', api:'api' };
+
+// [tag, "description"]
+// Each flow: [flowName, route, [ [tag, "case"] ... ]]
+// Each group: { label, badge?, items: flows[] }
+const DATA = [
+  {
+    label: "Auth — Đăng ký & Đăng nhập",
+    tag: "Auth",
+    flows: [
+      ["Đăng ký", "POST /auth/register", [
+        [T.val,  "Submit khi email/mật khẩu rỗng → field required chặn trước khi gọi API"],
+        [T.val,  "Mật khẩu < 6 ký tự → bị chặn (minLength 6)"],
+        [T.val,  "Mật khẩu ≠ xác nhận → toast \"Mật khẩu xác nhận không khớp\", không gọi API"],
+        [T.fail, "Email đã tồn tại → API 409 → toast lỗi từ server, ở lại trang"],
+        [T.api,  "Đăng ký thành công → response có accessToken, user object đúng cấu trúc"],
+        [T.ok,   "Đăng ký thành công → toast \"Đăng ký thành công\", redirect vào dashboard"],
+        [T.ok,   "Đăng ký qua referral link (?ref=CODE) → referralCode gửi lên API đúng"],
+      ]],
+      ["Đăng nhập", "POST /auth/login", [
+        [T.val,  "Email/mật khẩu rỗng → required chặn submit"],
+        [T.fail, "Sai email/mật khẩu → API 401 → toast lỗi, không vào dashboard"],
+        [T.ok,   "Đúng thông tin → toast \"Đăng nhập thành công\", vào dashboard"],
+        [T.ok,   "Session giữ sau reload (accessToken/cookie còn hiệu lực)"],
+        [T.ok,   "Nếu bật 2FA: sau login chuyển sang màn nhập OTP"],
+        [T.fail, "2FA OTP sai → POST /auth/2fa/verify → API 401 → toast lỗi, không vào"],
+        [T.ok,   "2FA OTP đúng → vào dashboard bình thường"],
+        [T.ok,   "Logout → xoá token, redirect /login, route app bị chặn sau logout"],
+      ]],
+      ["Xem thông tin bản thân", "GET /auth/me", [
+        [T.api,  "Gọi GET /auth/me khi có token → 200, trả user object đầy đủ"],
+        [T.api,  "Gọi GET /auth/me không có token → 401"],
+        [T.perm, "Token hết hạn → tự redirect /login, không báo lỗi crash"],
+      ]],
+    ]
+  },
+
+  {
+    label: "2FA — Thiết lập & Quản lý",
+    tag: "Auth",
+    flows: [
+      ["Setup 2FA", "POST /auth/2fa/setup  →  POST /auth/2fa/enable", [
+        [T.ok,   "Profile → bật 2FA → hiển thị QR code Google Authenticator"],
+        [T.val,  "Nhập OTP xác nhận sai → báo lỗi, không enable"],
+        [T.ok,   "Nhập OTP đúng → POST /auth/2fa/enable → 2FA được bật, UI cập nhật"],
+        [T.api,  "Sau enable: GET /auth/me trả twoFactorEnabled: true"],
+      ]],
+      ["Tắt 2FA", "DELETE /auth/2fa/disable", [
+        [T.ok,   "Profile → tắt 2FA → xác nhận OTP → DELETE /auth/2fa/disable → 2FA tắt"],
+        [T.fail, "OTP sai khi tắt → API 401 → toast lỗi, 2FA vẫn bật"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Dashboard User — Tổng quan & Profile",
+    tag: "User",
+    flows: [
+      ["Tổng quan dashboard", "/dashboard", [
+        [T.ok,   "Widget/số liệu load đúng (subscription, số key, số dư ví)"],
+        [T.fail, "API lỗi → hiển thị trạng thái lỗi, không vỡ layout"],
+        [T.ok,   "Sidebar hiển thị đúng theo role (user thường không thấy mục Admin)"],
+      ]],
+      ["Hồ sơ & đổi mật khẩu", "PATCH /auth/profile  |  /dashboard/profile", [
+        [T.val,  "Đổi mật khẩu: trống hoặc < 6 ký tự → chặn submit"],
+        [T.val,  "Mật khẩu mới ≠ xác nhận → toast lỗi, không gọi API"],
+        [T.ok,   "Đổi mật khẩu đúng → PATCH /auth/profile → toast thành công"],
+        [T.ok,   "Cập nhật tên/thông tin → PATCH /auth/profile → toast, dữ liệu cập nhật ngay"],
+        [T.fail, "Lưu lỗi server → toast lỗi, không mất dữ liệu đang nhập"],
+        [T.api,  "PATCH /auth/profile không có token → 401"],
+      ]],
+    ]
+  },
+
+  {
+    label: "My Keys — Subscription & API Key",
+    tag: "User",
+    flows: [
+      ["Xem danh sách key", "GET /subscriptions/my  |  /dashboard/my-keys", [
+        [T.ok,   "Có subscription → list đúng: plan name, API key (masked), hạn dùng, trạng thái, quota"],
+        [T.ok,   "Chưa có subscription → empty state \"Chưa có key nào\" + nút mua gói"],
+        [T.api,  "GET /subscriptions/my → 200, array subscriptions đúng cấu trúc"],
+      ]],
+      ["Thao tác key", "POST /subscriptions/:id/refresh-key", [
+        [T.ok,   "Copy key → toast \"Đã sao chép API key\", nội dung đúng"],
+        [T.ok,   "Đổi key mới → confirm dialog → POST refresh-key → toast, key mới hiển thị"],
+        [T.fail, "Đổi key lỗi API → toast lỗi, key cũ vẫn hiển thị"],
+        [T.api,  "POST /subscriptions/:id/refresh-key không có token → 401"],
+      ]],
+      ["Huỷ đơn", "PATCH /orders/:id/cancel", [
+        [T.val,  "Bấm huỷ → confirm dialog trước khi gọi API"],
+        [T.ok,   "Huỷ thành công → toast \"Huỷ đơn thành công\", danh sách cập nhật"],
+        [T.ok,   "Nếu hoàn ví → toast hiện số tiền hoàn, số dư ví tăng đúng"],
+        [T.fail, "Huỷ lỗi → toast lỗi, đơn vẫn giữ trạng thái cũ"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Ví (Wallet) — Số dư & Lịch sử",
+    tag: "User",
+    flows: [
+      ["Xem ví", "GET /wallet/me", [
+        [T.ok,   "Hiển thị số dư hiện tại đúng (VND)"],
+        [T.ok,   "Lịch sử giao dịch: nạp, hoàn đơn, trừ mua hàng, nhận hoa hồng — đều xuất hiện"],
+        [T.ok,   "Phân trang lịch sử hoạt động đúng"],
+        [T.api,  "GET /wallet/me → 200, trả balance và transactions"],
+        [T.api,  "GET /wallet/me không token → 401"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Mua gói (Buy Flow) — 3 bước",
+    tag: "User",
+    flows: [
+      ["Bước 1 — Chọn gói", "GET /plans  |  /dashboard/buy", [
+        [T.ok,   "Load danh sách plan từ GET /plans, chỉ hiện plan active"],
+        [T.val,  "Chưa chọn gói → không qua được Bước 2"],
+        [T.ok,   "Chọn gói → highlight plan, thấy giá gốc"],
+      ]],
+      ["Bước 2 — Coupon & Ví", "POST /coupons/validate", [
+        [T.val,  "Coupon input rỗng → nút Áp dụng disabled"],
+        [T.fail, "Coupon sai/hết hạn/hết lượt → POST /coupons/validate → toast lỗi, coupon = null"],
+        [T.ok,   "Coupon hợp lệ → toast \"Mã hợp lệ\", hiển thị mức giảm (% hoặc đ), giá tính lại"],
+        [T.val,  "Xoá coupon sau khi áp → giá reset về giá gốc"],
+        [T.ok,   "Tick \"Dùng số dư ví\" → hiển thị số dư, trừ đúng vào finalPrice"],
+        [T.val,  "Số dư ví > finalPrice → finalPrice = 0, không âm"],
+        [T.ok,   "finalPrice = 0 (ví đủ trả) → không cần QR, thanh toán ngay"],
+        [T.api,  "POST /coupons/validate body đúng (code, planId) → response discount đúng"],
+      ]],
+      ["Bước 3 — Tạo đơn & QR thanh toán", "POST /orders", [
+        [T.ok,   "Bấm \"Tiến hành thanh toán\" → POST /orders → tạo đơn thành công → sang Bước 3"],
+        [T.fail, "POST /orders lỗi → toast lỗi, ở lại Bước 2, đơn không tạo"],
+        [T.ok,   "Bước 3: hiển thị VietQR đúng số tiền finalPrice"],
+        [T.ok,   "Copy thông tin chuyển khoản (STK, nội dung) → toast copy thành công"],
+        [T.ok,   "Trạng thái đơn pending, hiện thông báo chờ xác nhận"],
+        [T.api,  "POST /orders payload đầy đủ (planId, couponCode?, useWallet, amount)"],
+        [T.api,  "GET /orders/my → đơn vừa tạo xuất hiện, status=pending"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Hướng dẫn & Notifications (User)",
+    tag: "User",
+    flows: [
+      ["Hướng dẫn sử dụng", "/dashboard/guide", [
+        [T.ok,   "Nội dung hướng dẫn hiển thị đầy đủ, code sample copy được"],
+        [T.ok,   "Link tài liệu (nếu có) mở đúng"],
+      ]],
+      ["Thông báo", "GET /notifications  |  PATCH /notifications/:id/read", [
+        [T.ok,   "Icon thông báo hiện badge số lượng chưa đọc (GET /notifications/unread-count)"],
+        [T.ok,   "Mở panel → list thông báo đúng, phân biệt đọc/chưa đọc"],
+        [T.ok,   "Click thông báo → PATCH /notifications/:id/read → đánh dấu đã đọc, badge giảm"],
+        [T.ok,   "\"Đánh dấu tất cả đã đọc\" → PATCH /notifications/read-all → badge = 0"],
+        [T.api,  "GET /notifications/unread-count không token → 401"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Referral — Hoa hồng (User)",
+    tag: "Referral",
+    flows: [
+      ["Xem & chia sẻ link giới thiệu", "GET /referrals/my-code  |  /dashboard/profile hoặc trang referral", [
+        [T.ok,   "User đăng nhập → GET /referrals/my-code → hiển thị referral link/code riêng"],
+        [T.ok,   "Copy link giới thiệu → toast \"Đã sao chép link\""],
+        [T.api,  "GET /referrals/my-code → 200, trả code (tạo mới nếu chưa có)"],
+        [T.api,  "GET /referrals/my-code không token → 401"],
+      ]],
+      ["Luồng hoa hồng end-to-end", "Flow: Register → Buy → Commission", [
+        [T.ok,   "User A lấy referral link, gửi cho User B"],
+        [T.ok,   "User B mở link đăng ký → form điền sẵn hoặc ghi nhớ ref code"],
+        [T.ok,   "User B đăng ký qua link → POST /auth/register với referralCode của A"],
+        [T.ok,   "User B mua gói thành công → admin confirm đơn"],
+        [T.ok,   "Sau khi đơn B confirmed → ví User A tăng đúng hoa hồng (theo % cấu hình)"],
+        [T.api,  "Kiểm tra GET /wallet/me của User A → transactions có entry loại commission"],
+        [T.ok,   "Admin xem /admin/referrals → thấy User B được giới thiệu bởi A, trạng thái, hoa hồng"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Admin — Phân quyền truy cập",
+    tag: "Admin",
+    flows: [
+      ["Chặn user thường", "/admin/*", [
+        [T.perm, "User thường mở bất kỳ /admin/* → bị redirect hoặc 403, không vào được"],
+        [T.perm, "User thường gọi GET /admin/users (API) → 403"],
+        [T.perm, "User thường gọi GET /admin/orders (API) → 403"],
+        [T.ok,   "Admin login → vào được toàn bộ trang /admin/*"],
+      ]],
+      ["Phân quyền theo permission", "roles:manage, users:manage, admin:all, settings:manage", [
+        [T.perm, "Role thiếu users:manage → không CRUD được users (API 403)"],
+        [T.perm, "Role thiếu roles:manage → không CRUD được roles (API 403)"],
+        [T.perm, "Role thiếu settings:manage → không sửa system config (API 403)"],
+        [T.perm, "Role thiếu admin:dept → không xem activity-logs, notifications admin (403)"],
+        [T.ok,   "Admin với đủ quyền → tất cả API trả 200/201"],
+        [T.api,  "GET /auth/permissions (cần roles:manage) → trả danh sách permission labels"],
+        [T.api,  "GET /auth/role-keys (cần users:manage) → trả danh sách role definitions"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Admin — Users",
+    tag: "Admin",
+    flows: [
+      ["Danh sách & tìm kiếm", "GET /admin/users", [
+        [T.ok,   "List users load đúng, phân trang hoạt động"],
+        [T.ok,   "Search theo email/tên → lọc đúng"],
+        [T.ok,   "Filter theo role/status → kết quả đúng"],
+        [T.api,  "GET /admin/users?page=1&limit=20 → 200, meta phân trang đúng"],
+      ]],
+      ["Tạo & Sửa user", "POST /admin/users  |  PATCH /admin/users/:id", [
+        [T.val,  "Tạo user: email/mật khẩu rỗng → chặn submit"],
+        [T.fail, "Tạo user email trùng → API 409 → toast lỗi"],
+        [T.ok,   "Tạo user hợp lệ → POST /admin/users → user xuất hiện trong list"],
+        [T.ok,   "Sửa role user → PATCH /admin/users/:id → cập nhật ngay"],
+        [T.api,  "PATCH /admin/users/:id body đúng cấu trúc → 200"],
+      ]],
+      ["Khoá / Mở user", "PATCH /admin/users/:id/deactivate  |  /activate", [
+        [T.ok,   "Khoá user → PATCH /deactivate → status=inactive, nút đổi sang \"Mở khoá\""],
+        [T.ok,   "Mở user → PATCH /activate → status=active"],
+        [T.fail, "User bị khoá login → API 403/401 → toast lỗi, không vào được"],
+        [T.api,  "User bị khoá gọi GET /auth/me → 401/403"],
+      ]],
+      ["Điều chỉnh ví user", "POST /admin/wallet/:userId/adjust  |  GET /admin/wallet/:userId/history", [
+        [T.ok,   "Cộng/trừ số dư ví user → POST adjust → số dư thay đổi đúng"],
+        [T.ok,   "Xem lịch sử ví user → GET history → đúng transactions"],
+        [T.fail, "Adjust với số âm vượt số dư → API lỗi → toast lỗi"],
+        [T.api,  "GET /admin/wallet → 200, list tất cả giao dịch ví"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Admin — Roles & Permissions",
+    tag: "Admin",
+    flows: [
+      ["CRUD Roles", "GET/POST/PATCH/DELETE /admin/roles", [
+        [T.val,  "Tạo role: tên rỗng hoặc trùng → báo lỗi, không gọi API"],
+        [T.ok,   "Tạo role hợp lệ → POST /admin/roles → xuất hiện trong list"],
+        [T.ok,   "Gán permission vào role → PATCH /admin/roles/:id → lưu đúng"],
+        [T.ok,   "Sửa tên role → cập nhật ngay"],
+        [T.ok,   "Xoá role không có user → DELETE → xoá thành công"],
+        [T.fail, "Xoá role đang có user → API lỗi → toast lỗi, role vẫn tồn tại"],
+        [T.api,  "GET /admin/roles/:id → 200, trả permissions đầy đủ"],
+      ]],
+      ["Groups", "GET/POST/PATCH/DELETE /admin/groups (nếu có)", [
+        [T.val,  "Tạo group: tên rỗng → chặn submit"],
+        [T.ok,   "CRUD group, gán user vào group, validate tên trùng"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Admin — Plans",
+    tag: "Admin",
+    flows: [
+      ["CRUD Plans", "GET/POST/PATCH/DELETE /admin/plans", [
+        [T.val,  "Tạo plan: tên rỗng, giá hoặc quota âm/0 → báo lỗi"],
+        [T.ok,   "Tạo plan hợp lệ → xuất hiện trong list và trong trang /dashboard/buy của user"],
+        [T.ok,   "Bật/tắt plan (isActive) → plan tắt không hiện ở trang buy của user"],
+        [T.ok,   "Sửa giá plan → giá mới xuất hiện ở trang buy"],
+        [T.ok,   "Xoá plan → không còn trong list"],
+        [T.fail, "Xoá plan đang có subscription active → API lỗi → toast lỗi"],
+        [T.api,  "GET /plans (public) chỉ trả plan isActive=true"],
+        [T.api,  "GET /admin/plans trả tất cả plan kể cả inactive"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Admin — Coupons",
+    tag: "Admin",
+    flows: [
+      ["CRUD Coupons", "GET/POST/PATCH/DELETE /admin/coupons", [
+        [T.val,  "Tạo coupon: % > 100, giá trị âm, ngày hết hạn là quá khứ → báo lỗi"],
+        [T.val,  "Code coupon rỗng → chặn submit"],
+        [T.ok,   "Tạo coupon hợp lệ → xuất hiện trong list"],
+        [T.ok,   "Giới hạn lượt dùng: tạo coupon maxUses=1 → dùng 1 lần → coupon hết, lần sau báo lỗi"],
+        [T.ok,   "Sửa/tắt coupon → cập nhật ngay"],
+        [T.ok,   "Xoá coupon → không còn trong list, user apply báo không tìm thấy"],
+        [T.api,  "POST /coupons/validate với code đúng → 200, discount info đúng"],
+        [T.api,  "POST /coupons/validate với code sai → 404/400"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Admin — Orders",
+    tag: "Admin",
+    flows: [
+      ["Danh sách & lọc", "GET /admin/orders", [
+        [T.ok,   "List orders load đúng, phân trang"],
+        [T.ok,   "Lọc theo status (pending, confirmed, cancelled) → đúng"],
+        [T.ok,   "Lọc theo user/thời gian → đúng"],
+        [T.api,  "GET /admin/orders?status=pending → chỉ trả pending orders"],
+      ]],
+      ["Xác nhận đơn", "PATCH /admin/orders/:id/confirm", [
+        [T.ok,   "Confirm đơn pending → PATCH confirm → status=confirmed"],
+        [T.ok,   "Sau confirm: subscription tương ứng được tạo, API key xuất hiện trong my-keys của user"],
+        [T.ok,   "Sau confirm: nếu user được giới thiệu → hoa hồng cộng vào ví người giới thiệu"],
+        [T.fail, "Confirm đơn đã confirmed → API 400/409 → toast lỗi"],
+        [T.api,  "PATCH /admin/orders/:id/confirm → response subscription info"],
+      ]],
+      ["Huỷ đơn (admin)", "PATCH /orders/:id/cancel", [
+        [T.ok,   "Admin huỷ đơn → status=cancelled"],
+        [T.ok,   "Nếu đã thanh toán, hoàn tiền vào ví user → GET /wallet/me user tăng đúng"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Admin — Subscriptions",
+    tag: "Admin",
+    flows: [
+      ["Danh sách & quản lý", "GET /admin/subscriptions  |  PATCH /admin/subscriptions/:id", [
+        [T.ok,   "List subscriptions, phân trang, lọc theo user/plan/status"],
+        [T.ok,   "Gia hạn subscription → PATCH → ngày hết hạn cập nhật"],
+        [T.ok,   "Huỷ subscription → status=cancelled, user không còn thấy key active"],
+        [T.api,  "POST /admin/subscriptions/:id/reset-period → reset quota/period đúng"],
+        [T.fail, "Sửa subscription lỗi → toast lỗi, trạng thái không đổi"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Admin — Master Keys",
+    tag: "Admin",
+    flows: [
+      ["CRUD Master Keys", "GET/POST/PUT/DELETE /admin/master-keys", [
+        [T.val,  "Thêm key sai định dạng → API validate → toast lỗi"],
+        [T.ok,   "Thêm key hợp lệ → xuất hiện trong list"],
+        [T.ok,   "Sửa key → PUT /admin/master-keys/:id → cập nhật"],
+        [T.ok,   "Xoá key → DELETE → không còn trong list"],
+        [T.fail, "Xoá key đang active/duy nhất → API lỗi hoặc confirm cảnh báo"],
+        [T.api,  "GET /admin/master-keys → list keys (masked nếu sensitive)"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Admin — Referrals",
+    tag: "Admin",
+    flows: [
+      ["Xem thống kê hoa hồng", "GET /admin/referrals (nếu có)", [
+        [T.ok,   "List referral: ai giới thiệu ai, ngày đăng ký, đơn mua, hoa hồng"],
+        [T.ok,   "Tổng hoa hồng đã trả đúng với giao dịch trong ví"],
+        [T.ok,   "Filter theo người giới thiệu, trạng thái, thời gian"],
+        [T.api,  "Response referral data đúng cấu trúc: referrer, referee, commission, status"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Admin — System Config",
+    tag: "Admin",
+    flows: [
+      ["Xem & sửa config", "GET /admin/config  |  PATCH /admin/config/:id", [
+        [T.ok,   "List config load đúng (commission rate, bank info, v.v.)"],
+        [T.val,  "Field bắt buộc để trống → chặn lưu"],
+        [T.ok,   "Lưu config → PATCH → toast, giá trị áp dụng ngay (trang buy phản ánh đúng)"],
+        [T.ok,   "Commission rate cập nhật → đơn mới sau đó tính hoa hồng theo rate mới"],
+        [T.api,  "GET /admin/config → 200, object config đầy đủ"],
+        [T.api,  "PATCH /admin/config/:id không có token → 401; thiếu quyền → 403"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Admin — Notifications",
+    tag: "Admin",
+    flows: [
+      ["Tạo & gửi thông báo", "POST /admin/notifications  |  GET /admin/notifications", [
+        [T.ok,   "List thông báo admin, phân trang"],
+        [T.val,  "Tạo notification: tiêu đề/nội dung rỗng → chặn submit"],
+        [T.ok,   "Tạo notification gửi tất cả user → POST → xuất hiện trong panel user"],
+        [T.ok,   "Tạo notification gửi user cụ thể → chỉ user đó nhận"],
+        [T.ok,   "User nhận được thông báo → badge tăng, đọc → badge giảm"],
+        [T.api,  "POST /admin/notifications payload đúng (title, body, targetUserId?)"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Admin — Activity Logs",
+    tag: "Admin",
+    flows: [
+      ["Xem log", "GET /admin/activity-logs", [
+        [T.ok,   "List logs load đúng, phân trang"],
+        [T.ok,   "Lọc theo user → chỉ log của user đó"],
+        [T.ok,   "Lọc theo thời gian (from/to) → đúng"],
+        [T.ok,   "Lọc theo action/resource type (nếu có) → đúng"],
+        [T.ok,   "Thao tác của admin (confirm order, adjust wallet) → xuất hiện trong log"],
+        [T.api,  "GET /admin/activity-logs?userId=X → đúng filter"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Claude API Proxy — Proxy endpoint",
+    tag: "Cross",
+    flows: [
+      ["Proxy chat completions", "POST /claude/v1/chat/completions  |  POST /claude/v1/messages", [
+        [T.ok,   "User có subscription active → gọi API proxy → nhận response đúng"],
+        [T.perm, "User không có subscription / key hết hạn → API 401/403"],
+        [T.ok,   "POST /claude/v1/models → trả list model đúng"],
+        [T.api,  "POST /claude/v1/messages/count_tokens → trả token count đúng"],
+        [T.fail, "Master key không hợp lệ phía server → user nhận lỗi phù hợp, không crash"],
+      ]],
+    ]
+  },
+
+  {
+    label: "Cross-cutting — UX & Resilience",
+    tag: "Cross",
+    flows: [
+      ["Responsive", "—", [
+        [T.ok,   "Mobile (375px): sidebar collapse, nội dung không bị cắt, bảng scroll ngang"],
+        [T.ok,   "Tablet (768px): layout điều chỉnh đúng"],
+        [T.ok,   "Desktop (1280px+): sidebar mở full, layout rộng"],
+      ]],
+      ["Loading & Empty states", "—", [
+        [T.ok,   "Tất cả danh sách: skeleton/spinner khi đang tải"],
+        [T.ok,   "Tất cả danh sách: empty state rõ ràng khi không có dữ liệu"],
+        [T.ok,   "Button gửi form: disabled + loading khi đang gọi API (không double-submit)"],
+      ]],
+      ["Lỗi mạng & Server error", "—", [
+        [T.fail, "API timeout → toast lỗi \"Lỗi kết nối\", không crash trang"],
+        [T.fail, "API 500 → toast lỗi server, không hiện stack trace ra UI"],
+        [T.fail, "Mất mạng giữa chừng → UI thông báo, không treo im"],
+      ]],
+      ["Security cơ bản", "—", [
+        [T.perm, "Token không hợp lệ / giả mạo → API 401 trên mọi endpoint protected"],
+        [T.perm, "User A không truy cập được resource của User B (orders, subscriptions, wallet)"],
+        [T.perm, "Route /admin/* không render nội dung trước khi check auth xong"],
+      ]],
+    ]
+  },
+];
+
+const KEY = "ai-key-ui-checklist-v3";
+let state = JSON.parse(localStorage.getItem(KEY) || "{}");
+const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+
+let currentFilter = 'all';
+let showUndone = false;
+
+function render() {
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+  let total = 0, done = 0;
+
+  DATA.forEach((group, gi) => {
+    const matchFilter = currentFilter === 'all' || group.tag === currentFilter;
+    const sec = document.createElement("section");
+    sec.className = "group";
+    sec.dataset.tag = group.tag;
+
+    let groupTotal = 0, groupDone = 0;
+    const secInner = document.createElement("div");
+
+    group.flows.forEach((flow, fi) => {
+      const [name, route, cases] = flow;
+      const flowEl = document.createElement("div");
+      flowEl.className = "flow";
+      flowEl.innerHTML = `<h3>${esc(name)} <span class="route">${esc(route)}</span></h3>`;
+
+      cases.forEach(([type, text], ci) => {
+        const id = `${gi}::${fi}::${ci}`;
+        const st = state[id] || {};
+        total++; groupTotal++;
+        if (st.done) { done++; groupDone++; }
+
+        if (showUndone && st.done) return;
+
+        const div = document.createElement("div");
+        div.className = "item" + (st.done ? " done" : "");
+        div.innerHTML = `
+          <input type="checkbox" ${st.done ? "checked" : ""} data-id="${esc(id)}">
+          <label>
+            <span><span class="tag ${type}">${type.toUpperCase()}</span>${esc(text)}</span>
+            <input type="text" placeholder="Ghi chú / bug..." data-note="${esc(id)}" value="${esc(st.note||"")}">
+          </label>`;
+        flowEl.appendChild(div);
+      });
+
+      secInner.appendChild(flowEl);
+    });
+
+    const badgeText = `${groupDone}/${groupTotal}`;
+    const badgeClass = group.tag === 'Admin' ? 'badge admin' : (group.tag === 'Cross' ? 'badge api' : 'badge');
+    sec.innerHTML = `<h2>${esc(group.label)} <span class="${badgeClass}">${badgeText}</span></h2>`;
+    sec.appendChild(secInner);
+
+    if (!matchFilter) sec.classList.add("hidden");
+    app.appendChild(sec);
+  });
+
+  document.getElementById("count").textContent = `${done} / ${total}`;
+  document.getElementById("bar").style.width = (total ? done/total*100 : 0) + "%";
+}
+
+document.addEventListener("change", e => {
+  const id = e.target.dataset.id;
+  if (id) { state[id] = { ...state[id], done: e.target.checked }; save(); render(); }
+});
+document.addEventListener("input", e => {
+  const id = e.target.dataset.note;
+  if (id) { state[id] = { ...state[id], note: e.target.value }; save(); }
+});
+
+function filter(tag, btn) {
+  currentFilter = tag;
+  showUndone = false;
+  document.querySelectorAll(".filter-bar button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  render();
+}
+
+function filterUndone(btn) {
+  showUndone = !showUndone;
+  currentFilter = 'all';
+  document.querySelectorAll(".filter-bar button").forEach(b => b.classList.remove("active"));
+  btn.classList.toggle("active", showUndone);
+  render();
+}
+
+function reset() {
+  if (confirm("Xóa toàn bộ trạng thái? Không thể hoàn tác.")) { state = {}; save(); render(); }
+}
+
+render();
+</script>
+</body>
+</html>
