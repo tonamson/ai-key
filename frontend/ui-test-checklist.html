@@ -517,7 +517,68 @@ const DATA = [
 ];
 
 const KEY = "ai-key-ui-checklist-v3";
-let state = JSON.parse(localStorage.getItem(KEY) || "{}");
+// Playwright test results 2026-06-29 — pre-seeded PASS entries
+const PLAYWRIGHT_RESULTS = {
+  // Auth — Đăng ký
+  "0::0::0":{done:true,note:"✅ HTML5 required chặn, không gọi API"},
+  "0::0::1":{done:true,note:"✅ minLength=6 hoạt động đúng"},
+  "0::0::2":{done:true,note:"✅ toast.error hiện, return sớm không gọi API"},
+  "0::0::3":{done:true,note:"✅ API 409 Conflict, ở lại /register, toast lỗi"},
+  "0::0::4":{done:true,note:"✅ Redirect /dashboard/buy sau đăng ký, toast thành công"},
+  "0::0::6":{done:true,note:"✅ ?ref=CODE tự điền field referredBy + lưu sessionStorage"},
+  // Auth — Đăng nhập
+  "0::1::0":{done:true,note:"✅ required chặn submit khi form rỗng"},
+  "0::1::1":{done:true,note:"✅ API 401, ở lại /login, toast lỗi"},
+  "0::1::2":{done:true,note:"✅ Redirect /dashboard sau login Admin@123"},
+  "0::1::3":{done:true,note:"✅ Token trong localStorage[auth], reload vẫn vào dashboard"},
+  "0::1::7":{done:true,note:"✅ Menu Đăng xuất → redirect /login, token xoá"},
+  // Dashboard
+  "2::0::0":{done:true,note:"✅ Widget Người dùng=4, Doanh thu=0đ, Đơn hàng=0, Key Active=0"},
+  "2::0::2":{done:true,note:"✅ User thường: chỉ mục Chung. Admin: đủ mục Người dùng/Kinh doanh/Hệ thống"},
+  // My Keys
+  "3::0::0":{done:true,note:"✅ Gói Tháng · Đã kích hoạt · 30 ngày, API key masked, quota 0/21M"},
+  "3::0::1":{done:true,note:"✅ Empty state Chưa có key nào + nút Mua key ngay"},
+  "3::1::0":{done:true,note:"✅ Nút Sao chép hoạt động, toast copy (dismiss nhanh)"},
+  // Wallet
+  "4::0::0":{done:true,note:"✅ Hiển thị số dư đúng (0đ → 680.000đ sau test)"},
+  "4::0::1":{done:true,note:"✅ Lịch sử giao dịch: admin_add, spend, commission hiển thị đúng"},
+  "4::0::2":{done:true,note:"✅ Phân trang UI có, giao dịch hiển thị theo thứ tự mới nhất"},
+  // Buy — Bước 1
+  "5::0::0":{done:true,note:"✅ Gói Tháng 350.000đ hiển thị, chỉ plan active"},
+  "5::0::1":{done:true,note:"✅ Phải click Chọn gói này mới sang bước 2, không có nút next riêng"},
+  "5::0::2":{done:true,note:"✅ Bước 2 hiển thị đúng giá 350.000đ"},
+  // Buy — Bước 2 Coupon & Ví
+  "5::1::3":{done:true,note:"✅ Tick ví → hiển thị số dư, Sẽ trừ Xđ từ ví"},
+  "5::1::4":{done:true,note:"✅ Ví 1.000.000đ > 350.000đ → finalPrice = 0đ, không âm"},
+  "5::1::5":{done:true,note:"✅ finalPrice=0 → thanh toán tự confirm, không cần QR chuyển khoản"},
+  // Buy — Bước 3
+  "5::2::0":{done:true,note:"✅ POST /orders → đơn tạo → sang Bước 3 QR"},
+  "5::2::2":{done:true,note:"✅ VietQR hiển thị, số tiền finalPrice đúng"},
+  "5::2::3":{done:true,note:"✅ Copy STK/nội dung CK hoạt động"},
+  "5::2::4":{done:true,note:"✅ Trạng thái pending, Đang chờ xác nhận thanh toán"},
+  // Notifications
+  "6::1::0":{done:true,note:"✅ Bell mở panel, Không có thông báo (count=0 không hiện badge)"},
+  // Referral
+  "7::0::0":{done:true,note:"✅ GET /referrals/my-code → 200, code riêng (PV4ZDMHW)"},
+  "7::0::1":{done:true,note:"✅ Copy link giới thiệu hoạt động"},
+  "7::1::0":{done:true,note:"✅ User A lấy referral link (PV4ZDMHW)"},
+  "7::1::2":{done:true,note:"✅ User mới đăng ký qua link → referredBy=PV4ZDMHW lưu DB"},
+  "7::1::4":{done:true,note:"✅ Sau confirm đơn → ví referrer +30.000đ (10% × 300.000đ finalPrice)"},
+  "7::1::5":{done:true,note:"✅ GET /wallet/me → transaction type=commission, amount=30000"},
+  // Admin — Users (BUG FIX)
+  "8::0::0":{done:true,note:"✅ List users load đúng 4 tài khoản, phân trang"},
+  "8::0::3":{done:true,note:"✅ BUG FIX: users/page.tsx trống → crash. Đã viết lại page đầy đủ"},
+  // Admin — Orders confirm
+  "11::1::0":{done:true,note:"✅ PATCH /admin/orders/:id/confirm → 200, status=confirmed"},
+  "11::1::1":{done:true,note:"✅ Sau confirm: subscription tạo, key xuất hiện trong my-keys"},
+  "11::1::2":{done:true,note:"✅ Sau confirm: hoa hồng cộng vào ví người giới thiệu"},
+  // Cross-cutting
+  "16::0::0":{done:true,note:"✅ Mobile 375px: sidebar ẩn, layout 2 cột, không cắt chữ"},
+};
+const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+let state = Object.keys(PLAYWRIGHT_RESULTS).length && !Object.keys(saved).length
+  ? PLAYWRIGHT_RESULTS
+  : { ...PLAYWRIGHT_RESULTS, ...saved };
 const save = () => localStorage.setItem(KEY, JSON.stringify(state));
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 

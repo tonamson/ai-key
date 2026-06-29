@@ -265,7 +265,7 @@ function StepPayment({ order, vietQRUrl }: { order: Order; vietQRUrl: string }) 
       <div className="rounded-2xl border bg-card overflow-hidden">
         {/* QR */}
         <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6 flex flex-col items-center gap-4">
-          <img src={vietQRUrl} alt="VietQR" className="w-52 h-52 rounded-xl shadow-md bg-white p-1" />
+          {vietQRUrl && <img src={vietQRUrl} alt="VietQR" className="w-52 h-52 rounded-xl shadow-md bg-white p-1" />}
           <p className="text-sm text-muted-foreground">Quét mã QR bằng app ngân hàng</p>
         </div>
 
