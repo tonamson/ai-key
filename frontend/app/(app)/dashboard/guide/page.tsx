@@ -19,7 +19,10 @@ import { Badge } from "@/components/ui/badge";
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:2053"
 ).replace(/\/$/, "");
-const PROXY_URL = `${API_BASE}/claude/v1`;
+// Claude Code tự ghép "/v1/messages" vào ANTHROPIC_BASE_URL → base phải dừng ở /claude.
+// curl/SDK tự ghép "/messages" → cần đủ /claude/v1. Hai client ghép khác nhau nên tách 2 biến.
+const PROXY_BASE = `${API_BASE}/claude`;
+const PROXY_URL = `${PROXY_BASE}/v1`;
 
 const CC_MODELS = [
   {
@@ -58,7 +61,7 @@ const SETTINGS_JSON = JSON.stringify(
   {
     env: {
       CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
-      ANTHROPIC_BASE_URL: PROXY_URL,
+      ANTHROPIC_BASE_URL: PROXY_BASE,
       ANTHROPIC_AUTH_TOKEN: "sk-xxxxxxxx-xxxxxx-xxxxxxxx",
       ANTHROPIC_DEFAULT_OPUS_MODEL: "cc/claude-opus-4-8",
       ANTHROPIC_DEFAULT_SONNET_MODEL: "cc/claude-sonnet-4-6",
@@ -263,6 +266,12 @@ export default function GuidePage() {
                 </code>{" "}
                 bằng key thật của bạn.
               </p>
+              <p className="text-sm text-amber-600 dark:text-amber-500">
+                Lưu ý: <code className="font-mono text-xs">ANTHROPIC_BASE_URL</code> kết thúc ở{" "}
+                <code className="font-mono text-xs">/claude</code> — KHÔNG thêm{" "}
+                <code className="font-mono text-xs">/v1</code> (Claude Code tự nối{" "}
+                <code className="font-mono text-xs">/v1/messages</code>).
+              </p>
               <CodeBlock code={SETTINGS_JSON} language="json" />
             </div>
           </div>
@@ -288,7 +297,7 @@ export default function GuidePage() {
         <h2 className="text-base font-semibold">Thông tin kết nối</h2>
         <div className="rounded-lg border bg-background divide-y text-sm">
           {[
-            { label: "Base URL", value: PROXY_URL },
+            { label: "Base URL", value: PROXY_BASE },
             { label: "Default Sonnet", value: "cc/claude-sonnet-4-6" },
             { label: "Default Opus", value: "cc/claude-opus-4-8" },
             { label: "Default Haiku", value: "cc/claude-haiku-4-5-20251001" },
