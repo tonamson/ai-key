@@ -56,6 +56,8 @@ export class ClaudeProxyController {
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no'); // tell nginx not to buffer SSE
+      (res as any).flushHeaders?.();
       const reader = (result.body as { body: ReadableStream }).body.getReader();
       const decoder = new TextDecoder();
       // Bóc hậu tố "_ide" upstream chèn vào tool name. SSE phân tách theo dòng và name luôn
