@@ -14,7 +14,7 @@ export class AdminUsersService {
     const qb = this.repo.createQueryBuilder('user')
       .leftJoinAndSelect('user.roleDetail', 'role')
       .select(['user.id', 'user.email', 'user.name',
-               'user.roleId', 'user.isActive', 'user.twoFactorEnabled',
+               'user.roleId', 'user.isActive', 'user.emailVerified', 'user.twoFactorEnabled',
                'user.createdAt', 'user.updatedAt', 'role'])
       .orderBy('user.createdAt', 'DESC')
       .skip((page - 1) * limit)
@@ -35,7 +35,7 @@ export class AdminUsersService {
       where: { id },
       relations: { roleDetail: true },
       select: { id: true, email: true, name: true,
-                roleId: true, isActive: true, twoFactorEnabled: true,
+                roleId: true, isActive: true, emailVerified: true, twoFactorEnabled: true,
                 createdAt: true, updatedAt: true },
     });
     if (!user) throw new NotFoundException('Nhân viên không tồn tại');
@@ -51,14 +51,18 @@ export class AdminUsersService {
     return this.findOne(user.id);
   }
 
-  async update(id: string, data: { name?: string; roleId?: string; isActive?: boolean }) {
+  async update(id: string, data: { name?: string; roleId?: string; isActive?: boolean; emailVerified?: boolean }) {
     const user = await this.repo.findOneBy({ id });
     if (!user) throw new NotFoundException('Nhân viên không tồn tại');
     Object.assign(user, data);
+    // Duyệt xác thực thì xoá token đang treo để link cũ vô hiệu.
+    if (data.emailVerified) user.emailVerifyToken = null;
     await this.repo.save(user);
     return this.findOne(id);
   }
 
   async deactivate(id: string) { return this.update(id, { isActive: false }); }
   async activate(id: string) { return this.update(id, { isActive: true }); }
+  async verifyEmail(id: string) { return this.update(id, { emailVerified: true }); }
+  async unverifyEmail(id: string) { return this.update(id, { emailVerified: false }); }
 }

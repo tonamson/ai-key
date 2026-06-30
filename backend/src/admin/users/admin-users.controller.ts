@@ -30,4 +30,10 @@ export class AdminUsersController {
 
   @Patch(':id/activate')
   activate(@Param('id') id: string) { return this.service.activate(id); }
+
+  @Patch(':id/verify-email')
+  verifyEmail(@Param('id') id: string) { return this.service.verifyEmail(id); }
+
+  @Patch(':id/unverify-email')
+  unverifyEmail(@Param('id') id: string) { return this.service.unverifyEmail(id); }
 }

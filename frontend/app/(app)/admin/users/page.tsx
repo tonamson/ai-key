@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Users, Search, MoreHorizontal, Lock, Unlock, Shield } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users, Search, MoreHorizontal, Lock, Unlock, Shield, MailCheck, MailX } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -63,6 +63,15 @@ function UsersTab({ roles }: { roles: Role[] }) {
       if (u.isActive) await adminUserApi.deactivate(u.id);
       else await adminUserApi.activate(u.id);
       toast.success(u.isActive ? 'Đã khoá tài khoản' : 'Đã mở khoá tài khoản');
+      load();
+    } catch (e) { toast.error((e as Error).message); }
+  }
+
+  async function toggleVerify(u: AdminUser) {
+    try {
+      if (u.emailVerified) await adminUserApi.unverifyEmail(u.id);
+      else await adminUserApi.verifyEmail(u.id);
+      toast.success(u.emailVerified ? 'Đã bỏ duyệt xác thực' : 'Đã duyệt xác thực email');
       load();
     } catch (e) { toast.error((e as Error).message); }
   }
@@ -146,9 +155,14 @@ function UsersTab({ roles }: { roles: Role[] }) {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1.5">
-                    <span className={`size-1.5 rounded-full ${u.isActive ? 'bg-emerald-500' : 'bg-destructive'}`} />
-                    <span className="text-sm">{u.isActive ? 'Hoạt động' : 'Bị khoá'}</span>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`size-1.5 rounded-full ${u.isActive ? 'bg-emerald-500' : 'bg-destructive'}`} />
+                      <span className="text-sm">{u.isActive ? 'Hoạt động' : 'Bị khoá'}</span>
+                    </div>
+                    <Badge variant={u.emailVerified ? 'default' : 'secondary'} className="text-xs w-fit">
+                      {u.emailVerified ? 'Đã xác thực' : 'Chưa xác thực'}
+                    </Badge>
                   </div>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
@@ -164,6 +178,12 @@ function UsersTab({ roles }: { roles: Role[] }) {
                         {u.isActive
                           ? <><Lock className="mr-2 size-3.5" />Khoá tài khoản</>
                           : <><Unlock className="mr-2 size-3.5" />Mở khoá</>
+                        }
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => toggleVerify(u)}>
+                        {u.emailVerified
+                          ? <><MailX className="mr-2 size-3.5" />Bỏ duyệt xác thực</>
+                          : <><MailCheck className="mr-2 size-3.5" />Duyệt xác thực</>
                         }
                       </DropdownMenuItem>
                     </DropdownMenuContent>

@@ -8,7 +8,7 @@ export interface Role {
 export interface AdminUser {
   id: string; email: string; name: string;
   role: string; roleId?: string; roleDetail?: Role;
-  isActive: boolean; twoFactorEnabled: boolean; createdAt: string; updatedAt: string;
+  isActive: boolean; emailVerified: boolean; twoFactorEnabled: boolean; createdAt: string; updatedAt: string;
 }
 
 export interface Paginated<T> { items: T[]; total: number; page: number; limit: number; }
@@ -30,6 +30,8 @@ export const adminUserApi = {
   update: (id: string, data: any) => apiClient.patch<AdminUser>(`/admin/users/${id}`, data).then(r => r.data),
   deactivate: (id: string) => apiClient.patch(`/admin/users/${id}/deactivate`).then(r => r.data),
   activate: (id: string) => apiClient.patch(`/admin/users/${id}/activate`).then(r => r.data),
+  verifyEmail: (id: string) => apiClient.patch(`/admin/users/${id}/verify-email`).then(r => r.data),
+  unverifyEmail: (id: string) => apiClient.patch(`/admin/users/${id}/unverify-email`).then(r => r.data),
 };
 
 // Role keys (hardcoded on backend)
