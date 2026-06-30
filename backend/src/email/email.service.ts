@@ -37,6 +37,31 @@ export class EmailService {
     }
   }
 
+  async sendPasswordReset(email: string, name: string, resetUrl: string): Promise<void> {
+    try {
+      await this.resend.emails.send({
+        from: this.from,
+        to: email,
+        subject: 'Đặt lại mật khẩu AI Key',
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#111">
+            <h2 style="margin:0 0 8px">Xin chào ${name}!</h2>
+            <p style="color:#555;margin:0 0 16px">Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>
+            <p style="color:#555;margin:0 0 24px">Nhấn vào nút bên dưới để đặt lại mật khẩu. Link có hiệu lực trong <strong>15 phút</strong>.</p>
+            <a href="${resetUrl}"
+               style="display:inline-block;background:#000;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600">
+              Đặt lại mật khẩu →
+            </a>
+            <p style="color:#555;margin:24px 0 0;font-size:13px">Nếu bạn không yêu cầu điều này, hãy bỏ qua email này.</p>
+            <p style="color:#999;font-size:12px;margin:16px 0 0">AI Key · moneynote.store</p>
+          </div>
+        `,
+      });
+    } catch (err) {
+      this.logger.warn(`Failed to send password reset email to ${email}: ${err}`);
+    }
+  }
+
   async sendWelcome(email: string, name: string): Promise<void> {
     try {
       await this.resend.emails.send({

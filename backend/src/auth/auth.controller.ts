@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Patch, Post, Request } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { RecaptchaService } from './recaptcha.service';
 import { EmailService } from '../email/email.service';
@@ -16,6 +17,7 @@ export class AuthController {
     private readonly auth: AuthService,
     private readonly recaptcha: RecaptchaService,
     private readonly email: EmailService,
+    private readonly config: ConfigService,
   ) {}
 
   @Public()
@@ -32,6 +34,26 @@ export class AuthController {
   async login(@Body() dto: LoginDto) {
     await this.recaptcha.verify(dto.recaptchaToken, 'login');
     return this.auth.login(dto.email, dto.password);
+  }
+
+  @Public()
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: { email: string }) {
+    const result = await this.auth.forgotPassword(dto.email);
+    if (result) {
+      const appUrl = this.config.get('APP_URL') ?? 'https://moneynote.store';
+      const resetUrl = `${appUrl}/reset-password?token=${result.token}`;
+      this.email.sendPasswordReset(dto.email, result.name, resetUrl);
+    }
+    // Luôn trả 200 để tránh user enumeration
+    return { message: 'Nếu email tồn tại, chúng tôi đã gửi link đặt lại mật khẩu.' };
+  }
+
+  @Public()
+  @Post('reset-password')
+  async resetPassword(@Body() dto: { token: string; password: string }) {
+    await this.auth.resetPassword(dto.token, dto.password);
+    return { message: 'Đặt lại mật khẩu thành công' };
   }
 
   @Public()

@@ -157,6 +157,11 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
+            <div className="text-right">
+              <Link href="/forgot-password" className="text-sm text-muted-foreground underline underline-offset-4">
+                Quên mật khẩu?
+              </Link>
+            </div>
           </form>
           <p className="text-center text-sm text-muted-foreground mt-4">
             Chưa có tài khoản?{" "}

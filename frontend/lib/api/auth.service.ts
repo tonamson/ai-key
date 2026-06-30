@@ -33,4 +33,10 @@ export const authService = {
 
   disableTwoFactor: (code: string) =>
     apiClient.delete<{ enabled: boolean }>('/auth/2fa/disable', { data: { code } }).then((r) => r.data),
+
+  forgotPassword: (email: string) =>
+    apiClient.post<{ message: string }>('/auth/forgot-password', { email }).then((r) => r.data),
+
+  resetPassword: (token: string, password: string) =>
+    apiClient.post<{ message: string }>('/auth/reset-password', { token, password }).then((r) => r.data),
 };

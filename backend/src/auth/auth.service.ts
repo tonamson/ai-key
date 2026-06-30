@@ -1,4 +1,5 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -132,6 +133,35 @@ export class AuthService {
     if (delta === null) throw new UnauthorizedException('Mã xác thực không đúng');
     await this.users.update(userId, { twoFactorEnabled: false, twoFactorSecret: null });
     return { enabled: false };
+  }
+
+  async forgotPassword(email: string): Promise<{ token: string; name: string } | null> {
+    const user = await this.users.findOneBy({ email });
+    // Trả về null dù email không tồn tại để tránh user enumeration
+    if (!user) return null;
+    const token = crypto.randomBytes(32).toString('hex');
+    await this.users.update(user.id, {
+      passwordResetToken: token,
+      passwordResetExpiry: new Date(Date.now() + 15 * 60 * 1000),
+    });
+    return { token, name: user.name };
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const found = await this.users
+      .createQueryBuilder('u')
+      .select(['u.id', 'u.passwordResetToken', 'u.passwordResetExpiry'])
+      .where('u.passwordResetToken = :token', { token })
+      .andWhere('u.passwordResetExpiry > NOW()')
+      .getOne();
+    if (!found) throw new BadRequestException('Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn');
+    await this.users.update(found.id, {
+      password: await bcrypt.hash(newPassword, 10),
+      passwordResetToken: null,
+      passwordResetExpiry: null,
+      loginFailCount: 0,
+      loginLockUntil: null,
+    });
   }
 
   async updateProfile(id: string, data: { name?: string; currentPassword?: string; newPassword?: string }) {

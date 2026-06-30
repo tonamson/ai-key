@@ -43,6 +43,12 @@ export class User {
   @Column({ type: 'timestamptz', nullable: true })
   loginLockUntil: Date | null;
 
+  @Column({ type: 'varchar', nullable: true, select: false })
+  passwordResetToken: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  passwordResetExpiry: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 
