@@ -78,10 +78,6 @@ export class ClaudeProxyController {
           res.write(this.service.stripInjectedToolSuffix(ready, validNames));
         }
         if (buf) res.write(this.service.stripInjectedToolSuffix(buf, validNames));
-        // DEBUG tool-call: log mọi tool_use name + stop_reason trong stream trả về
-        const toolNames = [...captured.matchAll(/"type":"tool_use"[^}]*?"name":"([^"]+)"/g)].map(m => m[1]);
-        const stopReason = captured.match(/"stop_reason":"([^"]+)"/)?.[1];
-        console.log('[proxy resp]', { clientTools: [...validNames].slice(0, 5), clientToolCount: validNames.size, toolUseNames: toolNames, stopReason, len: captured.length });
         // Trừ token sau khi stream xong, trước khi đóng kết nối
         await this.service.finalizeStream(result.sub.id, captured).catch(() => {});
         res.end();

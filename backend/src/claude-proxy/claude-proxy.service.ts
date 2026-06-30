@@ -128,8 +128,6 @@ export class ClaudeProxyService {
       const v = fwd(h);
       if (v) passHeaders[h] = String(v);
     }
-    console.log('[proxy hdr]', { ua: passHeaders['user-agent'], xApp: passHeaders['x-app'], fwded: Object.keys(passHeaders) });
-
     const res = await fetch(`${this.nineRouterBase}${path}`, {
       method,
       headers: passHeaders,
@@ -143,7 +141,6 @@ export class ClaudeProxyService {
 
     const contentType = res.headers.get('content-type') ?? '';
     const branch = isUserStream && contentType.includes('text/event-stream') ? 'passthrough' : 'assembly';
-    console.log('[proxy]', { path, isUserStream, contentType, branch, hasTools: Array.isArray(body?.tools) ? body.tools.length : 0 });
 
     if (isUserStream && contentType.includes('text/event-stream')) {
       // Pass SSE stream through — controller handles deduction via finalizeStream
