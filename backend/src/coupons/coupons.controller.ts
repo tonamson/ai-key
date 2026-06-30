@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from '@nestjs/common';
 import { CouponsService } from './coupons.service';
 import { RequirePermission } from '../auth/decorators/roles.decorator';
 import { Public } from '../auth/decorators/public.decorator';
@@ -21,5 +21,5 @@ export class CouponsAdminController {
 export class CouponsPublicController {
   constructor(private readonly service: CouponsService) {}
 
-  @Post('validate') validate(@Body('code') code: string) { return this.service.validate(code); }
+  @Post('validate') @HttpCode(200) validate(@Body('code') code: string) { return this.service.validate(code); }
 }

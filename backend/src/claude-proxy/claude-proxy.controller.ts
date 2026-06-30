@@ -26,8 +26,16 @@ export class ClaudeProxyController {
   }
 
   @Get('models')
-  models(@Req() req: Request, @Res() res: Response, @Headers('authorization') auth: string) {
-    return this.handle(req, res, auth, '/models');
+  models(@Res() res: Response) {
+    // 9router doesn't support /models — return static list so Claude CLI doesn't 405
+    res.json({
+      object: 'list',
+      data: [
+        { id: 'cc/claude-opus-4-8', object: 'model', created: 1749600000, owned_by: 'anthropic' },
+        { id: 'cc/claude-sonnet-4-6', object: 'model', created: 1749600000, owned_by: 'anthropic' },
+        { id: 'cc/claude-haiku-4-5-20251001', object: 'model', created: 1749600000, owned_by: 'anthropic' },
+      ],
+    });
   }
 
   // Catch-all for other paths
@@ -41,7 +49,7 @@ export class ClaudeProxyController {
     const nineRouterKey = auth?.replace(/^Bearer\s+/i, '') ?? '';
     const body = req.method !== 'GET' ? req.body : undefined;
 
-    const result = await this.service.forward(nineRouterKey, path, req.method, body);
+const result = await this.service.forward(nineRouterKey, path, req.method, body);
     this.setQuotaHeaders(res, result.quota);
 
     if (result.isStream) {

@@ -12,11 +12,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: { sub: string; email: string; roleKey: string | null }) {
+  validate(payload: { sub: string; email: string; roleKey: string | null; twoFactorEnabled?: boolean }) {
     return {
       id: payload.sub,
       email: payload.email,
       roleKey: payload.roleKey ?? null,
+      twoFactorEnabled: payload.twoFactorEnabled ?? false,
     };
   }
 }

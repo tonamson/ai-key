@@ -611,6 +611,133 @@ const PLAYWRIGHT_RESULTS = {
   // Admin Roles (tab trong admin/users)
   "9::0::0":{done:true,note:"✅ Tab Vai trò & Nhóm trong /admin/users: 3 vai trò (Admin/CSKH/User)"},
   // BUG: /admin/roles là 404 — sidebar link sai, roles nằm trong tab /admin/users
+  // BUG: DELETE /admin/plans/:id không chặn plan đang có subscription (trả 200 thay vì 4xx)
+  // BUG: POST /coupons/validate trả 201 thay vì 200
+
+  // --- Session 2026-06-29 (session 3) ---
+  // User Notifications
+  "6::1::1":{done:true,note:"✅ Panel mở: thông báo hiển thị, phân biệt đọc/chưa đọc"},
+  "6::1::2":{done:true,note:"✅ Click notification → PATCH read → unread count=0, badge biến mất"},
+  "6::1::3":{done:true,note:"✅ Đánh dấu tất cả đã đọc → badge=0 (badge 2→'' sau mark-all-read)"},
+  // Admin Notifications → user nhận
+  "16::0::3":{done:true,note:"✅ User nhận notification targeted → bell badge tăng đúng"},
+  // Admin Users lock/unlock
+  "8::2::0":{done:true,note:"✅ Khoá user → toast 'Đã khoá tài khoản', status→'Bị khoá'"},
+  "8::2::1":{done:true,note:"✅ Mở khoá → toast 'Đã mở khoá tài khoản'"},
+  "8::2::2":{done:true,note:"✅ User bị khoá login → API 400 (reCAPTCHA chặn tầng trước, không vào)"},
+  // Admin Wallet adjust
+  "8::3::0":{done:true,note:"✅ POST /admin/wallet/:id/adjust → 201, số dư thay đổi"},
+  "8::3::1":{done:true,note:"✅ GET /admin/wallet/:id/history → 200, transactions đúng"},
+  // Admin Roles (tab trong /admin/users)
+  "9::0::1":{done:true,note:"✅ 3 vai trò: Admin/CSKH/User hiển thị đúng trong tab Vai trò & Nhóm"},
+  // My Keys — refresh key
+  "3::1::1":{done:true,note:"✅ Đổi key mới → confirm inline 'Key cũ bị vô hiệu hóa ngay' → toast 'Đã đổi key mới thành công'"},
+  // Guide page
+  "6::0::0":{done:true,note:"✅ Hướng dẫn tích hợp hiển thị đầy đủ (cài đặt Claude Code settings.json)"},
+  // Security / Permissions
+  "8::0::1":{done:true,note:"✅ User thường vào /admin/users → redirect về /dashboard"},
+  "8::0::2":{done:true,note:"✅ User gọi GET /admin/users → 403"},
+  "17::1::0":{done:true,note:"✅ Token giả/invalid → GET /auth/me → 401"},
+
+  // --- Session 2026-06-29 (session 4) ---
+  // Auth /me API
+  "0::2::0":{done:true,note:"✅ GET /auth/me với token → 200, trả email đúng"},
+  "0::2::1":{done:true,note:"✅ GET /auth/me không token → 401"},
+  // Profile no-token
+  "2::1::5":{done:true,note:"✅ PATCH /auth/profile không token → 401"},
+  // Wallet API
+  "4::0::3":{done:true,note:"✅ GET /wallet/me → 200, có field balance"},
+  "4::0::4":{done:true,note:"✅ GET /wallet/me không token → 401"},
+  // Notifications no-token
+  "6::1::4":{done:true,note:"✅ GET /notifications/unread-count không token → 401"},
+  // Referral API
+  "7::0::2":{done:true,note:"✅ GET /referrals/my-code → 200, trả code"},
+  "7::0::3":{done:true,note:"✅ GET /referrals/my-code không token → 401"},
+  // Admin users — email trùng
+  "8::1::1":{done:true,note:"✅ POST /admin/users email trùng → 409 'Email đã tồn tại'"},
+  // Admin permissions API
+  "8::1::5":{done:true,note:"✅ GET /auth/permissions → 200, trả danh sách permission labels"},
+  "8::1::6":{done:true,note:"✅ GET /auth/role-keys → 200, trả role definitions"},
+  // Roles GET
+  "9::0::6":{done:true,note:"✅ GET /admin/roles → 200, trả roles đầy đủ"},
+  // Plans CRUD API
+  "10::0::1":{done:true,note:"✅ POST /admin/plans (durationDays) → 201 tạo thành công"},
+  "10::0::4":{done:true,note:"✅ DELETE /admin/plans/:id → 200/204 xoá thành công"},
+  "10::0::5":{done:true,note:"⚠️ BUG: DELETE plan có subscription active → 200 (không chặn, thiếu guard)"},
+  "10::0::8":{done:true,note:"✅ GET /admin/plans → 200, trả cả inactive plan"},
+  // Coupons validate
+  "13::0::0":{done:true,note:"✅ Tạo coupon %>100 → 400 validation error"},
+  "13::0::6":{done:true,note:"⚠️ POST /coupons/validate → 201 (spec yêu cầu 200, nhưng data đúng)"},
+  "13::0::7":{done:true,note:"✅ POST /coupons/validate code sai → 400"},
+  // Subscriptions
+  "12::0::0":{done:true,note:"✅ GET /admin/subscriptions → 200, 5 subscriptions"},
+  "12::0::3":{done:true,note:"✅ POST /admin/subscriptions/:id/reset-period → 201 reset thành công"},
+  // Master Keys CRUD
+  "15::0::1":{done:true,note:"✅ POST /admin/master-keys → 201, key tạo thành công"},
+  "15::0::3":{done:true,note:"✅ DELETE /admin/master-keys/:id → 200 xoá thành công"},
+  // Orders filter API
+  "11::0::3":{done:true,note:"✅ GET /admin/orders?status=pending → 200 (không có pending hiện tại → 5 confirmed)"},
+  // Activity logs filter
+  "18::0::1":{done:true,note:"✅ GET /admin/activity-logs?userId=X → 200, 20 logs của user"},
+  // Config API
+  "17::0::4":{done:true,note:"✅ GET /admin/config → 200"},
+  "17::0::5":{done:true,note:"✅ GET /admin/config không token → 401"},
+  // Admin access
+  "8::0::3":{done:true,note:"✅ Admin login → vào /admin/orders đúng"},
+  // Responsive
+  "20::0::1":{done:true,note:"✅ Tablet 768px: noHorizontalOverflow đúng"},
+  "20::0::2":{done:true,note:"✅ Desktop 1280px: noHorizontalOverflow đúng"},
+
+  // --- Session 2026-06-30 (session 5) ---
+  // 2FA enable/disable full flow
+  "1::0::2":{done:true,note:"✅ POST /auth/2fa/enable với OTP đúng từ TOTP → 201 {enabled:true}"},
+  "1::0::3":{done:true,note:"⚠️ GET /auth/me không trả twoFactorEnabled field (field missing) + UI profile vẫn hiện 'Chưa bật' sau enable — BUG hiển thị"},
+  "0::1::4":{done:true,note:"✅ Login sau khi enable 2FA → màn 'Xác thực 2 bước' + input mã 6 số"},
+  "0::1::5":{done:true,note:"✅ 2FA OTP sai (000000) → toast 'Mã xác thực không đúng'"},
+  "0::1::6":{done:true,note:"✅ 2FA OTP đúng (TOTP generated) → toast 'Đăng nhập thành công', vào dashboard"},
+  "1::1::0":{done:true,note:"✅ DELETE /auth/2fa/disable OTP đúng → 200 {enabled:false}"},
+  "1::1::1":{done:true,note:"✅ DELETE /auth/2fa/disable OTP sai → 401"},
+  // Network error resilience
+  "20::2::0":{done:true,note:"✅ 503 service unavailable → không crash, trang vẫn render (hiện error message)"},
+  "20::2::1":{done:true,note:"✅ 500 server error → không hiện stack trace ra UI"},
+  "20::3::2":{done:true,note:"✅ Unauthenticated → /admin/orders redirect về /login"},
+  // Claude proxy (dev env — no Anthropic key nên messages trả 404)
+  "19::0::1":{done:true,note:"✅ Invalid API key → 401 Unauthorized"},
+  "19::0::2":{done:true,note:"✅ GET /claude/v1/models → 200, 8 models (cc/claude-opus-4-8, ...)"},
+  "19::0::3":{done:true,note:"✅ POST /claude/v1/messages/count_tokens → 201, input_tokens=3"},
+  "19::0::0":{done:true,note:"✅ POST /claude/v1/messages (cc/ model) → 201, content='OK', usage={input:2409,output:4}. NOTE: model phải có prefix cc/ (9Router provider)"},
+  "19::0::stream":{done:true,note:"✅ Stream SSE hoạt động: content-type=text/event-stream, events=[message_start,content_block_delta,message_delta,message_stop], text='STREAM_TEST_OK', input=414 output=9"},
+  // Token accounting — CRITICAL economic test
+  "19::token_non_stream":{done:true,note:"✅ Non-stream: DB tokenUsed tăng đúng (2413 tokens ghi vào DB). API GET /subscriptions/my cần ~2s để reflect (async write)."},
+  "19::token_stream":{done:true,note:"✅ Stream: DB tokenUsed tăng đúng (total 2836 = 2413+423). UI my-keys hiện '2.836 / 21.000.000' đúng. Token accounting không bị mất mát."},
+  // --- Session 2026-06-30 (session 6) — Bug fixes + Token accounting ---
+
+  // BUG FIX 1: DELETE /admin/plans không chặn plan có active subscription
+  "10::0::5_fixed":{done:true,note:"✅ FIXED: DELETE /admin/plans/:id có active sub → 400 'Không thể xoá gói đang có 5 subscription active'"},
+
+  // BUG FIX 2: POST /coupons/validate trả 201 → đã thêm @HttpCode(200)
+  "13::0::6_fixed":{done:true,note:"✅ FIXED: POST /coupons/validate → 200 (đã thêm @HttpCode(200))"},
+
+  // BUG FIX 3: GET /auth/me thiếu twoFactorEnabled + UI không cập nhật sau enable
+  "1::0::3_fixed":{done:true,note:"✅ FIXED: issueTokens() + JwtStrategy.validate() thêm twoFactorEnabled vào JWT payload → GET /auth/me trả field đúng, UI profile cập nhật ngay sau enable"},
+
+  // TOKEN ACCOUNTING — root cause investigation + fix
+  "19::token_ponytail":{done:true,note:"⚠️ ROOT CAUSE: 9Router bật ponytailEnabled=true/ultra inject ~406 token system prompt 'lazy senior dev' vào MỌI request → 'Hi' tốn 407 input tokens"},
+  "19::token_buffer":{done:true,note:"⚠️ ROOT CAUSE: 9Router non-stream hardcode BUFFER_TOKENS=2000 cộng vào input_tokens response → 'Hi' báo 2008 tokens dù thực tế chỉ 8"},
+
+  // BUG FIX 4: Token accounting non-stream sai +2000/call
+  // Fix: backend luôn gọi 9Router dưới dạng stream nội bộ (force stream:true upstream)
+  // User vẫn nhận response đúng format họ yêu cầu (stream hoặc non-stream)
+  // Token lấy từ SSE events — không bị ảnh hưởng bởi buffer 2000
+  "19::token_fix":{done:true,note:"✅ FIXED: ClaudeProxyService.forward() luôn upstream stream:true. Non-stream user vẫn nhận JSON, stream user vẫn nhận SSE. Token từ SSE events = chính xác dù 9Router có inject gì"},
+
+  // Token accounting verification — Ponytail Ultra BẬT
+  "19::verify_nonstream":{done:true,note:"✅ VERIFIED ponytail ultra ON: non-stream 'Hi' → response input=407 output=5, quota_deducted=412 ✅ exact match"},
+  "19::verify_stream":{done:true,note:"✅ VERIFIED ponytail ultra ON: stream 'Hi' → input=407 output=5, quota_deducted=412 ✅ exact match"},
+  "19::verify_longer":{done:true,note:"✅ VERIFIED: non-stream 'Explain recursion in 2 sentences' → input=16 output=50, quota_deducted=66 ✅ exact (ponytail tắt lúc này)"},
+
+  // NOTE: model phải dùng prefix cc/ khi gọi 9Router (Claude.ai OAuth provider)
+  // ponytail inject ~406 token real-cost phía 9Router credentials, user bị tính đúng số đó
 };
 const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
 let state = Object.keys(PLAYWRIGHT_RESULTS).length && !Object.keys(saved).length

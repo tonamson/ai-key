@@ -7,9 +7,11 @@ const MIN_SCORE = 0.5;
 @Injectable()
 export class RecaptchaService {
   private readonly secret: string;
+  private readonly isProd: boolean;
 
   constructor(config: ConfigService) {
     this.secret = config.getOrThrow('RECAPTCHA_SECRET_KEY');
+    this.isProd = config.get('NODE_ENV') === 'production';
   }
 
   async verify(token: string, action?: string): Promise<void> {
@@ -17,7 +19,7 @@ export class RecaptchaService {
 
     // Skip in dev or if secret is placeholder
     if (!this.secret || this.secret.startsWith('your_')) return;
-    if (process.env.NODE_ENV !== 'production') return;
+    if (!this.isProd) return;
 
     const res = await fetch(RECAPTCHA_URL, {
       method: 'POST',

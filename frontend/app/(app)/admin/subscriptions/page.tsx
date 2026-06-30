@@ -108,7 +108,7 @@ export default function AdminSubscriptionsPage() {
               <TableHead>Gói</TableHead>
               <TableHead>API Key</TableHead>
               <TableHead>Token dùng / Quota</TableHead>
-              <TableHead>Quota/giờ (period)</TableHead>
+              <TableHead>Quota/5h (period)</TableHead>
               <TableHead>Hiệu lực</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead className="w-24" />
@@ -125,7 +125,7 @@ export default function AdminSubscriptionsPage() {
               const days = daysLeft(s.expiresAt);
               const expired = new Date(s.expiresAt) < new Date();
               const pct = Math.min(100, Math.round(Number(s.tokenUsed) / Number(s.tokenQuota) * 100));
-              const periodPct = Math.min(100, Math.round(Number(s.tokenUsedPeriod) / (Number(s.tokenQuota) / 720) * 100));
+              const periodPct = Math.min(100, Math.round(Number(s.tokenUsedPeriod) / (Number(s.tokenQuota) / 144) * 100));
               return (
                 <TableRow key={s.id}>
                   <TableCell>
@@ -154,12 +154,12 @@ export default function AdminSubscriptionsPage() {
                     <div className="text-xs text-muted-foreground mt-0.5">{pct}%</div>
                   </TableCell>
                   <TableCell>
-                    <div className="text-sm tabular-nums">{fmtN(Number(s.tokenUsedPeriod))} / {fmtN(Math.floor(Number(s.tokenQuota) / 720))}</div>
+                    <div className="text-sm tabular-nums">{fmtN(Number(s.tokenUsedPeriod))} / {fmtN(Math.floor(Number(s.tokenQuota) / 144))}</div>
                     <div className="h-1.5 w-28 rounded-full bg-muted overflow-hidden mt-1">
                       <div className={`h-full rounded-full ${periodPct >= 90 ? 'bg-destructive' : 'bg-cyan-500'}`}
                         style={{ width: `${periodPct}%` }} />
                     </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">Reset lúc {new Date(new Date(s.periodStartsAt).getTime() + 3600000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">Reset lúc {new Date(new Date(s.periodStartsAt).getTime() + 18000000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</div>
                   </TableCell>
                   <TableCell className="text-xs">
                     <div className="text-muted-foreground">{fmtDate(s.startsAt)} →</div>

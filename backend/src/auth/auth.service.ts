@@ -15,12 +15,12 @@ export class AuthService {
     private readonly referral: ReferralService,
   ) {}
 
-  private issueTokens(user: Pick<User, 'id' | 'email' | 'name' | 'roleId'> & { roleDetail?: { key: string } | null }) {
+  private issueTokens(user: Pick<User, 'id' | 'email' | 'name' | 'roleId' | 'twoFactorEnabled'> & { roleDetail?: { key: string } | null }) {
     const roleKey = user.roleDetail?.key ?? null;
-    const payload = { sub: user.id, email: user.email, roleKey };
+    const payload = { sub: user.id, email: user.email, roleKey, twoFactorEnabled: user.twoFactorEnabled ?? false };
     return {
       accessToken: this.jwt.sign(payload),
-      user: { id: user.id, email: user.email, name: user.name, roleKey },
+      user: { id: user.id, email: user.email, name: user.name, roleKey, twoFactorEnabled: user.twoFactorEnabled ?? false },
     };
   }
 

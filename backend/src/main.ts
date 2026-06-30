@@ -7,7 +7,13 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: true,
+  });
+  // ponytail: unlimited for claude proxy — Claude API enforces its own context limits
+  app.use('/claude', require('express').json({ limit: '100mb' }));
+  app.use(require('express').json({ limit: '10mb' }));
+  app.use(require('express').urlencoded({ limit: '10mb', extended: true }));
 
   // crossOriginResourcePolicy: cho phép FE (origin khác) nhúng ảnh từ /uploads
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
