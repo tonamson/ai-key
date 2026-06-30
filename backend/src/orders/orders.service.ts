@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -73,6 +74,7 @@ export class OrdersService {
         originalPrice, discountAmount, walletUsed, finalPrice,
         renewSubscriptionId,
         expiresAt: new Date(Date.now() + PENDING_TTL_MS),
+        transferMemo: randomBytes(16).toString('hex'),
       }));
       if (walletUsed > 0) {
         const ok = await this.wallet.spendForOrder(userId, walletUsed, created.id, em);
@@ -81,8 +83,9 @@ export class OrdersService {
       return created;
     });
 
+    const memo = order.transferMemo ?? order.id.replace(/-/g, '');
     const vietQRUrl = finalPrice > 0
-      ? `${VIETQR_BASE}?amount=${finalPrice}&addInfo=AIKEY${order.id.replace(/-/g, '').slice(0, 8)}`
+      ? `${VIETQR_BASE}?amount=${finalPrice}&addInfo=${memo}`
       : '';
 
     // Ví cover 100% — confirm ngay không cần QR
@@ -126,7 +129,14 @@ export class OrdersService {
       // Còn hạn thì cộng dồn từ ngày hết hạn; đã hết hạn thì tính từ bây giờ.
       const base = sub.expiresAt > now ? sub.expiresAt.getTime() : now.getTime();
       sub.expiresAt = new Date(base + addedMs);
-      sub.tokenQuota = Number(sub.tokenQuota) + Number(order.plan.tokenQuota);
+      // Quota đã dùng hết → reset về 0 (gói mới hoàn toàn); còn quota → cộng dồn như cũ.
+      const quotaExhausted = Number(sub.tokenUsed) >= Number(sub.tokenQuota);
+      if (quotaExhausted) {
+        sub.tokenQuota = Number(order.plan.tokenQuota);
+        sub.tokenUsed = 0;
+      } else {
+        sub.tokenQuota = Number(sub.tokenQuota) + Number(order.plan.tokenQuota);
+      }
       sub.isActive = true;
       await this.subRepo.save(sub);
 
@@ -146,6 +156,7 @@ export class OrdersService {
       await this.subRepo.save(this.subRepo.create({
         userId: order.userId,
         orderId: order.id,
+        planId: order.planId,
         nineRouterKeyId: keyId,
         nineRouterKey: keyValue,
         tokenQuota: order.plan.tokenQuota,

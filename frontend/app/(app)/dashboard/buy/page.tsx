@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { planApi, couponApi, orderApi, walletApi, Plan, Coupon, Order } from '@/lib/api/admin.service';
 
 const f = (n: number) => new Intl.NumberFormat('vi-VN').format(n);
+const memo = (o: Order) => o.transferMemo ?? o.id.replace(/-/g, '');
 
 // ── Step indicator ─────────────────────────────────────────────────────────────
 function Steps({ current }: { current: number }) {
@@ -289,8 +290,8 @@ function StepPayment({ order, vietQRUrl }: { order: Order; vietQRUrl: string }) 
           <div className="flex items-center justify-between py-2">
             <span className="text-sm text-muted-foreground">Nội dung CK</span>
             <div className="flex items-center gap-1.5">
-              <code className="text-xs bg-muted px-2 py-1 rounded font-mono">AIKEY{order.id.replace(/-/g, '').slice(0, 8)}</code>
-              <CopyBtn text={`AIKEY${order.id.replace(/-/g, '').slice(0, 8)}`} id="content" />
+              <code className="text-xs bg-muted px-2 py-1 rounded font-mono">{memo(order)}</code>
+              <CopyBtn text={memo(order)} id="content" />
             </div>
           </div>
         </div>
@@ -329,9 +330,25 @@ export default function BuyPage() {
   useEffect(() => {
     planApi.listPublic().then(setPlans).catch(e => toast.error(e.message));
     walletApi.getMe().then(r => setWalletBalance(r.balance)).catch(() => {});
-    // Đọc ?renew=<subId> để gia hạn đúng key cũ (giữ key, cộng dồn hạn + quota)
-    const renew = new URLSearchParams(window.location.search).get('renew');
+    const params = new URLSearchParams(window.location.search);
+    // Đọc ?renew=<subId> để gia hạn đúng key cũ
+    const renew = params.get('renew');
     if (renew) setRenewId(renew);
+    // Đọc ?order=<id> để hiển thị thông tin thanh toán đơn đang chờ
+    const orderId = params.get('order');
+    if (orderId) {
+      orderApi.listMine().then(orders => {
+        const found = orders.find(o => o.id === orderId && o.status === 'pending');
+        if (found) {
+          const qr = found.finalPrice > 0
+            ? `https://img.vietqr.io/image/TECHCOMBANK-19032009391010-compact.png?amount=${found.finalPrice}&addInfo=${memo(found)}`
+            : '';
+          setOrder(found);
+          setVietQRUrl(qr);
+          setStep(3);
+        }
+      }).catch(() => {});
+    }
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, []);
 

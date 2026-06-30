@@ -89,7 +89,7 @@ export const couponApi = {
 };
 
 // ─── Orders ──────────────────────────────────────────────────────────────────
-export interface Order { id: string; userId: string; user?: AdminUser; planId: string; plan?: Plan; couponId?: string; referralCode?: string; originalPrice: number; discountAmount: number; finalPrice: number; status: 'pending' | 'paid' | 'cancelled'; paidAt?: string; nineRouterKey?: string; renewSubscriptionId?: string | null; createdAt: string; }
+export interface Order { id: string; userId: string; user?: AdminUser; planId: string; plan?: Plan; couponId?: string; referralCode?: string; originalPrice: number; discountAmount: number; finalPrice: number; status: 'pending' | 'paid' | 'cancelled'; paidAt?: string; nineRouterKey?: string; renewSubscriptionId?: string | null; transferMemo?: string | null; createdAt: string; }
 export const orderApi = {
   listAdmin: () => apiClient.get<Order[]>('/admin/orders').then(r => r.data),
   listMine: () => apiClient.get<Order[]>('/orders/my').then(r => r.data),

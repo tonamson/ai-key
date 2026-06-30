@@ -24,6 +24,7 @@ export class Order {
   @Column({ type: 'uuid', nullable: true }) renewSubscriptionId: string | null;
   @Column({ type: 'varchar', nullable: true }) nineRouterKeyId: string | null;
   @Column({ type: 'varchar', nullable: true }) nineRouterKey: string | null;
+  @Column({ type: 'varchar', length: 32, nullable: true }) transferMemo: string | null;
   @CreateDateColumn() createdAt: Date;
   @UpdateDateColumn() updatedAt: Date;
 }

@@ -52,7 +52,7 @@ async function seed() {
   // Seed default plans
   const planRepo = AppDataSource.getRepository(Plan);
   const defaultPlans = [
-    { name: 'Gói Tháng', tokenQuota: 21000000, durationDays: 30, price: 350000 },
+    { name: 'Claude API 5x', tokenQuota: 63360000, durationDays: 30, price: 350000 },
   ];
   for (const p of defaultPlans) {
     const exists = await planRepo.findOneBy({ name: p.name });

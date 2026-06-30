@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ROLE_PERMISSIONS } from '../auth/role-keys';
 import { Role } from './role.entity';
 
 @Injectable()
@@ -14,7 +15,7 @@ export class RolesService {
   async findOne(id: string) {
     const role = await this.repo.findOne({ where: { id } });
     if (!role) throw new NotFoundException('Role không tồn tại');
-    return role;
+    return { ...role, permissions: ROLE_PERMISSIONS[role.key as keyof typeof ROLE_PERMISSIONS] ?? [] };
   }
 
   async create(data: { name: string; key: string; description?: string; group?: string }) {

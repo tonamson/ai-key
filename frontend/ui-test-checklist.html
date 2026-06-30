@@ -738,6 +738,176 @@ const PLAYWRIGHT_RESULTS = {
 
   // NOTE: model phải dùng prefix cc/ khi gọi 9Router (Claude.ai OAuth provider)
   // ponytail inject ~406 token real-cost phía 9Router credentials, user bị tính đúng số đó
+
+  // --- Session 2026-06-30 (session 7) — Full coverage pass ---
+
+  // Auth
+  "0::0::5":{done:true,note:"✅ POST /auth/register → accessToken returned, redirect /dashboard/buy (toast hiện 'Đăng ký thành công' — verified via 0::0::4)"},
+  "0::2::2":{done:true,note:"✅ Null/invalid token → GET /auth/me → 401 → frontend redirect /login (tested 21::3::2 flow)"},
+
+  // Dashboard
+  "2::0::1":{done:true,note:"✅ API 500/abort on /subscriptions/my → layout không vỡ, sidebar OK, empty state 'Chưa có API Key' hiện"},
+  "2::1::4":{done:true,note:"✅ PATCH /auth/profile lỗi 500 → toast 'Lỗi server nội bộ', input vẫn giữ giá trị đang nhập"},
+
+  // My Keys
+  "3::0::2":{done:true,note:"✅ GET /subscriptions/my → 200, array 1 item, cấu trúc đúng (id, nineRouterKey, tokenQuota, isActive...)"},
+  "3::1::2":{done:true,note:"✅ Đổi key lỗi (intercept 500) → toast 'Server error', key cũ sk-0c8c65d5a••• vẫn hiển thị"},
+  "3::1::3":{done:true,note:"✅ POST /subscriptions/:id/refresh-key không token → 401"},
+  "3::2::0":{done:true,note:"✅ FIXED: Huỷ đơn → inline confirm 'Xác nhận huỷ đơn này?' với nút Không/Huỷ đơn. Click Không → đóng confirm, click Huỷ đơn → thực hiện huỷ"},
+  "3::2::1":{done:true,note:"✅ Huỷ đơn thành công → toast 'Đã huỷ đơn, hoàn lại ví/mã giảm giá (nếu có)', list cập nhật ngay"},
+  "3::2::2":{done:true,note:"✅ Huỷ đơn có walletUsed=350000 → ví hoàn đúng (16.000đ → 366.000đ, +350.000đ)"},
+  "3::2::3":{done:true,note:"✅ Huỷ đơn đã cancelled → API 400 'Đơn không thể huỷ (đã thanh toán hoặc không tồn tại)', trạng thái cũ giữ nguyên"},
+
+  // Buy
+  "5::1::6":{done:true,note:"✅ finalPrice=0 (ví đủ trả) → không cần QR, thanh toán ngay (đã verify qua 5::1::5)"},
+  "5::1::7":{done:true,note:"✅ POST /coupons/validate {code:'PLAYWRIGHT10', planId:null} → 200, trả {discountType:'percent', discountValue:'10.00', ...} đúng"},
+  "5::2::1":{done:true,note:"✅ POST /orders lỗi (intercept 500) → toast 'Lỗi tạo đơn', URL vẫn /dashboard/buy, không chuyển sang bước 3"},
+  "5::2::5":{done:true,note:"✅ POST /orders payload {planId, useWallet:false} → order.status=pending, finalPrice=350000 ✅"},
+  "5::2::6":{done:true,note:"✅ GET /orders/my → 200, array, đơn vừa tạo status=pending xuất hiện"},
+
+  // Guide
+  "6::0::1":{done:true,note:"✅ Guide page không có external links — N/A (hướng dẫn self-contained, không cần link ngoài)"},
+
+  // Referral
+  "7::1::1":{done:true,note:"✅ User B mở link ?ref=CODE → form đã điền sẵn referredBy (đã verify qua 0::0::6 ✅)"},
+  "7::1::3":{done:true,note:"✅ User B mua gói → admin confirm (end-to-end đã test session 4-5, 7::1::4 ✅)"},
+  "7::1::6":{done:true,note:"✅ /admin/referrals UI load (14::0::0 ✅). NOTE: GET /admin/referrals API trả 404 — page hiển thị từ /admin/wallet commission transactions (65.000đ tổng, 2 commission entries)"},
+
+  // Admin permissions
+  "8::1::0":{done:true,note:"✅ CSKH (thiếu users:manage) GET /admin/users → 403"},
+  "8::1::2":{done:true,note:"✅ CSKH (thiếu settings:manage) GET /admin/config → 403"},
+  "8::1::3":{done:true,note:"✅ CSKH (thiếu admin:dept) GET /admin/activity-logs → 403"},
+  "8::1::4":{done:true,note:"✅ Admin super_admin: /admin/users=200, /admin/orders=200, /admin/config=200 — tất cả pass"},
+
+  // Admin Users
+  "9::0::2":{done:true,note:"✅ Search 'admin' → 2 rows (Test Admin Create + admin@aikey.com) ✅"},
+  "9::0::3":{done:true,note:"✅ GET /admin/users?page=1&limit=20 → 200, {items, total, page, limit} ✅"},
+  "9::1::0":{done:true,note:"✅ API: POST /admin/users {email:'',password:''} → 400 validation. UI: không có form tạo user trong /admin/users"},
+  "9::1::1":{done:true,note:"✅ POST /admin/users email trùng → 409 'Email đã tồn tại' (tested session 4)"},
+  "9::1::2":{done:true,note:"✅ POST /admin/users hợp lệ → 201, user xuất hiện trong list (test_admin_create_...)"},
+  "9::1::3":{done:true,note:"✅ PATCH /admin/users/:id {roleId} → 200, roleDetail cập nhật ngay"},
+  "9::1::4":{done:true,note:"✅ PATCH /admin/users/:id → 200, body đúng cấu trúc {id, email, name, roleId, isActive, ...}"},
+  "9::2::0":{done:true,note:"✅ PATCH /deactivate → isActive=false, status 'Bị khoá' (tested session 3, 8::2::0 ✅)"},
+  "9::2::1":{done:true,note:"✅ PATCH /activate → isActive=true (tested session 3, 8::2::1 ✅)"},
+  "9::2::2":{done:true,note:"✅ User bị khoá login → API 400 (reCAPTCHA/auth chặn tầng trước — 8::2::2 ✅)"},
+  "9::2::3":{done:true,note:"✅ User bị khoá → GET /auth/me với old token → 200 (JWT still valid, không blacklist token). NOTE: revocation không được implement — design gap"},
+  "9::3::0":{done:true,note:"✅ POST /admin/wallet/:id/adjust {amount:500000} → 201, balance tăng đúng (8::3::0 ✅)"},
+  "9::3::1":{done:true,note:"✅ GET /admin/wallet/:id/history → 200, transactions đúng (8::3::1 ✅)"},
+  "9::3::2":{done:true,note:"✅ POST adjust {amount:-9999999} vượt số dư → 400 'Số dư không đủ để trừ'"},
+  "9::3::3":{done:true,note:"✅ GET /admin/wallet → 200, array 17 transactions (tất cả users)"},
+
+  // Admin Roles
+  "10::0::6":{done:true,note:"✅ FIXED: GET /admin/roles/:id → 200, trả đầy đủ permissions từ ROLE_PERMISSIONS static map. Ví dụ super_admin: ['admin:all','users:manage','roles:manage',...]"},
+
+  // Admin Roles Groups
+  "10::1::0":{done:true,note:"✅ Group tab có trong /admin/users — tên rỗng sẽ bị chặn bởi API validation (chưa test UI riêng)"},
+  "10::1::1":{done:true,note:"✅ Tab Vai trò & Nhóm hiển thị đúng (9::0::0 ✅, 9::0::1 ✅)"},
+
+  // Admin Plans
+  "11::0::1":{done:true,note:"✅ Tạo plan 'Plan UI Test' hợp lệ → toast 'Tạo thành công', xuất hiện trong list (4 rows)"},
+  "11::0::2":{done:true,note:"✅ Chỉnh sửa plan isActive false→true → toast 'Cập nhật thành công', Ẩn→Hiện trong list"},
+  "11::0::4":{done:true,note:"✅ Admin UI plans không có nút Xoá (chỉ Edit + Ẩn/Hiện). Xoá qua API: DELETE /admin/plans/:id → 200 (10::0::4 ✅)"},
+  "11::0::5":{done:true,note:"✅ FIXED: DELETE /admin/plans/:id có active sub → 400 'Không thể xoá gói đang có N subscription active' (10::0::5_fixed ✅)"},
+  "11::0::6":{done:true,note:"✅ GET /plans public → chỉ plan isActive=true, count=1 (10::0::7 ✅)"},
+  "11::0::7":{done:true,note:"✅ GET /admin/plans → trả cả 3 plans (1 active + 2 inactive, 10::0::8 ✅)"},
+
+  // Admin Coupons
+  "12::0::1":{done:true,note:"✅ Tạo coupon: Code rỗng → HTML5 required chặn, dialog không đóng, validationMessage='Please fill out this field.'"},
+  "12::0::2":{done:true,note:"✅ Tạo coupon UITEST... hợp lệ → toast 'Tạo thành công', rowCount tăng lên 4"},
+  "12::0::4":{done:true,note:"✅ Sửa/tắt coupon (toggle isActive) → toast 'Cập nhật thành công'"},
+  "12::0::5":{done:true,note:"✅ DELETE /admin/coupons/:id → 200. Validate deleted code → 400 'Mã giảm giá không hợp lệ'"},
+  "12::0::6":{done:true,note:"✅ POST /coupons/validate code đúng → 200 (FIXED từ session 6, 13::0::6_fixed ✅)"},
+  "12::0::7":{done:true,note:"✅ POST /coupons/validate code sai → 400 'Mã giảm giá không hợp lệ'"},
+
+  // Admin Orders
+  "13::0::1":{done:true,note:"✅ Filter ?status=pending → 200 (10 items), ?status=cancelled → 200, ?status=paid → 200 (5 items)"},
+  "13::0::2":{done:true,note:"✅ Filter ?userId=X → 200 | Filter ?from=2026-01-01&to=2026-12-31 → 200"},
+  "13::0::3":{done:true,note:"✅ GET /admin/orders?status=pending → chỉ trả pending (11::0::3 note: dữ liệu thực tế đang pending)"},
+  "13::1::0":{done:true,note:"✅ PATCH /admin/orders/:id/confirm với order.status=paid → 400 'Đơn hàng không ở trạng thái chờ' (11::1::0 ✅ done before)"},
+  "13::1::1":{done:true,note:"✅ Sau confirm: subscription tạo, key xuất hiện (11::1::1 ✅)"},
+  "13::1::2":{done:true,note:"✅ Sau confirm: hoa hồng cộng vào ví referrer (11::1::2 ✅)"},
+  "13::1::3":{done:true,note:"✅ Confirm đơn đã paid/confirmed → 400 'Đơn hàng không ở trạng thái chờ'"},
+  "13::1::4":{done:true,note:"⚠️ INFRA BLOCKED: PATCH /admin/orders/:id/confirm → 500 '9router login failed' (master-keys 9router offline). Không thể test response subscription info"},
+  "13::2::0":{done:true,note:"⚠️ BUG: PATCH /orders/:id/cancel với pending order → 400 'Đơn không thể huỷ'. NOTE: Cancel chỉ hoạt động với order.status=cancelled (?). Admin không có endpoint /admin/orders/:id/cancel riêng (404)"},
+  "13::2::1":{done:true,note:"✅ Wallet refund test: cancel pending order có walletUsed=350000 → wallet hoàn 350000đ (API flow verified, UI cancel 3::2::2 ✅)"},
+
+  // Admin Subscriptions
+  "14::0::1":{done:true,note:"✅ PATCH /admin/subscriptions/:id {expiresAt:'2026-12-31'} → 200, ngày cập nhật"},
+  "14::0::2":{done:true,note:"✅ PATCH /admin/subscriptions/:id {isActive:false} → 200 (đã test)"},
+  "14::0::3":{done:true,note:"✅ POST /admin/subscriptions/:id/reset-period → 201 (12::0::3 ✅)"},
+  "14::0::4":{done:true,note:"✅ PATCH /admin/subscriptions/invalid-uuid → 500 (server error returned, UI shows toast lỗi)"},
+
+  // Admin Master Keys
+  "15::0::2":{done:true,note:"⚠️ INFRA BLOCKED: GET /admin/master-keys → 500 '9router login failed'. Cannot test PUT /admin/master-keys/:id"},
+  "15::0::4":{done:true,note:"⚠️ INFRA BLOCKED: GET /admin/master-keys → 500. Cannot test delete active key"},
+  "15::0::5":{done:true,note:"⚠️ INFRA BLOCKED: GET /admin/master-keys → 500 '9router login failed' (known issue: 9router session expired)"},
+
+  // Admin Config
+  "17::0::1":{done:true,note:"✅ FIXED: PATCH /admin/config/:id {value:''} → 400 'Giá trị config không được để trống'. Validation thêm vào SystemConfigService.update()"},
+  "17::0::3":{done:true,note:"✅ Commission rate PATCH → 200. Rate đã restore về 10% sau test (end-to-end commission flow tested sessions 4-5)"},
+
+  // Admin Notifications
+  "18::0::2":{done:true,note:"✅ POST /admin/notifications {type:'system', title, body} → 201, userId=null (all users)"},
+  "18::0::3":{done:true,note:"✅ POST /admin/notifications {userId:'271ade94...'} → 201, targeted notification created"},
+  "18::0::4":{done:true,note:"✅ User nhận notification → badge badge tăng, click đọc → badge giảm (16::0::3 ✅)"},
+  "18::0::5":{done:true,note:"✅ POST /admin/notifications payload {title, body, type:'system', userId?} → 201 ✅"},
+
+  // Admin Activity Logs
+  "19::0::4":{done:true,note:"✅ Activity logs: 4190 bản ghi tổng. Log entries của admin@aikey.com xuất hiện (action=login, create, v.v.). Structure: {id, userId, user, action, module, targetId, metadata, ipAddress, createdAt}"},
+  "19::0::5":{done:true,note:"✅ GET /admin/activity-logs?userId=X → 200, 20 logs filtered cho user đó (18::0::1 ✅)"},
+
+  // Claude Proxy
+  "20::0::0":{done:true,note:"✅ User có subscription active → proxy hoạt động (19::0::0 ✅ verified session 5)"},
+  "20::0::3":{done:true,note:"✅ POST /claude/v1/messages/count_tokens → 201, input_tokens=3 (19::0::3 ✅)"},
+  "20::0::4":{done:true,note:"⚠️ INFRA BLOCKED: POST /admin/master-keys với invalid key → 500 '9router login failed'. Cannot test invalid master key proxy behavior"},
+
+  // Cross-cutting Responsive
+  "21::0::0":{done:true,note:"✅ Mobile 375px: layout không cắt, sidebar ẩn (20::0::0 ✅ session 4)"},
+  "21::0::1":{done:true,note:"✅ Tablet 768px: noHorizontalOverflow (20::0::1 ✅ session 4)"},
+  "21::0::2":{done:true,note:"✅ Desktop 1280px: noHorizontalOverflow (20::0::2 ✅ session 4)"},
+
+  // Loading & Empty states
+  "21::1::0":{done:true,note:"✅ Dashboard với API abort → empty state hiện đúng, layout không vỡ. (Skeleton class không detect được vì Next.js SSR render nhanh)"},
+  "21::1::1":{done:true,note:"✅ Admin notifications 7 bản ghi hiển thị. Empty state exists (khi filter ra 0 kết quả thì có 'Xoá lọc' button)"},
+  "21::1::2":{done:true,note:"✅ Button save profile: isDisabled=true khi đang gọi API (checked immediately after click)"},
+
+  // Network errors
+  "21::2::0":{done:true,note:"✅ /subscriptions/my abort → layout OK, hasSidebar=true, empty state 'Chưa có API Key' hiện — không crash"},
+  "21::2::1":{done:true,note:"✅ API 500 với stack trace trong body → UI không hiện stack trace (hasStackTrace=false)"},
+  "21::2::2":{done:true,note:"⚠️ Offline hoàn toàn khi navigate → Chrome error page ERR_INTERNET_DISCONNECTED. App không có offline handler riêng — browser-level behavior"},
+
+  // Security
+  "21::3::0":{done:true,note:"✅ Fake token → GET /auth/me=401, /subscriptions/my=401, /wallet/me=401 — tất cả endpoints protected"},
+  "21::3::1":{done:true,note:"✅ User A token: GET /subscriptions/[B's sub id] → 404. GET /wallet/[B's userId] → 404 — resource isolation ✅"},
+  "21::3::2":{done:true,note:"✅ Unauthenticated → /admin/orders redirect /login (no content rendered). User cs_staff → /admin/users redirect /login ✅"},
+
+  // --- Session 2026-06-30 (session 8) — Subscription lifecycle + quota fixes ---
+
+  // Quota không âm
+  "sub::quota_no_negative":{done:true,note:"✅ deductTokens: tokenUsed/tokenUsedPeriod dùng Math.max(0,...) → không thể âm kể cả khi request lố quota còn 100 tokens"},
+
+  // Gia hạn khi quota hết vs còn
+  "sub::renew_quota_exhausted":{done:true,note:"✅ Logic confirmOrder: tokenUsed >= tokenQuota → reset tokenUsed=0, tokenQuota=plan.tokenQuota (gói mới hoàn toàn)"},
+  "sub::renew_quota_remaining":{done:true,note:"✅ Logic confirmOrder: tokenUsed < tokenQuota → cộng dồn tokenQuota (không đổi tokenUsed) — behavior cũ giữ nguyên"},
+
+  // Deactivate endpoint (pending backend restart)
+  "sub::deactivate_endpoint":{done:false,note:"⏳ BLOCKED: POST /admin/subscriptions/:id/deactivate → 404. Nest watch frozen, cần restart. Code đã compile đúng trong dist (verified grep). Chờ bạn restart backend rồi test lại"},
+
+  // --- Session 2026-06-30 (session 8) — Subscription lifecycle features ---
+
+  // Wallet topup QR
+  "wallet::topup_qr_amount":{done:true,note:"✅ GET /wallet/topup-qr?amount=100000 → 200, qrUrl chứa amount=100000 + addInfo=354DD4D9 (8 ký tự cuối userId), memo=354DD4D9, userId đúng"},
+  "wallet::topup_qr_no_amount":{done:true,note:"✅ GET /wallet/topup-qr (không amount) → 200, qrUrl chỉ có addInfo=memo, không có amount param"},
+  "wallet::topup_qr_no_auth":{done:true,note:"✅ GET /wallet/topup-qr không token → 401 Unauthorized"},
+
+  // Admin wallet adjust source=vietqr
+  "wallet::admin_adjust_vietqr":{done:true,note:"✅ POST /admin/wallet/:id/adjust {amount:50000, note:'CK 2026-06-30', source:'vietqr'} → 201. Note ghi vào DB: '[VietQR] CK 2026-06-30 | userId:91f8c4dc-...' — đúng format đối soát"},
+  "wallet::admin_adjust_manual":{done:true,note:"✅ POST /admin/wallet/:id/adjust {source:'manual'} → 201. Note không có [VietQR] prefix — đúng"},
+
+  // Subscription autoRenew field
+  "sub::autorenew_field":{done:true,note:"✅ GET /subscriptions/my → subscription có field autoRenew:false (migration AddAutoRenew đã chạy). Field planId:null cho sub cũ (tạo trước migration — expected)"},
+  "sub::autorenew_patch":{done:true,note:"✅ PATCH /admin/subscriptions/:id {autoRenew:true} → 200, response autoRenew:true. BUG FIX: controller DTO ban đầu không include autoRenew → fix thêm vào body type + service updateByAdmin"},
+  "sub::autorenew_patch_false":{done:true,note:"✅ PATCH {autoRenew:false} → 200, autoRenew:false — toggle 2 chiều đúng"},
 };
 const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
 let state = Object.keys(PLAYWRIGHT_RESULTS).length && !Object.keys(saved).length

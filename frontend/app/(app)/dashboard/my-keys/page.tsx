@@ -154,8 +154,11 @@ function KeyCard({ sub, onRefreshed }: { sub: KeySubscription; onRefreshed: (upd
 
 function PendingOrderCard({ order, onCancelled }: { order: Order; onCancelled: (id: string) => void }) {
   const [cancelling, setCancelling] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+
   async function cancel() {
     setCancelling(true);
+    setConfirming(false);
     try {
       await orderApi.cancel(order.id);
       onCancelled(order.id);
@@ -165,6 +168,7 @@ function PendingOrderCard({ order, onCancelled }: { order: Order; onCancelled: (
       setCancelling(false);
     }
   }
+
   return (
     <div className="rounded-2xl border border-dashed border-orange-400/50 bg-orange-50/40 dark:bg-orange-950/10 p-5 space-y-3">
       <div className="flex items-start justify-between gap-3">
@@ -184,15 +188,31 @@ function PendingOrderCard({ order, onCancelled }: { order: Order; onCancelled: (
       <p className="text-xs text-muted-foreground">
         Key chưa được kích hoạt. Sau khi thanh toán được xác nhận, key sẽ {order.renewSubscriptionId ? 'được gia hạn' : 'xuất hiện ở đây'} và sẵn sàng sử dụng. Đơn tự huỷ sau 24h nếu chưa thanh toán.
       </p>
-      <div className="flex gap-2">
-        <a href="/dashboard/buy" className="flex-1 flex items-center justify-center gap-1.5 text-xs bg-orange-600 text-white rounded-lg py-2 hover:bg-orange-700 transition-colors">
-          Hướng dẫn thanh toán
-        </a>
-        <button onClick={cancel} disabled={cancelling}
-          className="text-xs border rounded-lg px-3 hover:bg-muted transition-colors disabled:opacity-60">
-          {cancelling ? 'Đang huỷ...' : 'Huỷ đơn'}
-        </button>
-      </div>
+      {confirming ? (
+        <div className="flex items-center justify-between gap-2 rounded-lg border border-orange-300 bg-orange-100/60 dark:bg-orange-950/30 px-3 py-2">
+          <p className="text-xs text-orange-700 dark:text-orange-300">Xác nhận huỷ đơn này?</p>
+          <div className="flex gap-2 shrink-0">
+            <button onClick={() => setConfirming(false)} disabled={cancelling}
+              className="text-xs border rounded-md px-2.5 py-1 hover:bg-muted transition-colors disabled:opacity-60">
+              Không
+            </button>
+            <button onClick={cancel} disabled={cancelling}
+              className="text-xs bg-red-600 text-white rounded-md px-2.5 py-1 hover:bg-red-700 transition-colors disabled:opacity-60">
+              {cancelling ? 'Đang huỷ...' : 'Huỷ đơn'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <a href={`/dashboard/buy?order=${order.id}`} className="flex-1 flex items-center justify-center gap-1.5 text-xs bg-orange-600 text-white rounded-lg py-2 hover:bg-orange-700 transition-colors">
+            Xem thông tin thanh toán
+          </a>
+          <button onClick={() => setConfirming(true)}
+            className="text-xs border rounded-lg px-3 hover:bg-muted transition-colors">
+            Huỷ đơn
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -35,7 +35,7 @@ export default function OrdersPage() {
   }
 
   const f = (n: number) => new Intl.NumberFormat('vi-VN').format(n);
-  const vietQRUrl = (o: Order) => `https://img.vietqr.io/image/TECHCOMBANK-19032009391010-compact.png?amount=${o.finalPrice}&addInfo=AIKEY-${o.id}`;
+  const vietQRUrl = (o: Order) => `https://img.vietqr.io/image/TECHCOMBANK-19032009391010-compact.png?amount=${o.finalPrice}&addInfo=${o.transferMemo ?? o.id.replace(/-/g, '')}`;
 
   return (
     <div className="space-y-4">

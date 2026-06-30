@@ -68,12 +68,15 @@ export class SubscriptionsService {
     };
   }
 
-  async updateByAdmin(id: string, data: { tokenQuota?: number; expiresAt?: Date; tokenUsed?: number }) {
+  async updateByAdmin(id: string, data: { tokenQuota?: number; expiresAt?: Date; tokenUsed?: number; isActive?: boolean; autoRenew?: boolean; planId?: string }) {
     const sub = await this.repo.findOne({ where: { id } });
     if (!sub) throw new NotFoundException('Subscription không tồn tại');
     if (data.tokenQuota !== undefined) sub.tokenQuota = data.tokenQuota;
     if (data.expiresAt !== undefined) sub.expiresAt = data.expiresAt;
     if (data.tokenUsed !== undefined) sub.tokenUsed = data.tokenUsed;
+    if (data.isActive !== undefined) sub.isActive = data.isActive;
+    if (data.autoRenew !== undefined) sub.autoRenew = data.autoRenew;
+    if (data.planId !== undefined) sub.planId = data.planId;
     return this.repo.save(sub);
   }
 
@@ -114,8 +117,8 @@ export class SubscriptionsService {
         sub.tokenUsedPeriod = 0;
       }
 
-      sub.tokenUsed = Number(sub.tokenUsed) + delta;
-      sub.tokenUsedPeriod = Number(sub.tokenUsedPeriod) + delta;
+      sub.tokenUsed = Math.max(0, Number(sub.tokenUsed) + delta);
+      sub.tokenUsedPeriod = Math.max(0, Number(sub.tokenUsedPeriod) + delta);
       await em.save(sub);
 
       return this.getQuotaInfo(sub);

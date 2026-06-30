@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SystemConfig } from './system-config.entity';
@@ -32,6 +32,8 @@ export class SystemConfigService {
   }
 
   async update(id: string, value: string) {
+    if (value === undefined || value === null || value.trim() === '')
+      throw new BadRequestException('Giá trị config không được để trống');
     const c = await this.repo.findOne({ where: { id } });
     if (!c) throw new NotFoundException('Config không tồn tại');
     c.value = value;

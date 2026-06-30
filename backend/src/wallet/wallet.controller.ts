@@ -12,6 +12,18 @@ export class WalletController {
     const history = await this.svc.getHistory(req.user.id);
     return { balance, history };
   }
+
+  /** Trả về VietQR URL để nạp ví. Nội dung CK = userId (dùng để đối soát). */
+  @Get('topup-qr')
+  getTopupQr(@Request() req: any, @Query('amount') amount?: string) {
+    const userId = req.user.id as string;
+    // Lấy 8 ký tự cuối UUID làm memo ngắn gọn, dễ đối soát
+    const memo = userId.replace(/-/g, '').slice(-8).toUpperCase();
+    const base = 'https://img.vietqr.io/image/TECHCOMBANK-19032009391010-compact.png';
+    const params = new URLSearchParams({ addInfo: memo });
+    if (amount) params.set('amount', amount);
+    return { qrUrl: `${base}?${params}`, memo, userId };
+  }
 }
 
 @Controller('admin/wallet')
@@ -20,8 +32,11 @@ export class AdminWalletController {
 
   @Post(':userId/adjust')
   @RequirePermission('users:manage')
-  adjust(@Param('userId') userId: string, @Body() body: { amount: number; note: string }) {
-    return this.svc.adminAdjust(userId, body.amount, body.note);
+  adjust(@Param('userId') userId: string, @Body() body: { amount: number; note: string; source?: 'vietqr' | 'manual' }) {
+    const note = body.source === 'vietqr'
+      ? `[VietQR] ${body.note ?? ''} | userId:${userId}`.trim()
+      : (body.note ?? 'Admin điều chỉnh');
+    return this.svc.adminAdjust(userId, body.amount, note);
   }
 
   @Get(':userId/history')
