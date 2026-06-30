@@ -8,7 +8,8 @@ export class NineRouterService {
   private cookie: string | null = null;
 
   constructor(private readonly config: ConfigService) {
-    this.base = config.getOrThrow('NINE_ROUTER_URL').replace(/\/$/, '');
+    // Strip /v1 suffix — NineRouterService calls management API (/api/*), not the proxy endpoint
+    this.base = config.getOrThrow('NINE_ROUTER_URL').replace(/\/v1\/?$/, '').replace(/\/$/, '');
     this.password = config.getOrThrow('NINE_ROUTER_PASSWORD');
   }
 

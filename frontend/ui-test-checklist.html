@@ -891,7 +891,7 @@ const PLAYWRIGHT_RESULTS = {
   "sub::renew_quota_remaining":{done:true,note:"✅ Logic confirmOrder: tokenUsed < tokenQuota → cộng dồn tokenQuota (không đổi tokenUsed) — behavior cũ giữ nguyên"},
 
   // Deactivate endpoint (pending backend restart)
-  "sub::deactivate_endpoint":{done:false,note:"⏳ BLOCKED: POST /admin/subscriptions/:id/deactivate → 404. Nest watch frozen, cần restart. Code đã compile đúng trong dist (verified grep). Chờ bạn restart backend rồi test lại"},
+  "sub::deactivate_endpoint":{done:true,note:"✅ POST /admin/subscriptions/:id/deactivate → 201 {success:true}. Key 160c84c1 bị xóa khỏi 9router (8→7 keys). sub.isActive=false, autoRenew=false. BUG FIX: NineRouterService.base bị dùng NINE_ROUTER_URL=/v1 → login thành /v1/api/auth/login → 404. Fix: strip /v1 suffix trong constructor."},
 
   // --- Session 2026-06-30 (session 8) — Subscription lifecycle features ---
 

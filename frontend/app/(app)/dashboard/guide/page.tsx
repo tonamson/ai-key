@@ -40,30 +40,6 @@ const CC_MODELS = [
     tier: "Nhanh/Rẻ",
     desc: "Tốc độ cao, chi phí thấp",
   },
-  {
-    id: "cc/claude-opus-4-7",
-    label: "Claude Opus 4.7",
-    tier: "Opus",
-    desc: "",
-  },
-  {
-    id: "cc/claude-opus-4-6",
-    label: "Claude Opus 4.6",
-    tier: "Opus",
-    desc: "",
-  },
-  {
-    id: "cc/claude-sonnet-4-5-20250929",
-    label: "Claude Sonnet 4.5",
-    tier: "Sonnet",
-    desc: "",
-  },
-  {
-    id: "cc/claude-opus-4-5-20251101",
-    label: "Claude Opus 4.5",
-    tier: "Opus",
-    desc: "",
-  },
 ];
 
 const TIER_COLOR: Record<string, string> = {

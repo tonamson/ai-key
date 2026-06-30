@@ -39,9 +39,9 @@ export class ClaudeProxyController {
   }
 
   // Catch-all for other paths
-  @All('*')
+  @All('*path')
   catchAll(@Req() req: Request, @Res() res: Response, @Headers('authorization') auth: string) {
-    const path = '/' + ((req.params as any)[0] ?? '');
+    const path = '/' + ((req.params as any)['path'] ?? '');
     return this.handle(req, res, auth, path);
   }
 
