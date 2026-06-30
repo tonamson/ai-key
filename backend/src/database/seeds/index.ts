@@ -3,6 +3,7 @@ import { AppDataSource } from '../data-source';
 import { User } from '../../users/user.entity';
 import { Role } from '../../roles/role.entity';
 import { Plan } from '../../plans/plan.entity';
+import { In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 const roleSeeds = [
@@ -45,9 +46,16 @@ async function seed() {
       ...rest,
       password: await bcrypt.hash(u.password, 10),
       roleId: roleMap[roleKey] ?? null,
+      emailVerified: true, // seed accounts are pre-verified
     }));
     console.log(`Seeded user: ${u.email} → ${roleKey}`);
   }
+
+  // Đảm bảo tài khoản seed luôn được xác thực, kể cả khi đã tồn tại từ trước.
+  await userRepo.update(
+    { email: In(users.map((u) => u.email)) },
+    { emailVerified: true, emailVerifyToken: null },
+  );
 
   // Seed default plans
   const planRepo = AppDataSource.getRepository(Plan);
