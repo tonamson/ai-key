@@ -43,6 +43,12 @@ export class User {
   @Column({ type: 'timestamptz', nullable: true })
   loginLockUntil: Date | null;
 
+  @Column({ default: false })
+  emailVerified: boolean;
+
+  @Column({ type: 'varchar', nullable: true, select: false })
+  emailVerifyToken: string | null;
+
   @Column({ type: 'varchar', nullable: true, select: false })
   passwordResetToken: string | null;
 

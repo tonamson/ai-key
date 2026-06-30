@@ -33,16 +33,41 @@ export class AuthService {
     const exists = await this.users.findOneBy({ email });
     if (exists) throw new ConflictException('Email đã được sử dụng');
     const hashed = await bcrypt.hash(password, 10);
-    // Validate referral code trước khi lưu
     let validRef: string | null = null;
     if (referredBy) {
       const ref = await this.referral.findByCode(referredBy.trim().toUpperCase());
       if (ref) validRef = ref.code;
     }
-    const saved = await this.users.save(this.users.create({ email, password: hashed, name, referredBy: validRef }));
+    const token = crypto.randomBytes(32).toString('hex');
+    const saved = await this.users.save(
+      this.users.create({ email, password: hashed, name, referredBy: validRef, emailVerifyToken: token, emailVerified: false }),
+    );
     this.referral.generateCode(saved.id).catch(() => {});
-    const user = await this.users.findOne({ where: { id: saved.id }, relations: { roleDetail: true } });
-    return this.issueTokens(user!);
+    return { emailVerifyToken: token, name: saved.name, email: saved.email };
+  }
+
+  async verifyEmail(token: string) {
+    const user = await this.users
+      .createQueryBuilder('u')
+      .addSelect('u.emailVerifyToken')
+      .where('u.emailVerifyToken = :token', { token })
+      .getOne();
+    if (!user) throw new BadRequestException('Link xác thực không hợp lệ hoặc đã được sử dụng');
+    await this.users.update(user.id, { emailVerified: true, emailVerifyToken: null });
+    const updated = await this.users.findOne({ where: { id: user.id }, relations: { roleDetail: true } });
+    return this.issueTokens(updated!);
+  }
+
+  async resendVerifyEmail(email: string): Promise<{ token: string; name: string } | null> {
+    const user = await this.users
+      .createQueryBuilder('u')
+      .addSelect('u.emailVerifyToken')
+      .where('u.email = :email', { email })
+      .getOne();
+    if (!user || user.emailVerified) return null;
+    const token = crypto.randomBytes(32).toString('hex');
+    await this.users.update(user.id, { emailVerifyToken: token });
+    return { token, name: user.name };
   }
 
   async login(email: string, password: string) {
@@ -52,6 +77,10 @@ export class AuthService {
     if (user?.loginLockUntil && user.loginLockUntil > new Date()) {
       const wait = Math.ceil((user.loginLockUntil.getTime() - Date.now()) / 60000);
       throw new UnauthorizedException(`Tài khoản tạm khóa do nhập sai mật khẩu quá nhiều lần. Vui lòng thử lại sau ${wait} phút.`);
+    }
+
+    if (user && !user.emailVerified) {
+      throw new UnauthorizedException('EMAIL_NOT_VERIFIED');
     }
 
     const passwordOk = user && (await bcrypt.compare(password, user.password));

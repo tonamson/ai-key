@@ -25,8 +25,28 @@ export class AuthController {
   async register(@Body() dto: RegisterDto) {
     await this.recaptcha.verify(dto.recaptchaToken, 'register');
     const result = await this.auth.register(dto.email, dto.password, dto.name, dto.referredBy);
-    this.email.sendWelcome(dto.email, dto.name);
-    return result;
+    const appUrl = this.config.get('APP_URL') ?? 'https://moneynote.store';
+    const verifyUrl = `${appUrl}/verify-email?token=${result.emailVerifyToken}`;
+    this.email.sendEmailVerify(result.email, result.name, verifyUrl);
+    return { message: 'Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.' };
+  }
+
+  @Public()
+  @Post('verify-email')
+  async verifyEmail(@Body() dto: { token: string }) {
+    return this.auth.verifyEmail(dto.token);
+  }
+
+  @Public()
+  @Post('resend-verify-email')
+  async resendVerifyEmail(@Body() dto: { email: string }) {
+    const result = await this.auth.resendVerifyEmail(dto.email);
+    if (result) {
+      const appUrl = this.config.get('APP_URL') ?? 'https://moneynote.store';
+      const verifyUrl = `${appUrl}/verify-email?token=${result.token}`;
+      this.email.sendEmailVerify(dto.email, result.name, verifyUrl);
+    }
+    return { message: 'Nếu email tồn tại và chưa xác thực, chúng tôi đã gửi lại link.' };
   }
 
   @Public()

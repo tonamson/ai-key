@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:2053"
 ).replace(/\/$/, "");
-const PROXY_URL = `${API_BASE}/claude`;
+const PROXY_URL = `${API_BASE}/claude/v1`;
 
 const CC_MODELS = [
   {

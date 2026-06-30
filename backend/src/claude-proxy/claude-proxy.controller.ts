@@ -11,18 +11,18 @@ export class ClaudeProxyController {
 
   // Explicit routes needed — NestJS wildcard @All('*') doesn't catch all POST paths reliably
   @Post('chat/completions')
-  chatCompletions(@Req() req: Request, @Res() res: Response, @Headers('authorization') auth: string) {
-    return this.handle(req, res, auth, '/chat/completions');
+  chatCompletions(@Req() req: Request, @Res() res: Response, @Headers('x-api-key') apiKey: string) {
+    return this.handle(req, res, apiKey, '/chat/completions');
   }
 
   @Post('messages')
-  messages(@Req() req: Request, @Res() res: Response, @Headers('authorization') auth: string) {
-    return this.handle(req, res, auth, '/messages');
+  messages(@Req() req: Request, @Res() res: Response, @Headers('x-api-key') apiKey: string) {
+    return this.handle(req, res, apiKey, '/messages');
   }
 
   @Post('messages/count_tokens')
-  countTokens(@Req() req: Request, @Res() res: Response, @Headers('authorization') auth: string) {
-    return this.handle(req, res, auth, '/messages/count_tokens');
+  countTokens(@Req() req: Request, @Res() res: Response, @Headers('x-api-key') apiKey: string) {
+    return this.handle(req, res, apiKey, '/messages/count_tokens');
   }
 
   @Get('models')
@@ -40,13 +40,13 @@ export class ClaudeProxyController {
 
   // Catch-all for other paths
   @All('*path')
-  catchAll(@Req() req: Request, @Res() res: Response, @Headers('authorization') auth: string) {
+  catchAll(@Req() req: Request, @Res() res: Response, @Headers('x-api-key') apiKey: string) {
     const path = '/' + ((req.params as any)['path'] ?? '');
-    return this.handle(req, res, auth, path);
+    return this.handle(req, res, apiKey, path);
   }
 
-  private async handle(req: Request, res: Response, auth: string, path: string) {
-    const nineRouterKey = auth?.replace(/^Bearer\s+/i, '') ?? '';
+  private async handle(req: Request, res: Response, apiKey: string, path: string) {
+    const nineRouterKey = apiKey ?? '';
     const body = req.method !== 'GET' ? req.body : undefined;
 
     const result = await this.service.forward(nineRouterKey, path, req.method, body, req.headers as Record<string, any>);

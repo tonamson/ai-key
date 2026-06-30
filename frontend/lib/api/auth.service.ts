@@ -14,7 +14,13 @@ export interface UpdateProfilePayload { name?: string; currentPassword?: string;
 
 export const authService = {
   register: (payload: RegisterPayload) =>
-    apiClient.post<{ accessToken: string; user: AuthUser }>('/auth/register', payload).then((r) => r.data),
+    apiClient.post<{ message: string }>('/auth/register', payload).then((r) => r.data),
+
+  verifyEmail: (token: string) =>
+    apiClient.post<{ accessToken: string; user: AuthUser }>('/auth/verify-email', { token }).then((r) => r.data),
+
+  resendVerifyEmail: (email: string) =>
+    apiClient.post<{ message: string }>('/auth/resend-verify-email', { email }).then((r) => r.data),
 
   login: (payload: LoginPayload) =>
     apiClient.post<LoginResponse>('/auth/login', payload).then((r) => r.data),

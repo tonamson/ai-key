@@ -25,6 +25,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [tempToken, setTempToken] = useState<string | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const [otp, setOtp] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
 
@@ -44,9 +45,12 @@ export default function LoginPage() {
         router.replace("/dashboard");
       }
     } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message ?? err?.message ?? "Đăng nhập thất bại",
-      );
+      const msg = err?.response?.data?.message ?? err?.message ?? '';
+      if (msg === 'EMAIL_NOT_VERIFIED') {
+        setUnverifiedEmail(email);
+      } else {
+        toast.error(msg || 'Đăng nhập thất bại');
+      }
     }
   }
 
@@ -154,6 +158,19 @@ export default function LoginPage() {
                 autoComplete="current-password"
               />
             </div>
+            {unverifiedEmail && (
+              <p className="text-sm rounded-lg bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-300 dark:border-yellow-700 px-3 py-2 text-yellow-800 dark:text-yellow-300">
+                Email chưa được xác thực. Kiểm tra hộp thư hoặc{' '}
+                <button type="button" className="underline font-medium" onClick={async () => {
+                  try {
+                    await authService.resendVerifyEmail(unverifiedEmail);
+                    toast.success('Đã gửi lại email xác thực');
+                  } catch {
+                    toast.error('Gửi lại thất bại, thử lại sau');
+                  }
+                }}>gửi lại email</button>.
+              </p>
+            )}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>

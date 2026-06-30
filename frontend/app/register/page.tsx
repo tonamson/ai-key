@@ -24,6 +24,7 @@ function RegisterForm() {
   const { token } = useAuthStore();
   const { execute } = useRecaptcha();
   const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState<string | null>(null); // email vừa đăng ký
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -60,19 +61,15 @@ function RegisterForm() {
     setLoading(true);
     try {
       const recaptchaToken = await execute("register");
-      const result = await authService.register({
+      await authService.register({
         name: form.name,
         email: form.email,
         password: form.password,
         recaptchaToken,
         referredBy: form.referredBy.trim().toUpperCase() || undefined,
       });
-      const { setAuthToken } = await import("@/lib/api/client");
-      setAuthToken(result.accessToken);
-      useAuthStore.setState({ token: result.accessToken, user: result.user });
       sessionStorage.removeItem('ref_code');
-      toast.success("Đăng ký thành công! Chào mừng bạn 🎉");
-      router.replace("/dashboard/buy");
+      setRegistered(form.email);
     } catch (err: any) {
       toast.error(
         err?.response?.data?.message ?? err?.message ?? "Đăng ký thất bại",
@@ -80,6 +77,32 @@ function RegisterForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (registered) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Kiểm tra email</CardTitle>
+            <CardDescription>Chúng tôi đã gửi link xác thực đến <strong>{registered}</strong>. Nhấn vào link trong email để kích hoạt tài khoản.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="outline" className="w-full" onClick={async () => {
+              try {
+                await authService.resendVerifyEmail(registered);
+                toast.success('Đã gửi lại email xác thực');
+              } catch {
+                toast.error('Gửi lại thất bại, thử lại sau');
+              }
+            }}>Gửi lại email</Button>
+            <p className="text-center text-sm text-muted-foreground">
+              <Link href="/login" className="text-primary underline underline-offset-4">Quay lại đăng nhập</Link>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

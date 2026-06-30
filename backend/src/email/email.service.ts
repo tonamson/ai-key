@@ -62,6 +62,30 @@ export class EmailService {
     }
   }
 
+  async sendEmailVerify(email: string, name: string, verifyUrl: string): Promise<void> {
+    try {
+      await this.resend.emails.send({
+        from: this.from,
+        to: email,
+        subject: 'Xác thực email tài khoản AI Key',
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#111">
+            <h2 style="margin:0 0 8px">Xin chào ${name}!</h2>
+            <p style="color:#555;margin:0 0 16px">Nhấn vào nút bên dưới để xác thực địa chỉ email và kích hoạt tài khoản của bạn.</p>
+            <a href="${verifyUrl}"
+               style="display:inline-block;background:#000;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600">
+              Xác thực email →
+            </a>
+            <p style="color:#555;margin:24px 0 0;font-size:13px">Nếu bạn không đăng ký tài khoản này, hãy bỏ qua email này.</p>
+            <p style="color:#999;font-size:12px;margin:16px 0 0">AI Key · moneynote.store</p>
+          </div>
+        `,
+      });
+    } catch (err) {
+      this.logger.warn(`Failed to send verify email to ${email}: ${err}`);
+    }
+  }
+
   async sendWelcome(email: string, name: string): Promise<void> {
     try {
       await this.resend.emails.send({
