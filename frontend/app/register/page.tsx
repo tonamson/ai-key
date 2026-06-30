@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ import { useAuthStore } from "@/lib/store/auth.store";
 import { authService } from "@/lib/api/auth.service";
 import { useRecaptcha } from "@/lib/hooks/use-recaptcha";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token } = useAuthStore();
@@ -167,4 +167,8 @@ export default function RegisterPage() {
       </Card>
     </div>
   );
+}
+
+export default function RegisterPage() {
+  return <Suspense><RegisterForm /></Suspense>;
 }
