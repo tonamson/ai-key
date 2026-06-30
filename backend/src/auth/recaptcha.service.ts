@@ -29,7 +29,6 @@ export class RecaptchaService {
 
     const data: any = await res.json();
 
-    console.log('reCAPTCHA response:', JSON.stringify(data));
     if (!data.success) throw new BadRequestException(`Xác minh reCAPTCHA thất bại: ${JSON.stringify(data['error-codes'])}`);
     if (data.score < MIN_SCORE) throw new BadRequestException(`Score quá thấp: ${data.score}`);
     if (action && data.action !== action) throw new BadRequestException(`Action không khớp: expected ${action}, got ${data.action}`);

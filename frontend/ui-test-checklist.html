@@ -881,6 +881,13 @@ const PLAYWRIGHT_RESULTS = {
   "21::3::1":{done:true,note:"✅ User A token: GET /subscriptions/[B's sub id] → 404. GET /wallet/[B's userId] → 404 — resource isolation ✅"},
   "21::3::2":{done:true,note:"✅ Unauthenticated → /admin/orders redirect /login (no content rendered). User cs_staff → /admin/users redirect /login ✅"},
 
+  // --- Session 2026-06-30 (session 9) — Security audit fixes ---
+
+  "sec::2fa_bypass_fixed":{done:true,note:"🔴 CRITICAL FIXED: 2FA bypass. tempToken (twoFactorPending) cấp sau password trước OTP → trước đây dùng được mọi route (verified: /auth/me trả 200). Fix: JwtStrategy.validate reject payload.twoFactorPending → 401 'Cần xác thực 2FA'. Verified: tempToken→401, token thường→200"},
+  "sec::banned_token_fixed":{done:true,note:"🔴 CRITICAL FIXED: token user bị khóa sống 7 ngày. JwtStrategy chỉ trust payload, không query DB. Fix: validate() query users.isActive → 401 nếu khóa/xóa. Verified: deactivate user → /auth/me=401, activate lại → 200. Bonus: findActiveByKey thêm user.isActive=true để proxy không tốn tiền cho user bị ban"},
+  "sec::stream_token_leak_fixed":{done:true,note:"🟠 HIGH FIXED: stream disconnect = token free. pump().catch chỉ res.end() không finalizeStream → 9router tốn tiền thật, user không bị trừ. Fix: thêm res.on('close') + finalize() idempotent (finalized flag) → trừ token theo phần upstream đã trả kể cả khi client ngắt"},
+  "sec::recaptcha_log_removed":{done:true,note:"🟡 MEDIUM FIXED: bỏ console.log('reCAPTCHA response') mỗi request — noise + lộ thông tin verify"},
+
   // --- Session 2026-06-30 (session 8) — Subscription lifecycle + quota fixes ---
 
   // Quota không âm

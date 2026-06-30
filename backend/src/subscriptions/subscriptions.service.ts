@@ -40,7 +40,8 @@ export class SubscriptionsService {
   }
 
   findActiveByKey(nineRouterKey: string): Promise<KeySubscription | null> {
-    return this.repo.findOne({ where: { nineRouterKey, isActive: true } });
+    // user.isActive=true: tài khoản bị admin khoá thì key cũng không proxy được (tránh tốn tiền 9router).
+    return this.repo.findOne({ where: { nineRouterKey, isActive: true, user: { isActive: true } } });
   }
 
   findById(id: string): Promise<KeySubscription | null> {

@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { Eye, EyeOff, Key, ShoppingCart, Coins, Calendar, CheckCircle2, AlertTriangle, XCircle, Copy, RefreshCw, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { subscriptionApi, orderApi, KeySubscription, Order } from '@/lib/api/admin.service';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const f = (n: number) => new Intl.NumberFormat('vi-VN').format(n);
 
@@ -40,10 +41,9 @@ function TokenBar({ used, quota }: { used: number; quota: number }) {
   );
 }
 
-function KeyCard({ sub, onRefreshed }: { sub: KeySubscription; onRefreshed: (updated: KeySubscription) => void }) {
+function KeyCard({ sub, onRefreshed, confirm }: { sub: KeySubscription; onRefreshed: (updated: KeySubscription) => void; confirm: (o: Parameters<ReturnType<typeof useConfirm>['confirm']>[0]) => Promise<boolean> }) {
   const [show, setShow] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [confirming, setConfirming] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const days = daysLeft(sub.expiresAt);
   const expired = isExpired(sub.expiresAt);

@@ -64,6 +64,14 @@ export class ClaudeProxyController {
         (Array.isArray(body?.tools) ? body.tools : []).map((t: any) => t?.name).filter(Boolean));
       let captured = '';
       let buf = '';
+      let finalized = false;
+      // Trừ token dựa trên những gì ĐÃ nhận từ upstream, kể cả khi client ngắt giữa chừng.
+      // Không finalize = 9Router đã tốn tiền thật nhưng user xài free → token leak.
+      const finalize = async () => {
+        if (finalized) return;
+        finalized = true;
+        await this.service.finalizeStream(result.sub.id, captured).catch(() => {});
+      };
       const pump = async () => {
         while (true) {
           const { done, value } = await reader.read();
@@ -78,11 +86,12 @@ export class ClaudeProxyController {
           res.write(this.service.stripInjectedToolSuffix(ready, validNames));
         }
         if (buf) res.write(this.service.stripInjectedToolSuffix(buf, validNames));
-        // Trừ token sau khi stream xong, trước khi đóng kết nối
-        await this.service.finalizeStream(result.sub.id, captured).catch(() => {});
+        await finalize();
         res.end();
       };
-      pump().catch(() => res.end());
+      // Client ngắt kết nối giữa stream → vẫn trừ token theo phần upstream đã trả.
+      res.on('close', () => { reader.cancel().catch(() => {}); finalize(); });
+      pump().catch(async () => { await finalize(); res.end(); });
       return;
     }
 
