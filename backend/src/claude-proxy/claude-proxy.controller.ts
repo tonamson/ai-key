@@ -49,7 +49,8 @@ export class ClaudeProxyController {
   }
 
   private async handle(req: Request, res: Response, apiKey: string, path: string) {
-    const nineRouterKey = apiKey ?? '';
+    const auth = req.headers['authorization'] as string | undefined;
+    const nineRouterKey = apiKey || (auth?.startsWith('Bearer ') ? auth.slice(7) : '') || '';
     const body = req.method !== 'GET' ? req.body : undefined;
 
     const result = await this.service.forward(nineRouterKey, path, req.method, body, req.headers as Record<string, any>);
