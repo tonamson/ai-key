@@ -60,6 +60,7 @@ function KeyCard({ sub, onRefreshed, confirm }: { sub: KeySubscription; onRefres
   }
 
   async function handleRefresh() {
+    if (!await confirm({ title: 'Đổi API key', description: 'Key cũ sẽ bị vô hiệu hóa ngay lập tức. Tiếp tục?', confirmLabel: 'Xác nhận đổi key' })) return;
     setRefreshing(true);
     try {
       const updated = await subscriptionApi.refreshKey(sub.id);
@@ -69,7 +70,6 @@ function KeyCard({ sub, onRefreshed, confirm }: { sub: KeySubscription; onRefres
       toast.error((e as Error).message);
     } finally {
       setRefreshing(false);
-      setConfirming(false);
     }
   }
 
@@ -121,44 +121,25 @@ function KeyCard({ sub, onRefreshed, confirm }: { sub: KeySubscription; onRefres
         <a href={`/dashboard/buy?renew=${sub.id}`} className="w-full flex items-center justify-center gap-1.5 text-xs text-primary border border-dashed border-primary/40 rounded-lg py-2 transition-colors hover:bg-primary/5">
           <RefreshCw className="size-3" /> Gia hạn key này
         </a>
-      ) : !confirming ? (
-        <button
-          onClick={() => setConfirming(true)}
-          className="w-full flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-destructive border border-dashed rounded-lg py-2 transition-colors hover:border-destructive/50"
-        >
-          <RefreshCw className="size-3" /> Đổi API key mới
-        </button>
       ) : (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 space-y-2">
-          <p className="text-xs text-destructive font-medium">Key cũ sẽ bị vô hiệu hóa ngay lập tức. Tiếp tục?</p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setConfirming(false)}
-              className="flex-1 text-xs border rounded-md py-1.5 hover:bg-muted transition-colors"
-            >
-              Hủy
-            </button>
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="flex-1 text-xs bg-destructive text-destructive-foreground rounded-md py-1.5 hover:bg-destructive/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-1"
-            >
-              {refreshing ? <><RefreshCw className="size-3 animate-spin" /> Đang đổi...</> : 'Xác nhận đổi key'}
-            </button>
-          </div>
-        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="w-full flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-destructive border border-dashed rounded-lg py-2 transition-colors hover:border-destructive/50 disabled:opacity-60"
+        >
+          {refreshing ? <><RefreshCw className="size-3 animate-spin" /> Đang đổi...</> : <><RefreshCw className="size-3" /> Đổi API key mới</>}
+        </button>
       )}
     </div>
   );
 }
 
-function PendingOrderCard({ order, onCancelled }: { order: Order; onCancelled: (id: string) => void }) {
+function PendingOrderCard({ order, onCancelled, confirm }: { order: Order; onCancelled: (id: string) => void; confirm: (o: Parameters<ReturnType<typeof useConfirm>['confirm']>[0]) => Promise<boolean> }) {
   const [cancelling, setCancelling] = useState(false);
-  const [confirming, setConfirming] = useState(false);
 
   async function cancel() {
+    if (!await confirm({ title: 'Huỷ đơn hàng', description: 'Xác nhận huỷ đơn này? Ví/mã giảm giá (nếu có) sẽ được hoàn lại.', confirmLabel: 'Huỷ đơn', variant: 'destructive' })) return;
     setCancelling(true);
-    setConfirming(false);
     try {
       await orderApi.cancel(order.id);
       onCancelled(order.id);
@@ -188,31 +169,15 @@ function PendingOrderCard({ order, onCancelled }: { order: Order; onCancelled: (
       <p className="text-xs text-muted-foreground">
         Key chưa được kích hoạt. Sau khi thanh toán được xác nhận, key sẽ {order.renewSubscriptionId ? 'được gia hạn' : 'xuất hiện ở đây'} và sẵn sàng sử dụng. Đơn tự huỷ sau 24h nếu chưa thanh toán.
       </p>
-      {confirming ? (
-        <div className="flex items-center justify-between gap-2 rounded-lg border border-orange-300 bg-orange-100/60 dark:bg-orange-950/30 px-3 py-2">
-          <p className="text-xs text-orange-700 dark:text-orange-300">Xác nhận huỷ đơn này?</p>
-          <div className="flex gap-2 shrink-0">
-            <button onClick={() => setConfirming(false)} disabled={cancelling}
-              className="text-xs border rounded-md px-2.5 py-1 hover:bg-muted transition-colors disabled:opacity-60">
-              Không
-            </button>
-            <button onClick={cancel} disabled={cancelling}
-              className="text-xs bg-red-600 text-white rounded-md px-2.5 py-1 hover:bg-red-700 transition-colors disabled:opacity-60">
-              {cancelling ? 'Đang huỷ...' : 'Huỷ đơn'}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex gap-2">
-          <a href={`/dashboard/buy?order=${order.id}`} className="flex-1 flex items-center justify-center gap-1.5 text-xs bg-orange-600 text-white rounded-lg py-2 hover:bg-orange-700 transition-colors">
-            Xem thông tin thanh toán
-          </a>
-          <button onClick={() => setConfirming(true)}
-            className="text-xs border rounded-lg px-3 hover:bg-muted transition-colors">
-            Huỷ đơn
-          </button>
-        </div>
-      )}
+      <div className="flex gap-2">
+        <a href={`/dashboard/buy?order=${order.id}`} className="flex-1 flex items-center justify-center gap-1.5 text-xs bg-orange-600 text-white rounded-lg py-2 hover:bg-orange-700 transition-colors">
+          Xem thông tin thanh toán
+        </a>
+        <button onClick={cancel} disabled={cancelling}
+          className="text-xs border rounded-lg px-3 hover:bg-muted transition-colors disabled:opacity-60">
+          {cancelling ? 'Đang huỷ...' : 'Huỷ đơn'}
+        </button>
+      </div>
     </div>
   );
 }
@@ -220,6 +185,7 @@ function PendingOrderCard({ order, onCancelled }: { order: Order; onCancelled: (
 export default function KeysPage() {
   const [subs, setSubs] = useState<KeySubscription[]>([]);
   const [pending, setPending] = useState<Order[]>([]);
+  const { confirm, ConfirmDialog } = useConfirm();
   useEffect(() => {
     subscriptionApi.listMine().then(setSubs).catch(e => toast.error(e.message));
     orderApi.listMine().then(os => setPending(os.filter(o => o.status === 'pending'))).catch(() => {});
@@ -264,18 +230,18 @@ export default function KeysPage() {
       {/* Key + pending list */}
       {(subs.length > 0 || pending.length > 0) && (
         <div className="grid gap-4 sm:grid-cols-2">
-          {pending.map(o => <PendingOrderCard key={o.id} order={o} onCancelled={id => setPending(prev => prev.filter(p => p.id !== id))} />)}
+          {pending.map(o => <PendingOrderCard key={o.id} order={o} onCancelled={id => setPending(prev => prev.filter(p => p.id !== id))} confirm={confirm} />)}
           {subs.map(sub => (
             <KeyCard
               key={sub.id}
               sub={sub}
               onRefreshed={updated => setSubs(prev => prev.map(s => s.id === updated.id ? { ...s, ...updated } : s))}
+              confirm={confirm}
             />
           ))}
         </div>
       )}
-
-
+      {ConfirmDialog}
     </div>
   );
 }
