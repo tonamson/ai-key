@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query, Request } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { RequirePermission } from '../auth/decorators/roles.decorator';
+import { AdjustWalletDto } from './dto/adjust-wallet.dto';
 
 @Controller('wallet')
 export class WalletController {
@@ -32,7 +33,7 @@ export class AdminWalletController {
 
   @Post(':userId/adjust')
   @RequirePermission('users:manage')
-  adjust(@Param('userId') userId: string, @Body() body: { amount: number; note: string; source?: 'vietqr' | 'manual' }) {
+  adjust(@Param('userId') userId: string, @Body() body: AdjustWalletDto) {
     const note = body.source === 'vietqr'
       ? `[VietQR] ${body.note ?? ''} | userId:${userId}`.trim()
       : (body.note ?? 'Admin điều chỉnh');

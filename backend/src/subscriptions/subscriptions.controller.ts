@@ -2,6 +2,7 @@ import { Body, Controller, Get, NotFoundException, Param, Patch, Post, Request, 
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionLifecycleService } from './subscription-lifecycle.service';
 import { RequirePermission } from '../auth/decorators/roles.decorator';
+import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 
 @Controller('subscriptions')
 export class SubscriptionsController {
@@ -35,7 +36,7 @@ export class SubscriptionsAdminController {
   findAll() { return this.service.findAll(); }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() body: { tokenQuota?: number; expiresAt?: string; tokenUsed?: number; isActive?: boolean; autoRenew?: boolean; planId?: string }) {
+  update(@Param('id') id: string, @Body() body: UpdateSubscriptionDto) {
     return this.service.updateByAdmin(id, {
       tokenQuota: body.tokenQuota,
       expiresAt: body.expiresAt ? new Date(body.expiresAt) : undefined,
