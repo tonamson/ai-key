@@ -1,4 +1,4 @@
-import { All, Controller, Get, Headers, Post, Req, Res } from '@nestjs/common';
+import { All, Controller, Get, Headers, HttpCode, Post, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ClaudeProxyService } from './claude-proxy.service';
 import { Public } from '../auth/decorators/public.decorator';
@@ -11,16 +11,19 @@ export class ClaudeProxyController {
 
   // Explicit routes needed — NestJS wildcard @All('*') doesn't catch all POST paths reliably
   @Post('chat/completions')
+  @HttpCode(200) // NestJS defaults POST to 201; Anthropic/Claude CLI expect 200 or it retries
   chatCompletions(@Req() req: Request, @Res() res: Response, @Headers('x-api-key') apiKey: string) {
     return this.handle(req, res, apiKey, '/chat/completions');
   }
 
   @Post('messages')
+  @HttpCode(200)
   messages(@Req() req: Request, @Res() res: Response, @Headers('x-api-key') apiKey: string) {
     return this.handle(req, res, apiKey, '/messages');
   }
 
   @Post('messages/count_tokens')
+  @HttpCode(200)
   countTokens(@Req() req: Request, @Res() res: Response, @Headers('x-api-key') apiKey: string) {
     return this.handle(req, res, apiKey, '/messages/count_tokens');
   }
