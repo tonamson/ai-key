@@ -1,43 +1,98 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { Copy, Check, Settings, Zap, BookOpen, Terminal, AlertCircle, ChevronDown, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react";
+import { toast } from "sonner";
+import {
+  Copy,
+  Check,
+  Settings,
+  Zap,
+  BookOpen,
+  Terminal,
+  AlertCircle,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:2053').replace(/\/$/, '');
-const PROXY_URL = `${API_BASE}/claude/v1`;
+const API_BASE = (
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:2053"
+).replace(/\/$/, "");
+const PROXY_URL = `${API_BASE}/claude`;
 
 const CC_MODELS = [
-  { id: 'cc/claude-opus-4-8',            label: 'Claude Opus 4.8',   tier: 'Mạnh nhất',   desc: 'Tốt nhất cho tác vụ phức tạp' },
-  { id: 'cc/claude-sonnet-4-6',          label: 'Claude Sonnet 4.6', tier: 'Khuyên dùng', desc: 'Cân bằng tốc độ và chất lượng' },
-  { id: 'cc/claude-haiku-4-5-20251001',  label: 'Claude Haiku 4.5',  tier: 'Nhanh/Rẻ',   desc: 'Tốc độ cao, chi phí thấp' },
-  { id: 'cc/claude-opus-4-7',            label: 'Claude Opus 4.7',   tier: 'Opus',        desc: '' },
-  { id: 'cc/claude-opus-4-6',            label: 'Claude Opus 4.6',   tier: 'Opus',        desc: '' },
-  { id: 'cc/claude-sonnet-4-5-20250929', label: 'Claude Sonnet 4.5', tier: 'Sonnet',      desc: '' },
-  { id: 'cc/claude-opus-4-5-20251101',   label: 'Claude Opus 4.5',   tier: 'Opus',        desc: '' },
+  {
+    id: "cc/claude-opus-4-8",
+    label: "Claude Opus 4.8",
+    tier: "Mạnh nhất",
+    desc: "Tốt nhất cho tác vụ phức tạp",
+  },
+  {
+    id: "cc/claude-sonnet-4-6",
+    label: "Claude Sonnet 4.6",
+    tier: "Khuyên dùng",
+    desc: "Cân bằng tốc độ và chất lượng",
+  },
+  {
+    id: "cc/claude-haiku-4-5-20251001",
+    label: "Claude Haiku 4.5",
+    tier: "Nhanh/Rẻ",
+    desc: "Tốc độ cao, chi phí thấp",
+  },
+  {
+    id: "cc/claude-opus-4-7",
+    label: "Claude Opus 4.7",
+    tier: "Opus",
+    desc: "",
+  },
+  {
+    id: "cc/claude-opus-4-6",
+    label: "Claude Opus 4.6",
+    tier: "Opus",
+    desc: "",
+  },
+  {
+    id: "cc/claude-sonnet-4-5-20250929",
+    label: "Claude Sonnet 4.5",
+    tier: "Sonnet",
+    desc: "",
+  },
+  {
+    id: "cc/claude-opus-4-5-20251101",
+    label: "Claude Opus 4.5",
+    tier: "Opus",
+    desc: "",
+  },
 ];
 
 const TIER_COLOR: Record<string, string> = {
-  'Mạnh nhất':   'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800',
-  'Khuyên dùng': 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800',
-  'Opus':        'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-300 dark:border-indigo-800',
-  'Sonnet':      'bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-800',
-  'Nhanh/Rẻ':    'bg-green-100 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800',
+  "Mạnh nhất":
+    "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800",
+  "Khuyên dùng":
+    "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800",
+  Opus: "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-300 dark:border-indigo-800",
+  Sonnet:
+    "bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-800",
+  "Nhanh/Rẻ":
+    "bg-green-100 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800",
 };
 
-const SETTINGS_JSON = JSON.stringify({
-  env: {
-    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1',
-    ANTHROPIC_BASE_URL: PROXY_URL,
-    ANTHROPIC_AUTH_TOKEN: 'sk-xxxxxxxx-xxxxxx-xxxxxxxx',
-    ANTHROPIC_DEFAULT_OPUS_MODEL: 'cc/claude-opus-4-8',
-    ANTHROPIC_DEFAULT_SONNET_MODEL: 'cc/claude-sonnet-4-6',
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: 'cc/claude-haiku-4-5-20251001',
+const SETTINGS_JSON = JSON.stringify(
+  {
+    env: {
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+      ANTHROPIC_BASE_URL: PROXY_URL,
+      ANTHROPIC_AUTH_TOKEN: "sk-xxxxxxxx-xxxxxx-xxxxxxxx",
+      ANTHROPIC_DEFAULT_OPUS_MODEL: "cc/claude-opus-4-8",
+      ANTHROPIC_DEFAULT_SONNET_MODEL: "cc/claude-sonnet-4-6",
+      ANTHROPIC_DEFAULT_HAIKU_MODEL: "cc/claude-haiku-4-5-20251001",
+    },
+    model: "sonnet",
   },
-  model: 'sonnet',
-}, null, 2);
+  null,
+  2,
+);
 
 const CURL_EXAMPLE = `curl ${PROXY_URL}/messages \\
   -H "Content-Type: application/json" \\
@@ -68,25 +123,31 @@ console.log(response.content[0].text);`;
 
 const TROUBLESHOOTING = [
   {
-    q: '401 Unauthorized',
-    a: 'API Key không hợp lệ hoặc đã hết hạn. Kiểm tra lại key tại trang Keys của tôi và đảm bảo không có khoảng trắng thừa.',
+    q: "401 Unauthorized",
+    a: "API Key không hợp lệ hoặc đã hết hạn. Kiểm tra lại key tại trang Keys của tôi và đảm bảo không có khoảng trắng thừa.",
   },
   {
-    q: '403 Forbidden — subscription expired',
-    a: 'Gói dịch vụ của bạn đã hết hạn. Vào trang Mua key để gia hạn.',
+    q: "403 Forbidden — subscription expired",
+    a: "Gói dịch vụ của bạn đã hết hạn. Vào trang Mua key để gia hạn.",
   },
   {
-    q: 'Claude Code không nhận cấu hình',
-    a: 'Đảm bảo file settings.json nằm đúng ở ~/.claude/settings.json (macOS/Linux) hoặc %APPDATA%\\Claude\\settings.json (Windows). Khởi động lại Claude Code sau khi lưu.',
+    q: "Claude Code không nhận cấu hình",
+    a: "Đảm bảo file settings.json nằm đúng ở ~/.claude/settings.json (macOS/Linux) hoặc %APPDATA%\\Claude\\settings.json (Windows). Khởi động lại Claude Code sau khi lưu.",
   },
   {
-    q: 'Model không tồn tại',
-    a: 'Dùng đúng model ID có tiền tố cc/ như trong danh sách bên dưới. Không dùng model ID gốc của Anthropic.',
+    q: "Model không tồn tại",
+    a: "Dùng đúng model ID có tiền tố cc/ như trong danh sách bên dưới. Không dùng model ID gốc của Anthropic.",
   },
 ];
 
 // ── Components ────────────────────────────────────────────────────────────────
-function CodeBlock({ code, language = 'bash' }: { code: string; language?: string }) {
+function CodeBlock({
+  code,
+  language = "bash",
+}: {
+  code: string;
+  language?: string;
+}) {
   const [copied, setCopied] = useState(false);
   function copy() {
     navigator.clipboard.writeText(code);
@@ -101,11 +162,17 @@ function CodeBlock({ code, language = 'bash' }: { code: string; language?: strin
           onClick={copy}
           className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
         >
-          {copied ? <Check className="size-3.5 text-green-400" /> : <Copy className="size-3.5" />}
-          {copied ? 'Đã copy' : 'Copy'}
+          {copied ? (
+            <Check className="size-3.5 text-green-400" />
+          ) : (
+            <Copy className="size-3.5" />
+          )}
+          {copied ? "Đã copy" : "Copy"}
         </button>
       </div>
-      <pre className="overflow-x-auto p-4 text-sm text-zinc-200 font-mono leading-relaxed"><code>{code}</code></pre>
+      <pre className="overflow-x-auto p-4 text-sm text-zinc-200 font-mono leading-relaxed">
+        <code>{code}</code>
+      </pre>
     </div>
   );
 }
@@ -124,13 +191,17 @@ function Accordion({ q, a }: { q: string; a: string }) {
     <div className="border-b last:border-0">
       <button
         className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/40 transition-colors"
-        onClick={() => setOpen(o => !o)}
+        onClick={() => setOpen((o) => !o)}
       >
         <span className="text-sm font-medium flex items-center gap-2">
           <AlertCircle className="size-3.5 text-amber-500 shrink-0" />
           {q}
         </span>
-        {open ? <ChevronDown className="size-4 text-muted-foreground shrink-0" /> : <ChevronRight className="size-4 text-muted-foreground shrink-0" />}
+        {open ? (
+          <ChevronDown className="size-4 text-muted-foreground shrink-0" />
+        ) : (
+          <ChevronRight className="size-4 text-muted-foreground shrink-0" />
+        )}
       </button>
       {open && (
         <div className="px-4 pb-3 text-sm text-muted-foreground pl-10">{a}</div>
@@ -143,14 +214,13 @@ function Accordion({ q, a }: { q: string; a: string }) {
 export default function GuidePage() {
   function copy(text: string) {
     navigator.clipboard.writeText(text);
-    toast.success('Đã copy');
+    toast.success("Đã copy");
   }
 
-  const [codeTab, setCodeTab] = useState<'curl' | 'sdk'>('curl');
+  const [codeTab, setCodeTab] = useState<"curl" | "sdk">("curl");
 
   return (
     <div className="space-y-10">
-
       {/* Header */}
       <div className="space-y-1">
         <div className="flex items-center gap-2">
@@ -176,7 +246,14 @@ export default function GuidePage() {
             <div className="space-y-2 flex-1 pt-0.5">
               <p className="text-sm font-medium">Lấy API Key</p>
               <p className="text-sm text-muted-foreground">
-                Vào trang <a href="/dashboard/my-keys" className="text-primary underline font-medium">Keys của tôi</a> để copy API Key đang hoạt động.
+                Vào trang{" "}
+                <a
+                  href="/dashboard/my-keys"
+                  className="text-primary underline font-medium"
+                >
+                  Keys của tôi
+                </a>{" "}
+                để copy API Key đang hoạt động.
               </p>
             </div>
           </div>
@@ -187,8 +264,10 @@ export default function GuidePage() {
             <div className="space-y-2 flex-1 pt-0.5">
               <p className="text-sm font-medium">Mở file cấu hình</p>
               <p className="text-sm text-muted-foreground">
-                Tạo hoặc mở file{' '}
-                <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">~/.claude/settings.json</code>
+                Tạo hoặc mở file{" "}
+                <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">
+                  ~/.claude/settings.json
+                </code>
               </p>
               <CodeBlock code="code ~/.claude/settings.json" language="bash" />
             </div>
@@ -198,9 +277,15 @@ export default function GuidePage() {
           <div className="flex gap-3">
             <StepBadge n={3} />
             <div className="space-y-2 flex-1 pt-0.5">
-              <p className="text-sm font-medium">Paste cấu hình và thay API Key</p>
+              <p className="text-sm font-medium">
+                Paste cấu hình và thay API Key
+              </p>
               <p className="text-sm text-muted-foreground">
-                Thay <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">ANTHROPIC_AUTH_TOKEN</code> bằng key thật của bạn.
+                Thay{" "}
+                <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">
+                  ANTHROPIC_AUTH_TOKEN
+                </code>{" "}
+                bằng key thật của bạn.
               </p>
               <CodeBlock code={SETTINGS_JSON} language="json" />
             </div>
@@ -210,9 +295,12 @@ export default function GuidePage() {
           <div className="flex gap-3">
             <StepBadge n={4} />
             <div className="space-y-2 flex-1 pt-0.5">
-              <p className="text-sm font-medium">Lưu và khởi động lại Claude Code</p>
+              <p className="text-sm font-medium">
+                Lưu và khởi động lại Claude Code
+              </p>
               <p className="text-sm text-muted-foreground">
-                Cấu hình được tự động load mỗi lần mở. Không cần thêm bước nào khác.
+                Cấu hình được tự động load mỗi lần mở. Không cần thêm bước nào
+                khác.
               </p>
             </div>
           </div>
@@ -224,17 +312,27 @@ export default function GuidePage() {
         <h2 className="text-base font-semibold">Thông tin kết nối</h2>
         <div className="rounded-lg border bg-background divide-y text-sm">
           {[
-            { label: 'Base URL', value: PROXY_URL },
-            { label: 'Default Sonnet', value: 'cc/claude-sonnet-4-6' },
-            { label: 'Default Opus',   value: 'cc/claude-opus-4-8' },
-            { label: 'Default Haiku',  value: 'cc/claude-haiku-4-5-20251001' },
-          ].map(row => (
-            <div key={row.label} className="flex items-center justify-between gap-3 px-4 py-2.5">
-              <span className="text-muted-foreground shrink-0 text-xs font-medium uppercase tracking-wide w-32">{row.label}</span>
+            { label: "Base URL", value: PROXY_URL },
+            { label: "Default Sonnet", value: "cc/claude-sonnet-4-6" },
+            { label: "Default Opus", value: "cc/claude-opus-4-8" },
+            { label: "Default Haiku", value: "cc/claude-haiku-4-5-20251001" },
+          ].map((row) => (
+            <div
+              key={row.label}
+              className="flex items-center justify-between gap-3 px-4 py-2.5"
+            >
+              <span className="text-muted-foreground shrink-0 text-xs font-medium uppercase tracking-wide w-32">
+                {row.label}
+              </span>
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <code className="text-xs font-mono truncate text-foreground">{row.value}</code>
+                <code className="text-xs font-mono truncate text-foreground">
+                  {row.value}
+                </code>
               </div>
-              <button onClick={() => copy(row.value)} className="shrink-0 p-1 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => copy(row.value)}
+                className="shrink-0 p-1 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              >
                 <Copy className="size-3.5" />
               </button>
             </div>
@@ -249,17 +347,20 @@ export default function GuidePage() {
           Ví dụ gọi API
         </h2>
         <div className="flex gap-1 p-1 bg-muted rounded-lg w-fit">
-          {(['curl', 'sdk'] as const).map(tab => (
+          {(["curl", "sdk"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setCodeTab(tab)}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${codeTab === tab ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${codeTab === tab ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
-              {tab === 'curl' ? 'cURL' : 'Node.js SDK'}
+              {tab === "curl" ? "cURL" : "Node.js SDK"}
             </button>
           ))}
         </div>
-        <CodeBlock code={codeTab === 'curl' ? CURL_EXAMPLE : SDK_EXAMPLE} language={codeTab === 'curl' ? 'bash' : 'typescript'} />
+        <CodeBlock
+          code={codeTab === "curl" ? CURL_EXAMPLE : SDK_EXAMPLE}
+          language={codeTab === "curl" ? "bash" : "typescript"}
+        />
       </section>
 
       {/* Models */}
@@ -269,17 +370,33 @@ export default function GuidePage() {
           Models hỗ trợ
         </h2>
         <div className="rounded-lg border bg-background overflow-hidden divide-y">
-          {CC_MODELS.map(m => (
-            <div key={m.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors group">
+          {CC_MODELS.map((m) => (
+            <div
+              key={m.id}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors group"
+            >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">{m.label}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${TIER_COLOR[m.tier]}`}>{m.tier}</span>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full border font-medium ${TIER_COLOR[m.tier]}`}
+                  >
+                    {m.tier}
+                  </span>
                 </div>
-                {m.desc && <p className="text-xs text-muted-foreground mt-0.5">{m.desc}</p>}
-                <code className="text-xs font-mono text-muted-foreground mt-0.5 block">{m.id}</code>
+                {m.desc && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {m.desc}
+                  </p>
+                )}
+                <code className="text-xs font-mono text-muted-foreground mt-0.5 block">
+                  {m.id}
+                </code>
               </div>
-              <button onClick={() => copy(m.id)} className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100">
+              <button
+                onClick={() => copy(m.id)}
+                className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100"
+              >
                 <Copy className="size-3.5" />
               </button>
             </div>
@@ -294,12 +411,11 @@ export default function GuidePage() {
           Lỗi thường gặp
         </h2>
         <div className="rounded-lg border bg-background overflow-hidden">
-          {TROUBLESHOOTING.map(item => (
+          {TROUBLESHOOTING.map((item) => (
             <Accordion key={item.q} q={item.q} a={item.a} />
           ))}
         </div>
       </section>
-
     </div>
   );
 }

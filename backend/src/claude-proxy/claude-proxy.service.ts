@@ -28,10 +28,24 @@ export class ClaudeProxyService {
     return { input: 0, output: 0 };
   }
 
+  /**
+   * Upstream (9Router) thêm hậu tố "_ide" vào tool name trong response (vd get_weather -> get_weather_ide),
+   * khiến client (Claude Code) không nhận ra tool -> "tool unavailable". Bóc lại hậu tố, nhưng CHỈ khi
+   * tên-đã-bóc khớp một tool client thực sự gửi lên — tránh đụng tool có tên hợp lệ kết thúc "_ide".
+   * ponytail: chỉ xử lý hậu tố "_ide". Mở rộng sang hậu tố khác nếu upstream đổi hành vi.
+   */
+  stripInjectedToolSuffix(text: string, validNames: Set<string>): string {
+    if (!validNames.size || !text.includes('_ide')) return text;
+    return text.replace(/"name":"([A-Za-z0-9_.-]+?)_ide"/g, (m, base) =>
+      validNames.has(base) ? `"name":"${base}"` : m);
+  }
+
   private parseSseToJson(raw: string): { input: number; output: number; assembled: any } {
     let input = 0, output = 0;
     let message: any = null;
-    const contentBlocks: string[] = [];
+    // Per-index block being assembled. text/thinking accumulate strings; tool_use accumulates partial_json.
+    const blocks: any[] = [];
+    const toolJson: string[] = [];
 
     for (const line of raw.split('\n')) {
       const trimmed = line.trim();
@@ -46,9 +60,26 @@ export class ClaudeProxyService {
         const u = ev.message?.usage;
         if (u) { input = Math.max(input, u.input_tokens ?? 0); output = Math.max(output, u.output_tokens ?? 0); }
       }
-      if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta') {
+      if (ev.type === 'content_block_start') {
         const idx = ev.index ?? 0;
-        contentBlocks[idx] = (contentBlocks[idx] ?? '') + (ev.delta.text ?? '');
+        // Clone the starting block (carries tool_use id/name, text "", thinking, etc.)
+        blocks[idx] = { ...ev.content_block };
+        toolJson[idx] = '';
+      }
+      if (ev.type === 'content_block_delta') {
+        const idx = ev.index ?? 0;
+        const d = ev.delta ?? {};
+        if (!blocks[idx]) blocks[idx] = { type: 'text', text: '' };
+        if (d.type === 'text_delta') blocks[idx].text = (blocks[idx].text ?? '') + (d.text ?? '');
+        else if (d.type === 'thinking_delta') blocks[idx].thinking = (blocks[idx].thinking ?? '') + (d.thinking ?? '');
+        else if (d.type === 'signature_delta') blocks[idx].signature = (blocks[idx].signature ?? '') + (d.signature ?? '');
+        else if (d.type === 'input_json_delta') toolJson[idx] = (toolJson[idx] ?? '') + (d.partial_json ?? '');
+      }
+      if (ev.type === 'content_block_stop') {
+        const idx = ev.index ?? 0;
+        if (blocks[idx]?.type === 'tool_use') {
+          try { blocks[idx].input = JSON.parse(toolJson[idx] || '{}'); } catch { blocks[idx].input = {}; }
+        }
       }
       if (ev.type === 'message_delta') {
         const u = ev.usage;
@@ -59,14 +90,14 @@ export class ClaudeProxyService {
 
     const assembled = message ? {
       ...message,
-      content: contentBlocks.map((text, i) => ({ type: 'text', text })).filter(Boolean),
+      content: blocks.filter(Boolean),
       usage: { input_tokens: input, output_tokens: output },
     } : { error: 'empty response' };
 
     return { input, output, assembled };
   }
 
-  async forward(nineRouterKey: string, path: string, method: string, body: any): Promise<ForwardResult> {
+  async forward(nineRouterKey: string, path: string, method: string, body: any, clientHeaders: Record<string, any> = {}): Promise<ForwardResult> {
     const sub = await this.subs.findActiveByKey(nineRouterKey);
     if (!sub) throw new UnauthorizedException('Key không hợp lệ hoặc hết hạn');
     if (sub.expiresAt < new Date()) throw new ForbiddenException('Subscription đã hết hạn');
@@ -85,9 +116,23 @@ export class ClaudeProxyService {
       ? JSON.stringify({ ...body, stream: true, context_management: undefined })
       : undefined;
 
+    // Forward client identity headers so 9Router detects Claude Code (clientDetector.js uses
+    // user-agent / x-app) and takes its lossless passthrough path. Without these it treats us as
+    // an unknown client and cloaks tool names with an "_ide" suffix → client can't match tools.
+    const fwd = (k: string) => clientHeaders[k] ?? clientHeaders[k.toLowerCase()];
+    const passHeaders: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${nineRouterKey}`,
+    };
+    for (const h of ['user-agent', 'x-app', 'anthropic-version', 'anthropic-beta', 'x-stainless-lang']) {
+      const v = fwd(h);
+      if (v) passHeaders[h] = String(v);
+    }
+    console.log('[proxy hdr]', { ua: passHeaders['user-agent'], xApp: passHeaders['x-app'], fwded: Object.keys(passHeaders) });
+
     const res = await fetch(`${this.nineRouterBase}${path}`, {
       method,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${nineRouterKey}` },
+      headers: passHeaders,
       body: upstreamBody,
     });
 
@@ -97,6 +142,8 @@ export class ClaudeProxyService {
     }
 
     const contentType = res.headers.get('content-type') ?? '';
+    const branch = isUserStream && contentType.includes('text/event-stream') ? 'passthrough' : 'assembly';
+    console.log('[proxy]', { path, isUserStream, contentType, branch, hasTools: Array.isArray(body?.tools) ? body.tools.length : 0 });
 
     if (isUserStream && contentType.includes('text/event-stream')) {
       // Pass SSE stream through — controller handles deduction via finalizeStream
@@ -107,6 +154,16 @@ export class ClaudeProxyService {
     // Consume the SSE stream internally, extract accurate token counts, build JSON response.
     const rawSse = await res.text();
     const { input, output, assembled } = this.parseSseToJson(rawSse);
+
+    // Bóc hậu tố "_ide" do upstream chèn vào tool name (xem stripInjectedToolSuffix).
+    const validNames = new Set<string>(
+      (Array.isArray(body?.tools) ? body.tools : []).map((t: any) => t?.name).filter(Boolean));
+    for (const b of assembled?.content ?? []) {
+      if (b?.type === 'tool_use' && typeof b.name === 'string' && b.name.endsWith('_ide')) {
+        const base = b.name.slice(0, -4);
+        if (validNames.has(base)) b.name = base;
+      }
+    }
 
     const quota = input + output > 0
       ? await this.subs.deductTokens(sub.id, input, output).catch(() => this.subs.getQuotaInfo(sub))

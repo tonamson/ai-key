@@ -49,7 +49,7 @@ export class ClaudeProxyController {
     const nineRouterKey = auth?.replace(/^Bearer\s+/i, '') ?? '';
     const body = req.method !== 'GET' ? req.body : undefined;
 
-const result = await this.service.forward(nineRouterKey, path, req.method, body);
+    const result = await this.service.forward(nineRouterKey, path, req.method, body, req.headers as Record<string, any>);
     this.setQuotaHeaders(res, result.quota);
 
     if (result.isStream) {
@@ -58,14 +58,30 @@ const result = await this.service.forward(nineRouterKey, path, req.method, body)
       res.setHeader('Connection', 'keep-alive');
       const reader = (result.body as { body: ReadableStream }).body.getReader();
       const decoder = new TextDecoder();
+      // Bóc hậu tố "_ide" upstream chèn vào tool name. SSE phân tách theo dòng và name luôn
+      // nằm gọn trong một dòng `data:`, nên buffer theo dòng rồi strip từng dòng hoàn chỉnh.
+      const validNames = new Set<string>(
+        (Array.isArray(body?.tools) ? body.tools : []).map((t: any) => t?.name).filter(Boolean));
       let captured = '';
+      let buf = '';
       const pump = async () => {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          captured += decoder.decode(value, { stream: true });
-          res.write(Buffer.from(value));
+          const chunk = decoder.decode(value, { stream: true });
+          captured += chunk;
+          buf += chunk;
+          const nl = buf.lastIndexOf('\n');
+          if (nl === -1) continue;
+          const ready = buf.slice(0, nl + 1);
+          buf = buf.slice(nl + 1);
+          res.write(this.service.stripInjectedToolSuffix(ready, validNames));
         }
+        if (buf) res.write(this.service.stripInjectedToolSuffix(buf, validNames));
+        // DEBUG tool-call: log mọi tool_use name + stop_reason trong stream trả về
+        const toolNames = [...captured.matchAll(/"type":"tool_use"[^}]*?"name":"([^"]+)"/g)].map(m => m[1]);
+        const stopReason = captured.match(/"stop_reason":"([^"]+)"/)?.[1];
+        console.log('[proxy resp]', { clientTools: [...validNames].slice(0, 5), clientToolCount: validNames.size, toolUseNames: toolNames, stopReason, len: captured.length });
         // Trừ token sau khi stream xong, trước khi đóng kết nối
         await this.service.finalizeStream(result.sub.id, captured).catch(() => {});
         res.end();

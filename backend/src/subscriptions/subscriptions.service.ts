@@ -6,7 +6,8 @@ import { OrderStatus } from '../orders/order.entity';
 import { NineRouterService } from '../nine-router/nine-router.service';
 
 // Hourly window in ms — rolling from key creation time
-const PERIOD_WINDOW_MS = 60 * 60 * 1000;
+const PERIOD_WINDOW_MS = 5 * 60 * 60 * 1000; // 5-hour rolling window (giống rate-limit 5h của Claude)
+const PERIODS_PER_MONTH = 720 / 5; // 720h/tháng ÷ 5h = 144 cửa sổ
 
 export interface QuotaInfo {
   limitTotal: number;
@@ -48,7 +49,7 @@ export class SubscriptionsService {
 
   getQuotaInfo(sub: KeySubscription): QuotaInfo {
     const limitTotal = Number(sub.tokenQuota);
-    const limitPeriod = Math.floor(limitTotal / 720); // ~1 month / 720 hours
+    const limitPeriod = Math.floor(limitTotal / PERIODS_PER_MONTH); // hạn mức mỗi cửa sổ 5h
     const now = Date.now();
 
     // advance periodStartsAt until it's the current window start
