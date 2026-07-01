@@ -21,7 +21,6 @@ services:
     environment:
       - DATA_DIR=/app/data
       - ROUTER_PASSWORD=${NINE_ROUTER_PASSWORD}
-      - HEADROOM_API_KEY=${HEADROOM_API_KEY}
     ports:
       - "20129:20128"
     volumes:
