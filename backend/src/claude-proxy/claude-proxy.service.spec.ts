@@ -82,6 +82,39 @@ describe('ClaudeProxyService', () => {
     expect(mockSubs.deductTokens).toHaveBeenCalledWith('sub-1', 40, 250);
   });
 
+  it('finalizeStream counts anthropic cache tokens as input (Claude Code)', async () => {
+    // usage thật của Claude Code: input_tokens + cache_creation + cache_read đều là tiền thật.
+    const raw = [
+      'data: {"type":"message_start","message":{"usage":{"input_tokens":904,"cache_creation_input_tokens":1200,"cache_read_input_tokens":5000,"output_tokens":1}}}',
+      'data: {"type":"message_delta","usage":{"output_tokens":50}}',
+      'data: [DONE]',
+    ].join('\n');
+    mockSubs.deductTokens.mockResolvedValue(mockQuota);
+    await service.finalizeStream('sub-1', raw);
+    expect(mockSubs.deductTokens).toHaveBeenCalledWith('sub-1', 904 + 1200 + 5000, 50);
+  });
+
+  it('finalizeStream parses Responses API usage nested in response (Codex)', async () => {
+    const raw = [
+      'data: {"type":"response.completed","response":{"usage":{"input_tokens":300,"output_tokens":80}}}',
+      'data: [DONE]',
+    ].join('\n');
+    mockSubs.deductTokens.mockResolvedValue(mockQuota);
+    await service.finalizeStream('sub-1', raw);
+    expect(mockSubs.deductTokens).toHaveBeenCalledWith('sub-1', 300, 80);
+  });
+
+  it('finalizeStream parses OpenAI stream usage (include_usage last chunk)', async () => {
+    const raw = [
+      'data: {"choices":[{"delta":{"content":"hi"}}]}',
+      'data: {"choices":[],"usage":{"prompt_tokens":100,"completion_tokens":20}}',
+      'data: [DONE]',
+    ].join('\n');
+    mockSubs.deductTokens.mockResolvedValue(mockQuota);
+    await service.finalizeStream('sub-1', raw);
+    expect(mockSubs.deductTokens).toHaveBeenCalledWith('sub-1', 100, 20);
+  });
+
   it('finalizeStream does not deduct when stream has no usage', async () => {
     await service.finalizeStream('sub-1', 'data: {"choices":[]}\n\ndata: [DONE]');
     expect(mockSubs.deductTokens).not.toHaveBeenCalled();
