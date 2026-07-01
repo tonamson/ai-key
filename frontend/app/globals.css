@@ -83,23 +83,23 @@
 
 /* Dark — Ember Black palette */
 .dark {
-  --background: #100900;
-  --foreground: #FFF3E0;
-  --card: #1E1200;
-  --card-foreground: #FFF3E0;
-  --popover: #1E1200;
-  --popover-foreground: #FFF3E0;
+  --background: #0F0F11;
+  --foreground: #F2F2F4;
+  --card: #1A1A1E;
+  --card-foreground: #F2F2F4;
+  --popover: #1A1A1E;
+  --popover-foreground: #F2F2F4;
   --primary: #FF6B00;
   --primary-foreground: #FFFFFF;
-  --secondary: #3A2200;
-  --secondary-foreground: #FFF3E0;
-  --muted: #3A2200;
-  --muted-foreground: #C08040;
+  --secondary: #28282E;
+  --secondary-foreground: #F2F2F4;
+  --muted: #28282E;
+  --muted-foreground: #A0A0AA;
   --accent: #FF9430;
-  --accent-foreground: #100900;
+  --accent-foreground: #0F0F11;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: #6B4200;
-  --input: #3A2200;
+  --border: #333338;
+  --input: #28282E;
   --ring: #FF6B00;
   --chart-1: #FF6B00;
   --chart-2: #FF9430;
@@ -107,13 +107,13 @@
   --chart-4: #FF4D00;
   --chart-5: #CC4400;
   --radius: 0.625rem;
-  --sidebar: #100900;
-  --sidebar-foreground: #FFF3E0;
+  --sidebar: #0F0F11;
+  --sidebar-foreground: #F2F2F4;
   --sidebar-primary: #FF6B00;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #3A2200;
-  --sidebar-accent-foreground: #FFF3E0;
-  --sidebar-border: #6B4200;
+  --sidebar-accent: #28282E;
+  --sidebar-accent-foreground: #F2F2F4;
+  --sidebar-border: #333338;
   --sidebar-ring: #FF6B00;
   --glow-primary: 0 0 20px rgba(255, 107, 0, 0.4);
   --glow-primary-sm: 0 0 10px rgba(255, 107, 0, 0.25);
