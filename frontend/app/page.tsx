@@ -440,63 +440,6 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Testimonials ────────────────────────────────────────────────── */}
-      <section className="py-24 px-6 border-t border-[#14485F]/40">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <SectionTag><Star className="w-3.5 h-3.5" /> Người dùng nói gì?</SectionTag>
-            <SectionHeading>Được tin dùng bởi developers Việt Nam</SectionHeading>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[
-              {
-                name: 'Minh Tuấn', role: 'Full-stack Developer',
-                text: 'Trước đây phải nhờ bạn bè ở nước ngoài mua giúp API key. Giờ tự thanh toán qua chuyển khoản, nhận key trong vòng vài giây. Tiện hơn rất nhiều.',
-                stars: 5,
-              },
-              {
-                name: 'Lan Anh', role: 'Content Creator',
-                text: 'Dùng Claude để viết content mỗi ngày. Giá ở đây rẻ hơn nhiều so với mua trực tiếp, mà lại không cần thẻ Visa. Đã dùng 3 tháng, chưa gặp vấn đề gì.',
-                stars: 5,
-              },
-              {
-                name: 'Hoàng Nam', role: 'AI/ML Engineer',
-                text: 'Tích hợp vào pipeline xử lý dữ liệu. API hoạt động ổn định, latency tốt. Dashboard rõ ràng, biết được mình còn bao nhiêu token.',
-                stars: 5,
-              },
-              {
-                name: 'Thu Hương', role: 'Startup Founder',
-                text: 'Team tôi dùng Claude Code hàng ngày. cheapaikey.store giúp kiểm soát chi phí tốt hơn nhiều — biết rõ bao nhiêu token mỗi tháng, không lo bị charge bất ngờ.',
-                stars: 5,
-              },
-              {
-                name: 'Đức Khoa', role: 'Freelance Developer',
-                text: 'Workflow với Cursor + API key này cực kỳ mượt. Gia hạn dễ dàng, token cộng dồn không bị mất. Sẽ tiếp tục dùng lâu dài.',
-                stars: 5,
-              },
-              {
-                name: 'Phương Linh', role: 'Product Manager',
-                text: 'Không biết lập trình nhưng vẫn dùng được Claude qua API nhờ hướng dẫn rõ ràng. Support hỗ trợ tận tình khi gặp khó khăn ban đầu.',
-                stars: 5,
-              },
-            ].map(({ name, role, text, stars }) => (
-              <div key={name} className="bg-[#0B1F3A] border border-[#14485F] rounded-2xl p-7">
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: stars }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-[#F4D22B] text-[#F4D22B]" />
-                  ))}
-                </div>
-                <p className="text-sm text-[#8BA8B8] leading-relaxed mb-5">"{text}"</p>
-                <div>
-                  <p className="font-semibold text-[#EEF4FF] text-sm">{name}</p>
-                  <p className="text-xs text-[#4D7A8A]">{role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── FAQ ─────────────────────────────────────────────────────────── */}
       <section id="faq" className="py-24 px-6 border-t border-[#14485F]/40">
         <div className="max-w-3xl mx-auto">
