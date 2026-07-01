@@ -177,20 +177,20 @@ export default function DashboardPage() {
           {adminStats?.pendingOrders > 0 && (
             <Link href="/admin/orders"
               className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 px-4 py-3 hover:opacity-90 transition-opacity">
-              <AlertTriangle className="size-4 text-amber-600 shrink-0" />
+              <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 shrink-0" />
               <span className="text-sm text-amber-800 dark:text-amber-300 flex-1">
                 <strong>{adminStats.pendingOrders} đơn hàng</strong> đang chờ xác nhận
               </span>
-              <ChevronRight className="size-4 text-amber-600 shrink-0" />
+              <ChevronRight className="size-4 text-amber-600 dark:text-amber-400 shrink-0" />
             </Link>
           )}
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {adminStats ? [
-              { label: 'Người dùng', value: fmtN(adminStats.totalUsers), icon: Users, sub: 'Tổng tài khoản', c: 'text-blue-600 bg-blue-50 dark:bg-blue-950/50' },
-              { label: 'Doanh thu', value: fmtVND(adminStats.totalRevenue), icon: TrendingUp, sub: `${adminStats.paidOrders} đơn thành công`, c: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50' },
-              { label: 'Đơn hàng', value: fmtN(adminStats.totalOrders), icon: ShoppingCart, sub: `${adminStats.pendingOrders} chờ xác nhận`, c: adminStats.pendingOrders > 0 ? 'text-amber-600 bg-amber-50 dark:bg-amber-950/50' : 'text-violet-600 bg-violet-50 dark:bg-violet-950/50' },
-              { label: 'Key active', value: fmtN(adminStats.activeSubs), icon: Key, sub: 'Subscription đang dùng', c: 'text-rose-600 bg-rose-50 dark:bg-rose-950/50' },
+              { label: 'Người dùng', value: fmtN(adminStats.totalUsers), icon: Users, sub: 'Tổng tài khoản', c: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50' },
+              { label: 'Doanh thu', value: fmtVND(adminStats.totalRevenue), icon: TrendingUp, sub: `${adminStats.paidOrders} đơn thành công`, c: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50' },
+              { label: 'Đơn hàng', value: fmtN(adminStats.totalOrders), icon: ShoppingCart, sub: `${adminStats.pendingOrders} chờ xác nhận`, c: adminStats.pendingOrders > 0 ? 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50' : 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/50' },
+              { label: 'Key active', value: fmtN(adminStats.activeSubs), icon: Key, sub: 'Subscription đang dùng', c: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50' },
             ].map(({ label, value, icon: Icon, sub, c }) => (
               <div key={label} className="rounded-2xl border bg-card p-4 flex items-start gap-3">
                 <div className={`size-9 rounded-xl flex items-center justify-center shrink-0 ${c}`}>
@@ -242,7 +242,7 @@ export default function DashboardPage() {
                 )}
                 {adminStats?.recentOrders.map((o: any) => (
                   <div key={o.id} className="flex items-center gap-3 px-5 py-3">
-                    <div className={`size-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${o.status === 'paid' ? 'bg-emerald-100 text-emerald-600' : o.status === 'pending' ? 'bg-amber-100 text-amber-600' : 'bg-muted text-muted-foreground'}`}>
+                    <div className={`size-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${o.status === 'paid' ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400' : o.status === 'pending' ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400' : 'bg-muted text-muted-foreground'}`}>
                       {o.status === 'paid' ? <CheckCircle2 className="size-4" /> : o.status === 'pending' ? <Clock className="size-4" /> : <AlertTriangle className="size-4" />}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -400,7 +400,7 @@ export default function DashboardPage() {
           </div>
           <div className="text-right shrink-0 space-y-2">
             <p className="text-xs text-muted-foreground">Hoa hồng nhận được</p>
-            <p className="text-xl font-bold text-emerald-600">+{fmtVND(referral.totalEarned)}</p>
+            <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">+{fmtVND(referral.totalEarned)}</p>
             <button
               onClick={() => { navigator.clipboard.writeText(referral.code); setCopiedRef(true); setTimeout(() => setCopiedRef(false), 2000); }}
               className="flex items-center gap-1.5 text-xs text-primary hover:underline ml-auto">

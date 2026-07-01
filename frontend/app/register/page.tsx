@@ -15,14 +15,14 @@ import { Key, CheckCircle2, Zap, Shield, ArrowLeft } from "lucide-react";
 function AuthLeft() {
   return (
     <div className="hidden lg:flex flex-col justify-between p-12
-      bg-gradient-to-br from-[#080B0F] to-[#0D1F3C]
-      dark:from-[#080B0F] dark:to-[#0D1F3C]">
+      bg-gradient-to-br from-[#E85500] to-[#C94000]
+      dark:from-[#0D0800] dark:to-[#2E1A00]">
       <Link href="/" className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm">
         <ArrowLeft className="size-4" /> cheapaikey.store
       </Link>
       <div className="space-y-8">
-        <div className="size-14 rounded-2xl bg-[#1485FF]/20 flex items-center justify-center dark:shadow-[0_0_30px_rgba(20,133,255,0.35)]">
-          <Key className="size-7 text-[#1485FF]" />
+        <div className="size-14 rounded-2xl bg-white/20 flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)] dark:bg-[#FF6B00]/20 dark:shadow-[0_0_30px_rgba(255,107,0,0.35)]">
+          <Key className="size-7 text-white dark:text-[#FF6B00]" />
         </div>
         <div>
           <h1 className="text-3xl font-bold text-white mb-3">Tạo tài khoản</h1>
@@ -35,7 +35,7 @@ function AuthLeft() {
             { icon: CheckCircle2, text: 'Thanh toán chuyển khoản ngân hàng VN' },
           ].map(({ icon: Icon, text }) => (
             <li key={text} className="flex items-center gap-3 text-white/70">
-              <Icon className="size-4 text-[#78E4E2] shrink-0" />
+              <Icon className="size-4 text-white/90 dark:text-[#78E4E2] shrink-0" />
               <span className="text-sm">{text}</span>
             </li>
           ))}
