@@ -102,7 +102,7 @@ export const orderApi = {
 };
 
 // ─── Subscriptions ───────────────────────────────────────────────────────────
-export interface KeySubscription { id: string; nineRouterKey: string; nineRouterKeyMasked?: string; tokenQuota: number; tokenUsed: number; startsAt: string; expiresAt: string; isActive: boolean; order?: { plan?: Plan }; }
+export interface KeySubscription { id: string; nineRouterKey: string; nineRouterKeyMasked?: string; tokenQuota: number; tokenUsed: number; startsAt: string; expiresAt: string; isActive: boolean; order?: { plan?: Plan }; limitPeriod?: number; remainingPeriod?: number; resetAt?: string; }
 export const subscriptionApi = {
   listMine: () => apiClient.get<KeySubscription[]>('/subscriptions/my').then(r => r.data),
   refreshKey: (id: string) => apiClient.post<KeySubscription>(`/subscriptions/${id}/refresh-key`).then(r => r.data),

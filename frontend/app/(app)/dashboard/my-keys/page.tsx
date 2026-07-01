@@ -116,6 +116,19 @@ function KeyCard({ sub, onRefreshed, confirm }: { sub: KeySubscription; onRefres
       {/* Token usage */}
       <TokenBar used={used} quota={quota} />
 
+      {/* Quota 5h */}
+      {sub.limitPeriod != null && (
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span className="flex items-center gap-1"><Clock className="size-3" />Quota 5 tiếng</span>
+            <span className="tabular-nums">{f(sub.remainingPeriod ?? 0)} / {f(sub.limitPeriod)} còn lại</span>
+          </div>
+          {sub.resetAt && (
+            <p className="text-xs text-muted-foreground">Reset lúc {new Date(sub.resetAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</p>
+          )}
+        </div>
+      )}
+
       {/* Hết hạn → gia hạn đúng key này (giữ key cũ); còn hạn → đổi key */}
       {expired ? (
         <a href={`/dashboard/buy?renew=${sub.id}`} className="w-full flex items-center justify-center gap-1.5 text-xs text-primary border border-dashed border-primary/40 rounded-lg py-2 transition-colors hover:bg-primary/5">

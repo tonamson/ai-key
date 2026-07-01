@@ -16,11 +16,17 @@ export class SubscriptionsController {
   @Get('my')
   async findMine(@Request() req: any) {
     const subs = await this.service.findMine(req.user.id);
-    return subs.map(s => ({
-      ...s,
-      nineRouterKeyMasked: s.nineRouterKey ? s.nineRouterKey.substring(0, 12) + '•••' : null,
-      nineRouterKey: s.nineRouterKey,
-    }));
+    return subs.map(s => {
+      const q = this.service.getQuotaInfo(s);
+      return {
+        ...s,
+        nineRouterKeyMasked: s.nineRouterKey ? s.nineRouterKey.substring(0, 12) + '•••' : null,
+        nineRouterKey: s.nineRouterKey,
+        limitPeriod: q.limitPeriod,
+        remainingPeriod: q.remainingPeriod,
+        resetAt: q.resetAt,
+      };
+    });
   }
 }
 
