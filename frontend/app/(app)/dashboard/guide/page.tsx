@@ -13,9 +13,6 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:2053"
 ).replace(/\/$/, "");
@@ -24,22 +21,13 @@ const API_BASE = (
 const PROXY_BASE = `${API_BASE}/claude`;
 const PROXY_URL = `${PROXY_BASE}/v1`;
 
-const FALLBACK_MODELS = [
-  { id: "cc/claude-opus-4-8", label: "Claude Opus 4.8", tier: "Mạnh nhất", desc: "Tốt nhất cho tác vụ phức tạp" },
-  { id: "cc/claude-sonnet-4-6", label: "Claude Sonnet 4.6", tier: "Khuyên dùng", desc: "Cân bằng tốc độ và chất lượng" },
-  { id: "cc/claude-haiku-4-5-20251001", label: "Claude Haiku 4.5", tier: "Nhanh/Rẻ", desc: "Tốc độ cao, chi phí thấp" },
-];
-
-const TIER_COLOR: Record<string, string> = {
-  "Mạnh nhất":
-    "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800",
-  "Khuyên dùng":
-    "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800",
-  Opus: "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-300 dark:border-indigo-800",
-  Sonnet:
-    "bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-800",
-  "Nhanh/Rẻ":
-    "bg-green-100 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800",
+type RouterModel = {
+  provider: string;
+  model: string;
+  name: string;
+  fullModel: string;
+  alias: string;
+  caps: { vision?: boolean; search?: boolean; reasoning?: boolean };
 };
 
 const SETTINGS_JSON = JSON.stringify(
@@ -176,11 +164,12 @@ function Accordion({ q, a }: { q: string; a: string }) {
 
 const API_MODELS_URL = `${(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:2053").replace(/\/$/, "")}/models`;
 
-function labelFromId(id: string) {
-  // "cc/claude-sonnet-4-6" → "Claude Sonnet 4.6"
-  const name = id.split('/').pop() ?? id;
-  return name.replace(/^claude-/, 'Claude ').replace(/-(\d)/g, ' $1').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
+const CAP_LABEL: Record<string, string> = { vision: "Vision", search: "Search", reasoning: "Reasoning" };
+const CAP_STYLE: Record<string, string> = {
+  vision: "bg-violet-100 text-violet-700 border-violet-200 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-800",
+  search: "bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800",
+  reasoning: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800",
+};
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function GuidePage() {
@@ -190,19 +179,18 @@ export default function GuidePage() {
   }
 
   const [codeTab, setCodeTab] = useState<"curl" | "sdk">("curl");
-  const [models, setModels] = useState(FALLBACK_MODELS);
+  const [models, setModels] = useState<RouterModel[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(true);
 
   useEffect(() => {
     fetch(API_MODELS_URL)
       .then(r => r.json())
       .then((raw: any) => {
-        const data: any[] = Array.isArray(raw) ? raw : (raw.models ?? raw.data ?? []);
-        const claudeModels = data
-          .filter((m: any) => m.provider === 'cc')
-          .map((m: any) => ({ id: m.fullModel ?? m.id ?? m.name, label: m.name, tier: '', desc: '' }));
-        if (claudeModels.length > 0) setModels(claudeModels);
+        const data: RouterModel[] = Array.isArray(raw) ? raw : (raw.models ?? raw.data ?? []);
+        setModels(data.filter(m => m.provider === 'cc'));
       })
-      .catch(() => {}); // giữ fallback
+      .catch(() => {})
+      .finally(() => setModelsLoading(false));
   }, []);
 
   return (
@@ -361,39 +349,59 @@ export default function GuidePage() {
           <Zap className="size-4 text-primary" />
           Models hỗ trợ
         </h2>
-        <div className="rounded-lg border bg-background overflow-hidden divide-y">
-          {models.map((m) => (
-            <div
-              key={m.id}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors group"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{m.label}</span>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full border font-medium ${TIER_COLOR[m.tier]}`}
-                  >
-                    {m.tier}
-                  </span>
+        {modelsLoading ? (
+          <div className="rounded-lg border bg-background divide-y overflow-hidden">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="px-4 py-3 flex items-center gap-3">
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-40 bg-muted rounded animate-pulse" />
+                  <div className="h-3 w-56 bg-muted rounded animate-pulse" />
                 </div>
-                {m.desc && (
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {m.desc}
-                  </p>
-                )}
-                <code className="text-xs font-mono text-muted-foreground mt-0.5 block">
-                  {m.id}
-                </code>
               </div>
-              <button
-                onClick={() => copy(m.id)}
-                className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100"
-              >
-                <Copy className="size-3.5" />
-              </button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : models.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Không có model nào.</p>
+        ) : (
+          <div className="rounded-lg border bg-background overflow-hidden divide-y">
+            {models.map((m) => {
+              const activeCaps = Object.entries(m.caps ?? {}).filter(([, v]) => v).map(([k]) => k);
+              return (
+                <div
+                  key={m.fullModel}
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors group"
+                >
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-semibold">{m.name}</span>
+                      {activeCaps.map(cap => (
+                        <span
+                          key={cap}
+                          className={`text-xs px-2 py-0.5 rounded-full border font-medium ${CAP_STYLE[cap] ?? ''}`}
+                        >
+                          {CAP_LABEL[cap] ?? cap}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <code className="text-xs font-mono text-muted-foreground">{m.fullModel}</code>
+                      {m.alias && m.alias !== m.fullModel && (
+                        <span className="text-xs text-muted-foreground/60">alias: {m.alias}</span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => copy(m.fullModel)}
+                    className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100"
+                    title="Copy model ID"
+                  >
+                    <Copy className="size-3.5" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Troubleshooting */}
