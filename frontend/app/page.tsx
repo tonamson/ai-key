@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import {
-  Zap, Shield, Clock, Key, ArrowRight, CheckCircle2, Cpu, Globe,
+  Zap, Shield, Clock, ArrowRight, CheckCircle2, Cpu, Globe,
   Code2, MessageSquare, Brain, Terminal, ChevronDown, Star,
   TrendingUp, Users, Layers, BadgeCheck, Rocket, BookOpen,
 } from 'lucide-react';
