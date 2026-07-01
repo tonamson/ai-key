@@ -238,31 +238,28 @@ export class OrdersService {
 
   /** Huỷ đơn PENDING: nhả coupon + hoàn ví trong 1 transaction. Dùng cho user huỷ tay & cron. */
   async cancelOrder(orderId: string, opts: { userId?: string } = {}): Promise<void> {
-    let telegramMessageId: string | null = null;
+    let order: Order | null = null;
 
     await this.orderRepo.manager.transaction(async (em: EntityManager) => {
-      // Atomic claim PENDING→CANCELLED — tránh đua với confirmOrder.
       const where: any = { id: orderId, status: OrderStatus.PENDING };
       if (opts.userId) where.userId = opts.userId;
-      const claim = await em.update(Order, where, { status: OrderStatus.CANCELLED });
-      if (!claim.affected) throw new BadRequestException('Đơn không thể huỷ (đã thanh toán hoặc không tồn tại)');
+      order = await em.findOne(Order, { where });
+      if (!order) throw new BadRequestException('Đơn không thể huỷ (đã thanh toán hoặc không tồn tại)');
 
-      const order = await em.findOneOrFail(Order, { where: { id: orderId } });
-      telegramMessageId = order.telegramMessageId;
       if (order.couponId) await this.coupons.releaseUse(order.couponId);
       if (Number(order.walletUsed) > 0) {
         await this.wallet.refund(order.userId, Number(order.walletUsed), order.id, em);
       }
+      await em.delete(Order, { id: orderId });
     });
 
-    // Xóa message Telegram sau khi huỷ (ngoài transaction tránh delay)
-    if (telegramMessageId) {
-      await this.telegram.deleteMessage(telegramMessageId).catch(() => {});
-      await this.orderRepo.update({ id: orderId }, { telegramMessageId: null });
+    // Xóa message Telegram sau khi xóa DB (ngoài transaction tránh delay)
+    if (order?.telegramMessageId) {
+      await this.telegram.deleteMessage(order.telegramMessageId).catch(() => {});
     }
   }
 
-  /** Mỗi 10 phút: huỷ các đơn PENDING quá hạn thanh toán. */
+  /** Mỗi 10 phút: xóa các đơn PENDING quá hạn thanh toán. */
   @Cron('*/10 * * * *')
   async expirePending(): Promise<void> {
     const stale = await this.orderRepo.find({
@@ -271,7 +268,7 @@ export class OrdersService {
       take: 200,
     });
     for (const { id } of stale) {
-      await this.cancelOrder(id).catch(() => {}); // đơn có thể vừa được confirm — bỏ qua
+      await this.cancelOrder(id).catch(() => {});
     }
   }
 }
