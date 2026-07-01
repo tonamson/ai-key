@@ -56,11 +56,11 @@ function StatCard({ label, value, sub, icon: Icon, color }: { label: string; val
 const CustomTooltip = ({ active, payload, label, type }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border bg-popover shadow-md px-3 py-2 text-sm space-y-1">
-      <p className="font-medium text-xs text-muted-foreground">{label}</p>
+    <div style={{ background: '#0B1F3A', border: '1px solid #14485F', borderRadius: 8, padding: '8px 12px', fontSize: 13 }}>
+      <p style={{ color: '#78A8B8', fontSize: 11, marginBottom: 4 }}>{label}</p>
       {payload.map((p: any) => (
-        <p key={p.dataKey} style={{ color: p.color }}>
-          {p.name}: <span className="font-semibold">{type === 'revenue' ? `${fmtK(p.value)}đ` : fmtK(p.value)}</span>
+        <p key={p.dataKey} style={{ color: p.color, margin: '2px 0' }}>
+          {p.name}: <span style={{ fontWeight: 600, color: '#EEF4FF' }}>{type === 'revenue' ? `${fmtK(p.value)}đ` : fmtK(p.value)}</span>
         </p>
       ))}
     </div>
@@ -158,11 +158,11 @@ export default function StatsPage() {
         ) : (
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={revenueData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-              <XAxis dataKey="period" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <YAxis tickFormatter={fmtK} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={48} />
-              <Tooltip content={<CustomTooltip type="revenue" />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} />
-              <Bar dataKey="revenue" name="Doanh thu" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={48} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#14485F" vertical={false} />
+              <XAxis dataKey="period" tick={{ fontSize: 11, fill: '#78A8B8' }} axisLine={false} tickLine={false} />
+              <YAxis tickFormatter={fmtK} tick={{ fontSize: 11, fill: '#78A8B8' }} axisLine={false} tickLine={false} width={48} />
+              <Tooltip content={<CustomTooltip type="revenue" />} cursor={{ fill: '#1485FF', opacity: 0.1 }} />
+              <Bar dataKey="revenue" name="Doanh thu" fill="#1485FF" radius={[4, 4, 0, 0]} maxBarSize={48} />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -179,11 +179,11 @@ export default function StatsPage() {
         ) : (
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={tokenData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-              <XAxis dataKey="hour" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-              <YAxis tickFormatter={fmtK} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={48} />
-              <Tooltip content={<CustomTooltip type="token" />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#14485F" vertical={false} />
+              <XAxis dataKey="hour" tick={{ fontSize: 10, fill: '#78A8B8' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+              <YAxis tickFormatter={fmtK} tick={{ fontSize: 11, fill: '#78A8B8' }} axisLine={false} tickLine={false} width={48} />
+              <Tooltip content={<CustomTooltip type="token" />} cursor={{ fill: '#1485FF', opacity: 0.1 }} />
+              <Legend wrapperStyle={{ fontSize: 12, color: '#78A8B8' }} />
               <Bar dataKey="input" name="Input" fill="#8b5cf6" radius={[3, 3, 0, 0]} maxBarSize={32} stackId="a" />
               <Bar dataKey="output" name="Output" fill="#f97316" radius={[3, 3, 0, 0]} maxBarSize={32} stackId="a" />
             </BarChart>
