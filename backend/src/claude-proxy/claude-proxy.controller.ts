@@ -40,6 +40,10 @@ export class ClaudeProxyController {
     const nineRouterKey = apiKey || (auth?.startsWith('Bearer ') ? auth.slice(7) : '') || '';
     const body = req.method !== 'GET' ? req.body : undefined;
 
+    // NINE_ROUTER_URL đã kết thúc bằng /v1. Claude Code tự nối "/v1/messages" vào base có sẵn /v1
+    // → catch-all nhận "/v1/messages" → tránh forward thành ".../v1/v1/...". Strip /v1 thừa cho chuẩn.
+    if (path === '/v1' || path.startsWith('/v1/')) path = path.slice(3) || '/';
+
     const result = await this.service.forward(nineRouterKey, path, req.method, body, req.headers as Record<string, any>);
     this.setQuotaHeaders(res, result.quota);
 
