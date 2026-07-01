@@ -12,22 +12,39 @@ const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://cheapaikey.store'),
-  title: "cheapaikey.store — Affordable AI API Keys",
-  description: "Mua API Key Claude giá rẻ, thanh toán ngân hàng Việt Nam, kích hoạt tức thì. Tương thích Claude Code, Cursor và mọi app AI.",
+  title: "cheapaikey.store — Mua API Key Claude Giá Rẻ, Kích Hoạt Tức Thì",
+  description: "Mua API Key Claude giá rẻ nhất Việt Nam. Thanh toán chuyển khoản ngân hàng nội địa, nhận key ngay lập tức. Dùng được với Claude Code, Cursor, và mọi ứng dụng AI.",
+  keywords: [
+    "mua api key claude",
+    "api key claude giá rẻ",
+    "claude api key việt nam",
+    "mua key claude code",
+    "api key ai giá rẻ",
+    "claude api key thanh toán việt nam",
+    "mua key ai không cần visa",
+    "anthropic api key giá rẻ",
+    "key claude code rẻ",
+    "api key claude thanh toán ngân hàng",
+    "cheapaikey",
+    "mua key ai việt nam",
+  ],
   openGraph: {
-    title: "cheapaikey.store — Affordable AI API Keys",
-    description: "Mua API Key Claude giá rẻ, thanh toán ngân hàng Việt Nam, kích hoạt tức thì.",
+    title: "cheapaikey.store — Mua API Key Claude Giá Rẻ",
+    description: "API Key Claude giá rẻ nhất Việt Nam. Thanh toán chuyển khoản nội địa, kích hoạt ngay, dùng được với Claude Code và Cursor.",
     url: "https://cheapaikey.store",
     siteName: "cheapaikey.store",
-    images: [{ url: "/intro.png", width: 1200, height: 630, alt: "cheapaikey.store" }],
+    images: [{ url: "/intro.png", width: 1200, height: 630, alt: "cheapaikey.store — Mua API Key Claude Giá Rẻ" }],
     locale: "vi_VN",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "cheapaikey.store — Affordable AI API Keys",
-    description: "Mua API Key Claude giá rẻ, thanh toán ngân hàng Việt Nam, kích hoạt tức thì.",
+    title: "cheapaikey.store — Mua API Key Claude Giá Rẻ",
+    description: "API Key Claude giá rẻ nhất Việt Nam. Thanh toán chuyển khoản nội địa, kích hoạt ngay.",
     images: ["/intro.png"],
+  },
+  alternates: {
+    canonical: "https://cheapaikey.store",
   },
 };
 
