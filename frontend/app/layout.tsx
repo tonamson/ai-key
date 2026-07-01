@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
+import SupportButton from "@/components/support-button";
 import "./globals.css";
 
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? '';
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="vi" className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased dark`}>
       <body className="min-h-screen bg-background">
         {children}
+        <SupportButton />
         <Toaster richColors position="top-right" />
         <Script src={`https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`} strategy="lazyOnload" />
       </body>
