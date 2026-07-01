@@ -36,7 +36,7 @@ function TokenBar({ used, quota, label, suffix }: { used: number; quota: number;
           {label ?? 'Token đã dùng'}
           {suffix && <span className="opacity-60 ml-1">{suffix}</span>}
         </span>
-        <span className="tabular-nums">{f(used)} / {f(quota)} <span className="opacity-60">({pct}%)</span></span>
+        <span className="tabular-nums">{pct}%</span>
       </div>
       <div className="h-1.5 rounded-full bg-muted overflow-hidden">
         <div className={`h-full rounded-full transition-all duration-500 ${color}`} style={{ width: `${pct}%` }} />
