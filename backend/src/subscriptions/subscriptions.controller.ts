@@ -18,10 +18,21 @@ export class SubscriptionsController {
     const subs = await this.service.findMine(req.user.id);
     return subs.map(s => {
       const q = this.service.getQuotaInfo(s);
+      const used = Number(s.tokenUsed);
+      const quota = Number(s.tokenQuota);
+      const usedPct = quota > 0 ? Math.min(100, Math.round(used / quota * 100)) : 0;
       return {
-        ...s,
+        id: s.id,
+        isActive: s.isActive,
+        autoRenew: s.autoRenew,
+        expiresAt: s.expiresAt,
+        createdAt: s.createdAt,
+        planId: s.planId,
+        order: s.order,
         nineRouterKeyMasked: s.nineRouterKey ? s.nineRouterKey.substring(0, 12) + '•••' : null,
         nineRouterKey: s.nineRouterKey,
+        tokenUsedPct: usedPct,
+        tokenRemainingPct: Math.max(0, 100 - usedPct),
         limitPeriod: q.limitPeriod,
         remainingPeriod: q.remainingPeriod,
         resetAt: q.resetAt,
