@@ -275,6 +275,92 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ── Authenticity guarantee ──────────────────────────────────────── */}
+      <section className="py-20 px-6 border-t border-[#14485F]/40">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <SectionTag><BadgeCheck className="w-3.5 h-3.5" /> Cam kết chính hãng</SectionTag>
+            <SectionHeading>100% API thật từ Anthropic<br />không phải model giả mạo</SectionHeading>
+            <SectionSub>
+              Nhiều dịch vụ trên thị trường dùng model mã nguồn mở (Llama, Mistral...) rồi giả danh Claude.<br />
+              cheapaikey.store cam kết hoàn toàn khác.
+            </SectionSub>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            {/* Left — how it works */}
+            <div className="bg-[#0B1F3A] border border-[#14485F] rounded-2xl p-8 space-y-5">
+              <h3 className="font-bold text-[#EEF4FF] text-lg">Request của bạn đi qua đâu?</h3>
+              {[
+                { step: '1', color: '#1485FF', label: 'Ứng dụng của bạn', desc: 'Claude Code, Cursor, SDK... gửi request với API Key của bạn' },
+                { step: '2', color: '#78E4E2', label: 'cheapaikey.store proxy', desc: '9Router — chỉ xác thực key và chuyển tiếp, không đọc nội dung' },
+                { step: '3', color: '#F4D22B', label: 'Anthropic API', desc: 'api.anthropic.com — server chính thức của Anthropic, Claude thật' },
+              ].map(({ step, color, label, desc }, i) => (
+                <div key={step} className="flex gap-4 items-start">
+                  <div className="flex flex-col items-center gap-1 shrink-0">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-[#06090F]"
+                      style={{ background: color }}>
+                      {step}
+                    </div>
+                    {i < 2 && <div className="w-px h-8 bg-[#14485F]" />}
+                  </div>
+                  <div className="pt-1">
+                    <p className="font-semibold text-[#EEF4FF] text-sm">{label}</p>
+                    <p className="text-xs text-[#78A8B8] mt-0.5">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Right — guarantees */}
+            <div className="space-y-4">
+              {[
+                {
+                  icon: '🔐', color: '#1485FF',
+                  title: 'Kết nối thẳng Anthropic',
+                  desc: 'Mọi request đều đến trực tiếp api.anthropic.com. 9Router chỉ là lớp proxy xác thực key — không thay đổi model hay nội dung phản hồi.',
+                },
+                {
+                  icon: '🧠', color: '#78E4E2',
+                  title: 'Đúng model, đúng phiên bản',
+                  desc: 'Claude Opus 4, Sonnet 4, Haiku 4 — chính xác model bạn chỉ định. Không swap sang model rẻ hơn phía sau.',
+                },
+                {
+                  icon: '✅', color: '#F4D22B',
+                  title: 'Tự kiểm chứng được',
+                  desc: 'Dùng Claude Code với key của chúng tôi rồi chạy /model — bạn sẽ thấy đúng model Anthropic, không phải model giả mạo nào.',
+                },
+                {
+                  icon: '🚫', color: '#1485FF',
+                  title: 'Không log nội dung chat',
+                  desc: 'Proxy chỉ đọc header xác thực. Nội dung conversation đi thẳng đến Anthropic, không bị lưu hay đọc trung gian.',
+                },
+              ].map(({ icon, color, title, desc }) => (
+                <div key={title} className="flex gap-4 bg-[#0B1F3A] border border-[#14485F] hover:border-[#1485FF]/40 rounded-xl p-5 transition-all">
+                  <span className="text-2xl shrink-0">{icon}</span>
+                  <div>
+                    <p className="font-semibold text-[#EEF4FF] text-sm mb-1">{title}</p>
+                    <p className="text-xs text-[#78A8B8] leading-relaxed">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom badge */}
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
+            <div className="flex items-center gap-2 bg-[#0B1F3A] border border-[#1485FF]/40 rounded-full px-5 py-2.5">
+              <BadgeCheck className="w-4 h-4 text-[#1485FF]" />
+              <span className="text-[#EEF4FF]">Powered by <strong>Anthropic API</strong> chính thức</span>
+            </div>
+            <div className="flex items-center gap-2 bg-[#0B1F3A] border border-[#78E4E2]/40 rounded-full px-5 py-2.5">
+              <BadgeCheck className="w-4 h-4 text-[#78E4E2]" />
+              <span className="text-[#EEF4FF]">Proxy bởi <strong>9Router</strong> — mã nguồn mở, minh bạch</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Features grid ───────────────────────────────────────────────── */}
       <section className="py-12 px-6">
         <div className="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
