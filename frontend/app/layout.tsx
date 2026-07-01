@@ -57,7 +57,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`} suppressHydrationWarning>
       <body className="min-h-screen bg-background">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
           <SupportButton />
           <Toaster richColors position="top-right" />
