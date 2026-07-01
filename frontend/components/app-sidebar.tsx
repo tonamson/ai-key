@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard,
   Users,
   ScrollText,
   Bell,
@@ -99,6 +98,7 @@ function NavItem({
         render={<Link href={href} />}
         isActive={active}
         tooltip={label}
+        className={active ? 'dark:shadow-[0_0_10px_rgba(20,133,255,0.2)]' : ''}
       >
         <Icon />
         <span>{label}</span>
@@ -124,11 +124,11 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton render={<Link href="/dashboard" />} size="lg">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <LayoutDashboard className="size-4" />
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary/10 text-primary dark:shadow-[0_0_10px_rgba(20,133,255,0.25)]">
+                <Key className="size-4" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-semibold text-sm">cheapaikey.store</span>
+                <span className="font-semibold text-sm">cheapaikey<span className="text-muted-foreground">.store</span></span>
                 <span className="text-xs text-muted-foreground">
                   Affordable AI API Keys
                 </span>
@@ -140,7 +140,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Tổng quan</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[11px] uppercase tracking-widest font-semibold text-muted-foreground/70">Tổng quan</SidebarGroupLabel>
           <SidebarMenu>
             {MAIN_NAV.map((item) => (
               <NavItem key={item.href} {...item} />
@@ -150,7 +150,7 @@ export function AppSidebar() {
 
         {canAccessAdmin(user?.roleKey ?? null) && ADMIN_NAV_GROUPS.map((group) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-[11px] uppercase tracking-widest font-semibold text-muted-foreground/70">{group.label}</SidebarGroupLabel>
             <SidebarMenu>
               {group.items.map((item) => (
                 <NavItem key={item.href} {...item} />

@@ -25,7 +25,7 @@ function Steps({ current }: { current: number }) {
         return (
           <div key={idx} className="flex items-center flex-1 last:flex-none">
             <div className="flex items-center gap-2">
-              <div className={`size-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${done ? 'bg-primary text-primary-foreground' : active ? 'bg-primary text-primary-foreground ring-4 ring-primary/20' : 'bg-muted text-muted-foreground'}`}>
+              <div className={`size-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${done ? 'bg-primary text-primary-foreground' : active ? 'bg-primary text-primary-foreground ring-4 ring-primary/20 dark:shadow-[0_0_10px_rgba(20,133,255,0.4)]' : 'bg-muted text-muted-foreground'}`}>
                 {done ? <Check className="size-3.5" /> : idx}
               </div>
               <span className={`text-sm font-medium hidden sm:block ${active ? 'text-foreground' : 'text-muted-foreground'}`}>{label}</span>
@@ -48,11 +48,11 @@ function PlanCard({ plan, onSelect }: { plan: Plan; onSelect: () => void }) {
   return (
     <button
       onClick={onSelect}
-      className={`group relative text-left rounded-2xl border-2 bg-card p-6 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isPopular ? 'border-primary shadow-md shadow-primary/10' : 'border-border hover:border-primary/60'}`}
+      className={`group relative text-left rounded-2xl border-2 bg-card p-6 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isPopular ? 'border-primary dark:shadow-[0_0_25px_rgba(20,133,255,0.3)]' : 'border-border hover:border-primary/60'}`}
     >
       {isPopular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+          <span className="inline-flex items-center gap-1 bg-gradient-to-r from-[#1485FF] to-[#78E4E2] text-white text-xs font-semibold px-3 py-1 rounded-full">
             <Sparkles className="size-3" /> Phổ biến nhất
           </span>
         </div>

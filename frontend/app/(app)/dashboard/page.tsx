@@ -28,7 +28,7 @@ function Skeleton({ className }: { className?: string }) {
 /* ─── Token progress bar ─── */
 function TokenBar({ used, quota, showLabel = true }: { used: number; quota: number; showLabel?: boolean }) {
   const pct = quota > 0 ? Math.min(100, Math.round(used / quota * 100)) : 0;
-  const color = pct >= 90 ? 'bg-destructive' : pct >= 70 ? 'bg-orange-500' : 'bg-primary';
+  const barColor = pct >= 90 ? 'bg-destructive' : pct >= 70 ? 'bg-orange-500' : 'bg-gradient-to-r from-[#1485FF] to-[#78E4E2]';
   return (
     <div className="space-y-1.5">
       {showLabel && (
@@ -38,7 +38,7 @@ function TokenBar({ used, quota, showLabel = true }: { used: number; quota: numb
         </div>
       )}
       <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-        <div className={`h-full rounded-full transition-all duration-500 ${color}`} style={{ width: `${pct}%` }} />
+        <div className={`h-full rounded-full transition-all duration-500 ${barColor}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -58,8 +58,9 @@ function KeyCard({ sub }: { sub: any }) {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  const isActiveNotExpired = sub.isActive && days > 0;
   return (
-    <div className="rounded-2xl border bg-card overflow-hidden">
+    <div className={`rounded-2xl border bg-card overflow-hidden ${isActiveNotExpired ? 'dark:shadow-[0_0_20px_rgba(20,133,255,0.25)] dark:border-primary/30' : ''}`}>
       {/* Header stripe */}
       <div className={`h-1 w-full ${days <= 3 ? 'bg-destructive' : days <= 7 ? 'bg-orange-500' : 'bg-primary'}`} />
       <div className="p-5 space-y-4">
@@ -177,7 +178,7 @@ export default function DashboardPage() {
 
           {adminStats?.pendingOrders > 0 && (
             <Link href="/admin/orders"
-              className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 px-4 py-3 hover:opacity-90 transition-opacity">
+              className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 dark:shadow-[0_0_15px_rgba(251,191,36,0.15)] px-4 py-3 hover:opacity-90 transition-opacity">
               <AlertTriangle className="size-4 text-amber-600 shrink-0" />
               <span className="text-sm text-amber-800 dark:text-amber-300 flex-1">
                 <strong>{adminStats.pendingOrders} đơn hàng</strong> đang chờ xác nhận
@@ -188,10 +189,10 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {adminStats ? [
-              { label: 'Người dùng', value: fmtN(adminStats.totalUsers), icon: Users, sub: 'Tổng tài khoản', c: 'text-blue-600 bg-blue-50 dark:bg-blue-950/50' },
-              { label: 'Doanh thu', value: fmtVND(adminStats.totalRevenue), icon: TrendingUp, sub: `${adminStats.paidOrders} đơn thành công`, c: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50' },
-              { label: 'Đơn hàng', value: fmtN(adminStats.totalOrders), icon: ShoppingCart, sub: `${adminStats.pendingOrders} chờ xác nhận`, c: adminStats.pendingOrders > 0 ? 'text-amber-600 bg-amber-50 dark:bg-amber-950/50' : 'text-violet-600 bg-violet-50 dark:bg-violet-950/50' },
-              { label: 'Key active', value: fmtN(adminStats.activeSubs), icon: Key, sub: 'Subscription đang dùng', c: 'text-rose-600 bg-rose-50 dark:bg-rose-950/50' },
+              { label: 'Người dùng', value: fmtN(adminStats.totalUsers), icon: Users, sub: 'Tổng tài khoản', c: 'text-blue-600 bg-blue-50 dark:bg-blue-500/10 dark:shadow-[0_0_15px_rgba(20,133,255,0.2)]' },
+              { label: 'Doanh thu', value: fmtVND(adminStats.totalRevenue), icon: TrendingUp, sub: `${adminStats.paidOrders} đơn thành công`, c: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10' },
+              { label: 'Đơn hàng', value: fmtN(adminStats.totalOrders), icon: ShoppingCart, sub: `${adminStats.pendingOrders} chờ xác nhận`, c: adminStats.pendingOrders > 0 ? 'text-amber-600 bg-amber-50 dark:bg-amber-500/10' : 'text-violet-600 bg-violet-50 dark:bg-violet-500/10' },
+              { label: 'Key active', value: fmtN(adminStats.activeSubs), icon: Key, sub: 'Subscription đang dùng', c: 'text-rose-600 bg-rose-50 dark:bg-rose-500/10' },
             ].map(({ label, value, icon: Icon, sub, c }) => (
               <div key={label} className="rounded-2xl border bg-card p-4 flex items-start gap-3">
                 <div className={`size-9 rounded-xl flex items-center justify-center shrink-0 ${c}`}>
@@ -318,7 +319,7 @@ export default function DashboardPage() {
               <p className="text-sm text-muted-foreground mt-1">Mua gói để dùng Claude thông qua AI Key</p>
             </div>
             <div className="flex gap-2">
-              <Button render={<Link href="/dashboard/buy" />} nativeButton={false} size="sm">
+              <Button render={<Link href="/dashboard/buy" />} nativeButton={false} size="sm" className="animate-pulse">
                 <ShoppingCart className="size-3.5 mr-1.5" />Mua key
               </Button>
               <Button variant="outline" render={<Link href="/dashboard/guide" />} nativeButton={false} size="sm">
