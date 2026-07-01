@@ -1,6 +1,16 @@
 import { Body, Controller, Delete, Get, Param, Put, Post } from '@nestjs/common';
 import { NineRouterService } from './nine-router.service';
 import { RequirePermission } from '../auth/decorators/roles.decorator';
+import { Public } from '../auth/decorators/public.decorator';
+
+@Controller('models')
+export class ModelsController {
+  constructor(private readonly svc: NineRouterService) {}
+
+  @Public()
+  @Get()
+  list() { return this.svc.listModels(); }
+}
 
 @RequirePermission('admin:all')
 @Controller('admin/master-keys')
