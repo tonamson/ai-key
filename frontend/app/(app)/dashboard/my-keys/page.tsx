@@ -25,8 +25,8 @@ function StatusBadge({ days, isActive, expired }: { days: number; isActive: bool
   return <Badge className="gap-1 bg-green-600 hover:bg-green-600 text-white"><CheckCircle2 className="size-3" />Đã kích hoạt · {days} ngày</Badge>;
 }
 
-function TokenBar({ used, quota, label, suffix }: { used: number; quota: number; label?: string; suffix?: string }) {
-  const pct = Math.min(100, Math.round((used / quota) * 100));
+function TokenBar({ pct: pctProp, used, quota, label, suffix }: { pct?: number; used?: number; quota?: number; label?: string; suffix?: string }) {
+  const pct = pctProp ?? (quota ? Math.min(100, Math.round(((used ?? 0) / quota) * 100)) : 0);
   const color = pct >= 90 ? 'bg-destructive' : pct >= 70 ? 'bg-orange-500' : 'bg-primary';
   return (
     <div className="space-y-1.5">
@@ -51,8 +51,7 @@ function KeyCard({ sub, onRefreshed, confirm }: { sub: KeySubscription; onRefres
   const [refreshing, setRefreshing] = useState(false);
   const days = daysLeft(sub.expiresAt);
   const expired = isExpired(sub.expiresAt);
-  const used = Number(sub.tokenUsed);
-  const quota = Number(sub.tokenQuota);
+  const usedPct = (sub as any).tokenUsedPct ?? 0;
   const masked = (sub as any).nineRouterKeyMasked ?? sub.nineRouterKey?.substring(0, 12) + '•••••••••';
 
   function copyKey() {
@@ -118,7 +117,7 @@ function KeyCard({ sub, onRefreshed, confirm }: { sub: KeySubscription; onRefres
       </div>
 
       {/* Token usage */}
-      <TokenBar used={used} quota={quota} />
+      <TokenBar pct={usedPct} />
 
       {/* Quota 5h */}
       {sub.limitPeriod != null && (
