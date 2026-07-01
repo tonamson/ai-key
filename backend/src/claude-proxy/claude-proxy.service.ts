@@ -40,9 +40,12 @@ export class ClaudeProxyService {
     // Pure passthrough: forward TẤT CẢ header client gửi (trừ hop-by-hop / host / auth do ta tự set)
     // để 9Router + upstream nhận đúng identity. Whitelist trước đây làm sót header → 403.
     const DROP = new Set(['host', 'content-length', 'connection', 'authorization', 'x-api-key', 'accept-encoding']);
+    // Cloudflare/nginx chèn header proxy (cf-*, x-forwarded-*, via, x-real-ip) → upstream thấy lạ → 403 "blocked".
+    const DROP_PREFIX = ['cf-', 'x-forwarded-', 'x-real-', 'x-vercel-', 'via', 'forwarded', 'cdn-'];
     const passHeaders: Record<string, string> = { Authorization: `Bearer ${nineRouterKey}` };
     for (const [k, v] of Object.entries(clientHeaders)) {
-      if (v == null || DROP.has(k.toLowerCase())) continue;
+      const key = k.toLowerCase();
+      if (v == null || DROP.has(key) || DROP_PREFIX.some(p => key.startsWith(p))) continue;
       passHeaders[k] = Array.isArray(v) ? v.join(',') : String(v);
     }
     if (!passHeaders['content-type'] && !passHeaders['Content-Type']) passHeaders['Content-Type'] = 'application/json';
