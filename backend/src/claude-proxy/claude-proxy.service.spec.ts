@@ -91,7 +91,8 @@ describe('ClaudeProxyService', () => {
     ].join('\n');
     mockSubs.deductTokens.mockResolvedValue(mockQuota);
     await service.finalizeStream('sub-1', raw);
-    expect(mockSubs.deductTokens).toHaveBeenCalledWith('sub-1', 904 + 1200 + 5000, 50);
+    // weighted: 904 + 1200*1.25 + 5000*0.1 = 904 + 1500 + 500 = 2904
+    expect(mockSubs.deductTokens).toHaveBeenCalledWith('sub-1', 2904, 50);
   });
 
   it('finalizeStream parses Responses API usage nested in response (Codex)', async () => {
