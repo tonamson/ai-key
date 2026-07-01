@@ -198,7 +198,7 @@ export default function GuidePage() {
       .then((raw: any) => {
         const data: any[] = Array.isArray(raw) ? raw : (raw.models ?? raw.data ?? []);
         const claudeModels = data
-          .filter((m: any) => (m.name ?? '').toLowerCase().includes('claude'))
+          .filter((m: any) => m.provider === 'cc')
           .map((m: any) => ({ id: m.fullModel ?? m.id ?? m.name, label: m.name, tier: '', desc: '' }));
         if (claudeModels.length > 0) setModels(claudeModels);
       })
