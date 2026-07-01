@@ -75,4 +75,9 @@ export class NineRouterService {
   deleteKey(id: string) {
     return this.fetch<{ message: string }>(`/api/keys/${id}`, { method: 'DELETE' });
   }
+
+  async listModels(): Promise<any[]> {
+    const raw = await this.fetch<any>('/api/models');
+    return Array.isArray(raw) ? raw : (raw.models ?? raw.data ?? []);
+  }
 }

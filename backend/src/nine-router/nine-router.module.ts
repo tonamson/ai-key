@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { NineRouterController } from './nine-router.controller';
+import { NineRouterController, ModelsController } from './nine-router.controller';
 import { NineRouterService } from './nine-router.service';
 
 @Module({
-  controllers: [NineRouterController],
+  controllers: [NineRouterController, ModelsController],
   providers: [NineRouterService],
   exports: [NineRouterService],
 })

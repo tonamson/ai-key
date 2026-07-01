@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   Copy,
@@ -24,25 +24,10 @@ const API_BASE = (
 const PROXY_BASE = `${API_BASE}/claude`;
 const PROXY_URL = `${PROXY_BASE}/v1`;
 
-const CC_MODELS = [
-  {
-    id: "cc/claude-opus-4-8",
-    label: "Claude Opus 4.8",
-    tier: "Mạnh nhất",
-    desc: "Tốt nhất cho tác vụ phức tạp",
-  },
-  {
-    id: "cc/claude-sonnet-4-6",
-    label: "Claude Sonnet 4.6",
-    tier: "Khuyên dùng",
-    desc: "Cân bằng tốc độ và chất lượng",
-  },
-  {
-    id: "cc/claude-haiku-4-5-20251001",
-    label: "Claude Haiku 4.5",
-    tier: "Nhanh/Rẻ",
-    desc: "Tốc độ cao, chi phí thấp",
-  },
+const FALLBACK_MODELS = [
+  { id: "cc/claude-opus-4-8", label: "Claude Opus 4.8", tier: "Mạnh nhất", desc: "Tốt nhất cho tác vụ phức tạp" },
+  { id: "cc/claude-sonnet-4-6", label: "Claude Sonnet 4.6", tier: "Khuyên dùng", desc: "Cân bằng tốc độ và chất lượng" },
+  { id: "cc/claude-haiku-4-5-20251001", label: "Claude Haiku 4.5", tier: "Nhanh/Rẻ", desc: "Tốc độ cao, chi phí thấp" },
 ];
 
 const TIER_COLOR: Record<string, string> = {
@@ -189,6 +174,14 @@ function Accordion({ q, a }: { q: string; a: string }) {
   );
 }
 
+const API_MODELS_URL = `${(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:2053").replace(/\/$/, "")}/models`;
+
+function labelFromId(id: string) {
+  // "cc/claude-sonnet-4-6" → "Claude Sonnet 4.6"
+  const name = id.split('/').pop() ?? id;
+  return name.replace(/^claude-/, 'Claude ').replace(/-(\d)/g, ' $1').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function GuidePage() {
   function copy(text: string) {
@@ -197,6 +190,20 @@ export default function GuidePage() {
   }
 
   const [codeTab, setCodeTab] = useState<"curl" | "sdk">("curl");
+  const [models, setModels] = useState(FALLBACK_MODELS);
+
+  useEffect(() => {
+    fetch(API_MODELS_URL)
+      .then(r => r.json())
+      .then((raw: any) => {
+        const data: any[] = Array.isArray(raw) ? raw : (raw.models ?? raw.data ?? []);
+        const claudeModels = data
+          .filter((m: any) => m.provider === 'cc')
+          .map((m: any) => ({ id: m.fullModel ?? m.id ?? m.name, label: m.name, tier: '', desc: '' }));
+        if (claudeModels.length > 0) setModels(claudeModels);
+      })
+      .catch(() => {}); // giữ fallback
+  }, []);
 
   return (
     <div className="space-y-10">
@@ -355,7 +362,7 @@ export default function GuidePage() {
           Models hỗ trợ
         </h2>
         <div className="rounded-lg border bg-background overflow-hidden divide-y">
-          {CC_MODELS.map((m) => (
+          {models.map((m) => (
             <div
               key={m.id}
               className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors group"
