@@ -11,8 +11,24 @@ const fontSans = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "cheapaikey.store",
-  description: "Affordable AI API Keys — cheapaikey.store",
+  metadataBase: new URL('https://cheapaikey.store'),
+  title: "cheapaikey.store — Affordable AI API Keys",
+  description: "Mua API Key Claude giá rẻ, thanh toán ngân hàng Việt Nam, kích hoạt tức thì. Tương thích Claude Code, Cursor và mọi app AI.",
+  openGraph: {
+    title: "cheapaikey.store — Affordable AI API Keys",
+    description: "Mua API Key Claude giá rẻ, thanh toán ngân hàng Việt Nam, kích hoạt tức thì.",
+    url: "https://cheapaikey.store",
+    siteName: "cheapaikey.store",
+    images: [{ url: "/intro.png", width: 1200, height: 630, alt: "cheapaikey.store" }],
+    locale: "vi_VN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "cheapaikey.store — Affordable AI API Keys",
+    description: "Mua API Key Claude giá rẻ, thanh toán ngân hàng Việt Nam, kích hoạt tức thì.",
+    images: ["/intro.png"],
+  },
 };
 
 export default function RootLayout({
