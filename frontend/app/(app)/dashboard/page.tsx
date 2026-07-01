@@ -43,7 +43,7 @@ function KeyCard({ sub }: { sub: any }) {
   }
 
   return (
-    <div className={`rounded-2xl border bg-card overflow-hidden transition-all ${
+    <div className={`rounded-2xl border bg-card overflow-hidden shadow-sm transition-all ${
       urgency === 'crit' ? 'border-destructive/50' : urgency === 'warn' ? 'border-orange-400/40' : 'border-border'
     }`}>
       {/* top bar — urgency indicator */}
@@ -177,7 +177,7 @@ export default function DashboardPage() {
 
       {/* ── Welcome header ── */}
       <div className="rounded-2xl border bg-card px-6 py-5 flex items-center justify-between gap-4
-        dark:shadow-[0_0_30px_rgba(255,107,0,0.06)]">
+        shadow-sm dark:shadow-[0_0_30px_rgba(255,107,0,0.06)]">
         <div>
           <p className="text-xs text-muted-foreground uppercase tracking-widest font-medium mb-1">Bảng điều khiển</p>
           <h1 className="text-xl font-bold">Xin chào, {user.name} 👋</h1>
@@ -213,7 +213,7 @@ export default function DashboardPage() {
               { label: 'Đơn hàng', value: fmtN(adminStats.totalOrders), icon: ShoppingCart, sub: `${adminStats.pendingOrders} chờ`, iconCls: adminStats.pendingOrders > 0 ? 'bg-amber-500/10 text-amber-500' : 'bg-primary/10 text-primary' },
               { label: 'Key active', value: fmtN(adminStats.activeSubs), icon: Key, sub: 'Đang dùng', iconCls: 'bg-rose-500/10 text-rose-500' },
             ].map(({ label, value, icon: Icon, sub, iconCls }) => (
-              <div key={label} className="rounded-xl border bg-card p-4 space-y-3">
+              <div key={label} className="rounded-xl border bg-card p-4 space-y-3 shadow-sm">
                 <div className={`size-9 rounded-lg flex items-center justify-center ${iconCls}`}>
                   <Icon className="size-4" />
                 </div>
@@ -230,7 +230,7 @@ export default function DashboardPage() {
             const pct = Math.min(100, Math.round(adminStats.totalTokenUsed / adminStats.totalTokenQuota * 100));
             const barColor = pct >= 90 ? 'bg-destructive' : pct >= 70 ? 'bg-orange-500' : 'bg-primary';
             return (
-              <div className="rounded-xl border bg-card p-5 space-y-3">
+              <div className="rounded-xl border bg-card p-5 space-y-3 shadow-sm">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Zap className="size-4 text-primary" />
@@ -250,7 +250,7 @@ export default function DashboardPage() {
 
           <div className="grid gap-4 lg:grid-cols-5">
             {/* Recent orders */}
-            <div className="lg:col-span-3 rounded-xl border bg-card overflow-hidden">
+            <div className="lg:col-span-3 rounded-xl border bg-card overflow-hidden shadow-sm">
               <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
                 <div className="flex items-center gap-2 text-sm font-semibold">
                   <Activity className="size-4 text-primary" />
@@ -298,7 +298,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Quick nav */}
-            <div className="lg:col-span-2 rounded-xl border bg-card overflow-hidden">
+            <div className="lg:col-span-2 rounded-xl border bg-card overflow-hidden shadow-sm">
               <div className="flex items-center gap-2 px-5 py-3.5 border-b border-border text-sm font-semibold">
                 <ScrollText className="size-4 text-primary" />Quản lý
               </div>
@@ -373,7 +373,7 @@ export default function DashboardPage() {
                 { label: 'Token đã dùng', value: fmtN(totalUsed), accent: false },
                 { label: 'Token còn lại', value: fmtN(Math.max(0, totalQuota - totalUsed)), accent: false },
               ].map(({ label, value, accent }) => (
-                <div key={label} className={`rounded-xl border px-4 py-3 text-center ${accent ? 'border-primary/30 bg-primary/5' : 'bg-card'}`}>
+                <div key={label} className={`rounded-xl border px-4 py-3 text-center shadow-sm ${accent ? 'border-primary/30 bg-primary/5' : 'bg-card'}`}>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
                   <p className={`text-xl font-bold mt-1 tabular-nums ${accent ? 'text-primary' : ''}`}>{value}</p>
                 </div>
@@ -397,7 +397,7 @@ export default function DashboardPage() {
             { href: '/dashboard/profile', icon: ShieldCheck, label: 'Bảo mật', desc: 'Đổi mật khẩu, bật 2FA', accent: false },
           ].map(({ href, icon: Icon, label, desc }) => (
             <Link key={href} href={href}
-              className="group flex items-center gap-3.5 rounded-xl border bg-card p-4 hover:border-primary/40 hover:shadow-sm transition-all">
+              className="group flex items-center gap-3.5 rounded-xl border bg-card p-4 shadow-sm hover:border-primary/40 hover:shadow-md transition-all">
               <div className="size-10 rounded-xl bg-muted group-hover:bg-primary/10 flex items-center justify-center shrink-0 transition-colors">
                 <Icon className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
@@ -414,7 +414,7 @@ export default function DashboardPage() {
       {/* ── Wallet ── */}
       {walletBalance > 0 && (
         <Link href="/dashboard/buy"
-          className="flex items-center justify-between rounded-xl border bg-card p-5 hover:border-primary/40 hover:shadow-sm transition-all group">
+          className="flex items-center justify-between rounded-xl border bg-card p-5 shadow-sm hover:border-primary/40 hover:shadow-md transition-all group">
           <div className="flex items-center gap-3.5">
             <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Wallet className="size-5 text-primary" />
@@ -433,7 +433,7 @@ export default function DashboardPage() {
 
       {/* ── Referral ── */}
       {referral && (
-        <div className="rounded-xl border bg-card p-5">
+        <div className="rounded-xl border bg-card p-5 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">

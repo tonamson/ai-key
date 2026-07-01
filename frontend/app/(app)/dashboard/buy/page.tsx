@@ -137,7 +137,7 @@ function StepConfirm({
   return (
     <div className="max-w-lg mx-auto space-y-5">
       {/* Summary card */}
-      <div className="rounded-2xl border bg-card p-5">
+      <div className="rounded-2xl border bg-card shadow-sm p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-1">Gói đã chọn</p>
@@ -152,7 +152,7 @@ function StepConfirm({
       </div>
 
       {/* Coupon */}
-      <div className="rounded-2xl border bg-card p-5">
+      <div className="rounded-2xl border bg-card shadow-sm p-5">
         <div className="space-y-2">
           <Label className="flex items-center gap-1.5 text-sm font-medium">
             <Tag className="size-3.5" /> Mã giảm giá
@@ -179,7 +179,7 @@ function StepConfirm({
 
       {/* Ví */}
       {walletBalance > 0 && (
-        <div className="rounded-2xl border bg-card p-5">
+        <div className="rounded-2xl border bg-card shadow-sm p-5">
           <label className="flex items-center justify-between cursor-pointer gap-4">
             <div className="flex items-center gap-3">
               <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -202,7 +202,7 @@ function StepConfirm({
       )}
 
       {/* Price breakdown */}
-      <div className="rounded-2xl border bg-card p-5 space-y-3">
+      <div className="rounded-2xl border bg-card shadow-sm p-5 space-y-3">
         <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Chi tiết đơn hàng</h4>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
@@ -263,7 +263,7 @@ function StepPayment({ order, vietQRUrl }: { order: Order; vietQRUrl: string }) 
 
   return (
     <div className="max-w-md mx-auto space-y-5">
-      <div className="rounded-2xl border bg-card overflow-hidden">
+      <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
         {/* QR */}
         <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6 flex flex-col items-center gap-4">
           {vietQRUrl && <img src={vietQRUrl} alt="VietQR" className="w-52 h-52 rounded-xl shadow-md bg-white p-1" />}

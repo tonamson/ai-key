@@ -136,10 +136,10 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent className="px-1 py-2 gap-4">
+      <SidebarContent className="px-2 py-3 gap-5">
         <SidebarGroup className="p-0">
-          <SidebarGroupLabel className="px-3 mb-1 text-[10px] uppercase tracking-widest font-semibold text-muted-foreground/60">Menu</SidebarGroupLabel>
-          <SidebarMenu>
+          <SidebarGroupLabel className="px-2 mb-1.5 text-[10px] uppercase tracking-widest font-semibold text-muted-foreground/50">Menu</SidebarGroupLabel>
+          <SidebarMenu className="gap-0.5">
             {MAIN_NAV.map((item) => (
               <NavItem key={item.href} {...item} />
             ))}
@@ -148,8 +148,8 @@ export function AppSidebar() {
 
         {canAccessAdmin(user?.roleKey ?? null) && ADMIN_NAV_GROUPS.map((group) => (
           <SidebarGroup key={group.label} className="p-0">
-            <SidebarGroupLabel className="px-3 mb-1 text-[10px] uppercase tracking-widest font-semibold text-muted-foreground/60">{group.label}</SidebarGroupLabel>
-            <SidebarMenu>
+            <SidebarGroupLabel className="px-2 mb-1.5 text-[10px] uppercase tracking-widest font-semibold text-muted-foreground/50">{group.label}</SidebarGroupLabel>
+            <SidebarMenu className="gap-0.5">
               {group.items.map((item) => (
                 <NavItem key={item.href} {...item} />
               ))}

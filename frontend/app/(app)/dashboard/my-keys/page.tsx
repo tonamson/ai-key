@@ -77,7 +77,7 @@ function KeyCard({ sub, onRefreshed, confirm }: { sub: KeySubscription; onRefres
   }
 
   return (
-    <div className={`rounded-2xl border bg-card p-5 space-y-4 transition-shadow hover:shadow-md ${expired ? 'opacity-60' : ''} ${!expired && sub.isActive && days > 7 ? 'border-green-500/40 ring-1 ring-green-500/20' : ''}`}>
+    <div className={`rounded-2xl border bg-card shadow-sm p-5 space-y-4 transition-shadow hover:shadow-md ${expired ? 'opacity-60' : ''} ${!expired && sub.isActive && days > 7 ? 'border-green-500/40 ring-1 ring-green-500/20' : ''}`}>
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -164,7 +164,7 @@ function PendingOrderCard({ order, onCancelled, confirm }: { order: Order; onCan
   }
 
   return (
-    <div className="rounded-2xl border border-dashed border-orange-400/50 bg-orange-50/40 dark:bg-orange-950/10 p-5 space-y-3">
+    <div className="rounded-2xl border border-dashed border-orange-400/50 bg-orange-50/40 dark:bg-orange-950/10 shadow-sm p-5 space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="size-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
@@ -226,7 +226,7 @@ export default function KeysPage() {
 
       {/* Empty state */}
       {subs.length === 0 && pending.length === 0 && (
-        <div className="rounded-2xl border-2 border-dashed bg-card p-16 flex flex-col items-center gap-4 text-center">
+        <div className="rounded-2xl border-2 border-dashed bg-card shadow-sm p-16 flex flex-col items-center gap-4 text-center">
           <div className="size-14 rounded-2xl bg-muted flex items-center justify-center">
             <Key className="size-7 text-muted-foreground" />
           </div>

@@ -30,8 +30,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-sidebar/40 backdrop-blur-sm px-5">
+      <SidebarInset className="app-bg">
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 backdrop-blur-sm px-5">
           <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground" />
           <Separator orientation="vertical" className="mx-1 h-4" />
           <div className="ml-auto flex items-center gap-1">

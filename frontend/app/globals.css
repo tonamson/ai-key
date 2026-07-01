@@ -119,6 +119,15 @@
   --glow-primary-sm: 0 0 10px rgba(255, 107, 0, 0.25);
 }
 
+.app-bg {
+  background-image: radial-gradient(rgba(184, 58, 0, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.dark .app-bg {
+  background-image: radial-gradient(rgba(255, 107, 0, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

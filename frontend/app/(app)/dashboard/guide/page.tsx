@@ -290,7 +290,7 @@ export default function GuidePage() {
       {/* API quick reference */}
       <section className="space-y-3">
         <h2 className="text-base font-semibold">Thông tin kết nối</h2>
-        <div className="rounded-lg border bg-background divide-y text-sm">
+        <div className="rounded-lg border bg-background shadow-sm divide-y text-sm">
           {[
             { label: "Base URL", value: PROXY_BASE },
             { label: "Default Sonnet", value: "cc/claude-sonnet-4-6" },
@@ -350,7 +350,7 @@ export default function GuidePage() {
           Models hỗ trợ
         </h2>
         {modelsLoading ? (
-          <div className="rounded-lg border bg-background divide-y overflow-hidden">
+          <div className="rounded-lg border bg-background shadow-sm divide-y overflow-hidden">
             {[1, 2, 3].map(i => (
               <div key={i} className="px-4 py-3 flex items-center gap-3">
                 <div className="flex-1 space-y-2">
@@ -363,7 +363,7 @@ export default function GuidePage() {
         ) : models.length === 0 ? (
           <p className="text-sm text-muted-foreground">Không có model nào.</p>
         ) : (
-          <div className="rounded-lg border bg-background overflow-hidden divide-y">
+          <div className="rounded-lg border bg-background shadow-sm overflow-hidden divide-y">
             {models.map((m) => {
               const activeCaps = Object.entries(m.caps ?? {}).filter(([, v]) => v).map(([k]) => k);
               return (
@@ -410,7 +410,7 @@ export default function GuidePage() {
           <AlertCircle className="size-4 text-primary" />
           Lỗi thường gặp
         </h2>
-        <div className="rounded-lg border bg-background overflow-hidden">
+        <div className="rounded-lg border bg-background shadow-sm overflow-hidden">
           {TROUBLESHOOTING.map((item) => (
             <Accordion key={item.q} q={item.q} a={item.a} />
           ))}
