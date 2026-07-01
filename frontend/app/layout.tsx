@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
 import SupportButton from "@/components/support-button";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? '';
@@ -54,11 +55,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased dark`}>
+    <html lang="vi" className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`} suppressHydrationWarning>
       <body className="min-h-screen bg-background">
-        {children}
-        <SupportButton />
-        <Toaster richColors position="top-right" />
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          {children}
+          <SupportButton />
+          <Toaster richColors position="top-right" />
+        </ThemeProvider>
         <Script src={`https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`} strategy="lazyOnload" />
       </body>
     </html>
