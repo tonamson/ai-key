@@ -14,7 +14,7 @@ import { useAuthStore } from '@/lib/store/auth.store';
 import { authService } from '@/lib/api/auth.service';
 import { QRCodeCanvas } from '@/components/ui/qr-code';
 import { getRoleLabel } from '@/lib/role-keys';
-import { referralApi, walletApi, WalletTransaction } from '@/lib/api/admin.service';
+import { referralApi, walletApi, WalletTransaction, TopupRequest } from '@/lib/api/admin.service';
 
 type Section = 'info' | 'password' | 'security' | 'referral' | 'wallet';
 
@@ -33,14 +33,28 @@ export default function ProfilePage() {
   const [active, setActive] = useState<Section>('info');
   const [referral, setReferral] = useState<{ id: string; code: string; totalEarned: number; commissionPercent: number } | null>(null);
   const [wallet, setWallet] = useState<{ balance: number; history: WalletTransaction[] } | null>(null);
-  const [topupQr, setTopupQr] = useState<{ qrUrl: string; memo: string } | null>(null);
+  const [topups, setTopups] = useState<TopupRequest[]>([]);
   const [topupAmount, setTopupAmount] = useState('');
+  const [topupLoading, setTopupLoading] = useState(false);
   const [refCopied, setRefCopied] = useState<'code' | 'link' | null>(null);
+
+  const refreshWallet = () => {
+    walletApi.getMe().then(setWallet).catch(() => {});
+    walletApi.getMyTopups().then(setTopups).catch(() => {});
+  };
 
   useEffect(() => {
     referralApi.getMyCode().then(r => setReferral(r as any)).catch(() => {});
-    walletApi.getMe().then(setWallet).catch(() => {});
+    refreshWallet();
   }, []);
+
+  // Poll pending topup mỗi 15s để tự động cập nhật khi admin duyệt
+  useEffect(() => {
+    const hasPending = topups.some(t => t.status === 'pending');
+    if (!hasPending) return;
+    const t = setInterval(refreshWallet, 15_000);
+    return () => clearInterval(t);
+  }, [topups]);
 
   const refLink = referral ? `${typeof window !== 'undefined' ? window.location.origin : ''}/?ref=${referral.code}` : '';
   const [name, setName] = useState(user?.name ?? '');
@@ -311,11 +325,11 @@ export default function ProfilePage() {
                 </CardHeader>
               </Card>
 
-              {/* Nạp tiền */}
+              {/* Tạo đơn nạp */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Nạp tiền vào ví</CardTitle>
-                  <CardDescription>Chuyển khoản ngân hàng — hệ thống xác nhận và cộng ví tự động</CardDescription>
+                  <CardDescription>Tạo đơn → chuyển khoản đúng nội dung → admin duyệt tự động cộng ví</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex gap-2">
@@ -328,63 +342,115 @@ export default function ProfilePage() {
                       step={10000}
                     />
                     <Button
+                      disabled={topupLoading || !topupAmount || parseInt(topupAmount) < 10000}
                       onClick={async () => {
-                        const amt = topupAmount ? parseInt(topupAmount) : undefined;
-                        const qr = await walletApi.getTopupQr(amt);
-                        setTopupQr(qr);
+                        setTopupLoading(true);
+                        try {
+                          await walletApi.createTopup(parseInt(topupAmount));
+                          setTopupAmount('');
+                          refreshWallet();
+                          toast.success('Đã tạo đơn nạp tiền');
+                        } catch (err: any) {
+                          toast.error(err?.response?.data?.message ?? 'Tạo đơn thất bại');
+                        } finally {
+                          setTopupLoading(false);
+                        }
                       }}
                     >
-                      Lấy mã QR
+                      {topupLoading ? 'Đang tạo...' : 'Tạo đơn nạp'}
                     </Button>
                   </div>
 
-                  {topupQr && (
-                    <div className="rounded-xl border bg-muted/30 p-5 space-y-4">
-                      <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
-                        <img src={topupQr.qrUrl} alt="VietQR" className="w-44 h-44 rounded-lg border" />
-                        <div className="space-y-3 text-sm flex-1">
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Ngân hàng</p>
-                            <p className="font-semibold">Techcombank</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Số tài khoản</p>
-                            <p className="font-mono font-semibold">19032009391010</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">Nội dung chuyển khoản <span className="text-destructive font-semibold">*bắt buộc*</span></p>
-                            <div className="flex items-center gap-2">
-                              <code className="bg-background border rounded px-2 py-1 font-mono font-bold tracking-widest text-primary">
-                                {topupQr.memo}
-                              </code>
-                              <button
-                                onClick={() => navigator.clipboard.writeText(topupQr.memo).then(() => toast.success('Đã copy nội dung CK'))}
-                                className="text-xs text-muted-foreground hover:text-foreground underline"
-                              >
-                                Copy
-                              </button>
+                  {/* Đơn pending hiện tại */}
+                  {topups.filter(t => t.status === 'pending').map(topup => {
+                    const qrUrl = `https://img.vietqr.io/image/TECHCOMBANK-19032009391010-compact.png?amount=${topup.amount}&addInfo=${topup.memo}`;
+                    const expiresAt = new Date(topup.expiresAt);
+                    const msLeft = expiresAt.getTime() - Date.now();
+                    const minLeft = Math.max(0, Math.floor(msLeft / 60000));
+                    return (
+                      <div key={topup.id} className="rounded-xl border border-primary/30 bg-primary/5 p-5 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-primary">⏳ Chờ thanh toán</span>
+                          <span className="text-xs text-muted-foreground">Hết hạn sau ~{minLeft} phút</span>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
+                          <img src={qrUrl} alt="VietQR" className="w-44 h-44 rounded-lg border" />
+                          <div className="space-y-3 text-sm flex-1">
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">Ngân hàng</p>
+                              <p className="font-semibold">Techcombank</p>
                             </div>
-                          </div>
-                          {topupAmount && (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">Số tài khoản</p>
+                              <p className="font-mono font-semibold">19032009391010</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">
+                                Nội dung CK <span className="text-destructive font-semibold">*bắt buộc*</span>
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <code className="bg-background border rounded px-3 py-1.5 font-mono font-bold tracking-widest text-primary text-base">
+                                  {topup.memo}
+                                </code>
+                                <button
+                                  onClick={() => navigator.clipboard.writeText(topup.memo).then(() => toast.success('Đã copy nội dung CK'))}
+                                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  <Copy className="size-3" /> Copy
+                                </button>
+                              </div>
+                            </div>
                             <div>
                               <p className="text-xs text-muted-foreground mb-1">Số tiền</p>
-                              <p className="font-bold text-base">{f(parseInt(topupAmount))}đ</p>
+                              <p className="font-bold text-lg">{f(Number(topup.amount))}đ</p>
                             </div>
-                          )}
+                          </div>
                         </div>
+                        <p className="text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800/40 rounded-lg px-3 py-2 flex items-center gap-2 flex-wrap">
+                          ⚠️ Nhập <strong>đúng nội dung CK</strong> để admin nhận diện đơn của bạn. Đơn tự huỷ sau 30 phút nếu chưa được duyệt.
+                          Nếu cần hỗ trợ,{' '}
+                          <a href={process.env.NEXT_PUBLIC_SUPPORT_URL ?? 'https://t.me/giahuyweed'} target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 font-semibold underline underline-offset-2">
+                            <ExternalLink className="size-3" /> liên hệ hỗ trợ
+                          </a>
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800/40 rounded-lg px-3 py-2">
-                        ⚠️ Nhập <strong>đúng nội dung chuyển khoản</strong> để hệ thống tự động xác nhận. Nếu quên, liên hệ admin để xử lý thủ công.
-                      </p>
-                    </div>
-                  )}
+                    );
+                  })}
                 </CardContent>
               </Card>
 
-              {/* Lịch sử */}
+              {/* Lịch sử đơn nạp */}
+              {topups.filter(t => t.status !== 'pending').length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Lịch sử đơn nạp</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="divide-y">
+                      {topups.filter(t => t.status !== 'pending').map(topup => (
+                        <div key={topup.id} className="flex items-center justify-between py-3 gap-4">
+                          <div>
+                            <p className="text-sm font-medium font-mono">{topup.memo}</p>
+                            <p className="text-xs text-muted-foreground">{new Date(topup.createdAt).toLocaleString('vi-VN')}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-semibold">{f(Number(topup.amount))}đ</p>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${topup.status === 'approved' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-muted text-muted-foreground'}`}>
+                              {topup.status === 'approved' ? '✓ Đã duyệt' : 'Hết hạn'}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Lịch sử giao dịch ví */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Lịch sử giao dịch</CardTitle>
+                  <CardTitle className="text-base">Lịch sử giao dịch ví</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {!wallet || wallet.history.length === 0 ? (

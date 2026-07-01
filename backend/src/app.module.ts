@@ -36,6 +36,8 @@ import { SystemConfig } from './system-config/system-config.entity';
 import { WalletTransaction } from './wallet/wallet-transaction.entity';
 import { TokenUsageLog } from './stats/token-usage-log.entity';
 import { StatsModule } from './stats/stats.module';
+import { TopupRequest } from './topup/topup-request.entity';
+import { TopupModule } from './topup/topup.module';
 
 @Module({
   imports: [
@@ -59,6 +61,7 @@ import { StatsModule } from './stats/stats.module';
           SystemConfig,
           WalletTransaction,
           TokenUsageLog,
+          TopupRequest,
         ],
         migrations: ['dist/database/migrations/*.js'],
         migrationsRun: true,
@@ -82,6 +85,7 @@ import { StatsModule } from './stats/stats.module';
     SystemConfigModule,
     WalletModule,
     StatsModule,
+    TopupModule,
   ],
   controllers: [AppController],
   providers: [

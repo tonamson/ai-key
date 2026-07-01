@@ -111,10 +111,16 @@ export const subscriptionApi = {
 // ─── Referral ────────────────────────────────────────────────────────────────
 export interface WalletTransaction { id: string; amount: number; type: string; description: string | null; orderId: string | null; createdAt: string; }
 
+export interface TopupRequest { id: string; amount: number; memo: string; status: 'pending' | 'approved' | 'expired'; expiresAt: string; createdAt: string; }
+
 export const walletApi = {
   getMe: () => apiClient.get<{ balance: number; history: WalletTransaction[] }>('/wallet/me').then(r => r.data),
-  getTopupQr: (amount?: number) => apiClient.get<{ qrUrl: string; memo: string }>('/wallet/topup-qr', { params: amount ? { amount } : {} }).then(r => r.data),
+  createTopup: (amount: number) => apiClient.post<TopupRequest>('/topup', { amount }).then(r => r.data),
+  getMyTopups: () => apiClient.get<TopupRequest[]>('/topup/my').then(r => r.data),
   adminHistory: (userId: string) => apiClient.get<WalletTransaction[]>(`/admin/wallet/${userId}/history`).then(r => r.data),
+  adminApproveTopup: (id: string, note?: string) => apiClient.post(`/admin/topup/${id}/approve`, { note }).then(r => r.data),
+  adminRejectTopup:  (id: string) => apiClient.post(`/admin/topup/${id}/reject`).then(r => r.data),
+  adminListTopups:   () => apiClient.get<TopupRequest[]>('/admin/topup').then(r => r.data),
 };
 
 export const referralApi = {
