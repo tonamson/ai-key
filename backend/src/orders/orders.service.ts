@@ -11,6 +11,7 @@ import { ReferralService } from '../referral/referral.service';
 import { NineRouterService } from '../nine-router/nine-router.service';
 import { WalletService } from '../wallet/wallet.service';
 import { EmailService } from '../email/email.service';
+import { TelegramService } from '../telegram/telegram.service';
 import { DiscountType } from '../coupons/coupon.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 
@@ -29,7 +30,10 @@ export class OrdersService {
     private readonly nineRouter: NineRouterService,
     private readonly wallet: WalletService,
     private readonly email: EmailService,
+    private readonly telegram: TelegramService,
   ) {}
+
+  private readonly fmt = (n: number) => new Intl.NumberFormat('vi-VN').format(n);
 
   async createOrder(userId: string, dto: CreateOrderDto) {
     const plan = await this.plans.findOne(dto.planId);
@@ -95,6 +99,34 @@ export class OrdersService {
       await this.confirmOrder(order.id);
       const confirmed = await this.orderRepo.findOne({ where: { id: order.id } });
       return { order: confirmed!, vietQRUrl: '' };
+    }
+
+    // Gửi Telegram thông báo chờ thanh toán
+    const user = await this.orderRepo.manager.findOne(
+      (await import('../users/user.entity')).User, { where: { id: userId } }
+    );
+    const expiresAt = order.expiresAt!;
+    const fmtExp = expiresAt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' });
+    const text = [
+      `🛒 <b>Đơn hàng mới</b>`,
+      ``,
+      `👤 <b>User:</b> ${user?.name ?? userId} (<code>${user?.email ?? userId}</code>)`,
+      `📦 <b>Gói:</b> ${plan.name}`,
+      `💵 <b>Cần CK:</b> ${this.fmt(finalPrice)}đ`,
+      `🔑 <b>Mã CK:</b> <code>${memo}</code>`,
+      `⏰ <b>Hết hạn lúc:</b> ${fmtExp}`,
+      `🆔 <b>ID:</b> <code>${order.id}</code>`,
+    ].join('\n');
+
+    const msgId = await this.telegram.sendMessage(text, {
+      inlineKeyboard: [[
+        { text: '✅ Duyệt', callback_data: `order_approve:${order.id}` },
+        { text: '❌ Huỷ',   callback_data: `order_cancel:${order.id}`  },
+      ]],
+    });
+    if (msgId) {
+      order.telegramMessageId = msgId;
+      await this.orderRepo.save(order);
     }
 
     return { order, vietQRUrl };
@@ -188,6 +220,12 @@ export class OrdersService {
       isRenewal: !!order.renewSubscriptionId,
     }).catch(() => {});
 
+    // Xóa message Telegram sau khi duyệt thành công
+    if (order.telegramMessageId) {
+      await this.telegram.deleteMessage(order.telegramMessageId).catch(() => {});
+      await this.orderRepo.update({ id: orderId }, { telegramMessageId: null });
+    }
+
     return order;
   }
 
@@ -201,6 +239,8 @@ export class OrdersService {
 
   /** Huỷ đơn PENDING: nhả coupon + hoàn ví trong 1 transaction. Dùng cho user huỷ tay & cron. */
   async cancelOrder(orderId: string, opts: { userId?: string } = {}): Promise<void> {
+    let telegramMessageId: string | null = null;
+
     await this.orderRepo.manager.transaction(async (em: EntityManager) => {
       // Atomic claim PENDING→CANCELLED — tránh đua với confirmOrder.
       const where: any = { id: orderId, status: OrderStatus.PENDING };
@@ -209,11 +249,18 @@ export class OrdersService {
       if (!claim.affected) throw new BadRequestException('Đơn không thể huỷ (đã thanh toán hoặc không tồn tại)');
 
       const order = await em.findOneOrFail(Order, { where: { id: orderId } });
+      telegramMessageId = order.telegramMessageId;
       if (order.couponId) await this.coupons.releaseUse(order.couponId);
       if (Number(order.walletUsed) > 0) {
         await this.wallet.refund(order.userId, Number(order.walletUsed), order.id, em);
       }
     });
+
+    // Xóa message Telegram sau khi huỷ (ngoài transaction tránh delay)
+    if (telegramMessageId) {
+      await this.telegram.deleteMessage(telegramMessageId).catch(() => {});
+      await this.orderRepo.update({ id: orderId }, { telegramMessageId: null });
+    }
   }
 
   /** Mỗi 10 phút: huỷ các đơn PENDING quá hạn thanh toán. */

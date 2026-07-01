@@ -10,6 +10,7 @@ import { ReferralModule } from '../referral/referral.module';
 import { NineRouterModule } from '../nine-router/nine-router.module';
 import { WalletModule } from '../wallet/wallet.module';
 import { EmailModule } from '../email/email.module';
+import { TelegramModule } from '../telegram/telegram.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { EmailModule } from '../email/email.module';
     NineRouterModule,
     WalletModule,
     EmailModule,
+    TelegramModule,
   ],
   controllers: [OrdersController, OrdersAdminController],
   providers: [OrdersService],
