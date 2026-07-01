@@ -9,9 +9,9 @@ User → Cloudflare → Nginx → Backend (NestJS) → nine-router (Docker inter
                           → Frontend (Next.js)
 ```
 
-- `api.moneynote.store` → backend proxy Claude API
-- `moneynote.store` → frontend dashboard
-- `9router.moneynote.store` → giao diện 9Router (có mật khẩu)
+- `api.cheapaikey.store` → backend proxy Claude API
+- `cheapaikey.store` → frontend dashboard
+- `9router.cheapaikey.store` → giao diện 9Router (có mật khẩu)
 
 ---
 
@@ -50,22 +50,22 @@ docker compose exec backend npm run seed
 |------|-------|
 | `DATABASE_URL` | PostgreSQL connection string |
 | `JWT_SECRET` | Chuỗi ngẫu nhiên ≥ 32 ký tự |
-| `CORS_ORIGINS` | Domain frontend, ví dụ `https://moneynote.store` |
+| `CORS_ORIGINS` | Domain frontend, ví dụ `https://cheapaikey.store` |
 | `NINE_ROUTER_URL` | `http://nine-router:20128/v1` (giữ nguyên) |
 | `NINE_ROUTER_PASSWORD` | Mật khẩu admin 9Router |
 | `VIETQR_BANK_ID` | Mã ngân hàng VietQR |
 | `VIETQR_ACCOUNT_NO` | Số tài khoản nhận tiền |
 | `VIETQR_ACCOUNT_NAME` | Tên chủ tài khoản |
 | `RESEND_API_KEY` | API key từ resend.com |
-| `RESEND_FROM` | Email gửi, ví dụ `noreply@moneynote.store` |
-| `APP_URL` | URL frontend, ví dụ `https://moneynote.store` |
+| `RESEND_FROM` | Email gửi, ví dụ `noreply@cheapaikey.store` |
+| `APP_URL` | URL frontend, ví dụ `https://cheapaikey.store` |
 | `RECAPTCHA_SECRET_KEY` | Secret key Google reCAPTCHA v3 |
 
 ### Frontend (`frontend/.env.production`)
 
 | Biến | Mô tả |
 |------|-------|
-| `NEXT_PUBLIC_API_URL` | URL backend, ví dụ `https://api.moneynote.store` |
+| `NEXT_PUBLIC_API_URL` | URL backend, ví dụ `https://api.cheapaikey.store` |
 | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | Site key Google reCAPTCHA v3 |
 
 ---
@@ -74,7 +74,7 @@ docker compose exec backend npm run seed
 
 | Dịch vụ | URL | Tài khoản |
 |---------|-----|-----------|
-| 9Router dashboard | `https://9router.moneynote.store` | `admin` / `adminkanni@123` |
+| 9Router dashboard | `https://9router.cheapaikey.store` | `admin` / `adminkanni@123` |
 | 9Router admin (trong app) | — | Dùng `NINE_ROUTER_PASSWORD` trong env |
 
 > **Lưu ý:** Đổi mật khẩu Basic Auth bằng cách sửa `nginx/.htpasswd`.
@@ -90,7 +90,7 @@ Thêm vào `~/.claude/settings.json` của user:
 {
   "env": {
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    "ANTHROPIC_BASE_URL": "https://api.moneynote.store/claude",
+    "ANTHROPIC_BASE_URL": "https://api.cheapaikey.store/claude",
     "ANTHROPIC_API_KEY": "sk-...",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "cc/claude-opus-4-8",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "cc/claude-sonnet-4-6",
