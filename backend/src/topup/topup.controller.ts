@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Request } from '@nestjs/common';
 import { TopupService } from './topup.service';
 import { RequirePermission } from '../auth/decorators/roles.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('topup')
 export class TopupController {
@@ -35,5 +36,21 @@ export class AdminTopupController {
   @RequirePermission('users:manage')
   reject(@Param('id') id: string) {
     return this.svc.reject(id);
+  }
+}
+
+/** Webhook nhận callback từ Telegram inline button — Public vì Telegram gọi không có token */
+@Controller('telegram')
+export class TelegramWebhookController {
+  constructor(private readonly svc: TopupService) {}
+
+  @Public()
+  @Post('webhook')
+  async webhook(@Body() body: any) {
+    const cq = body?.callback_query;
+    if (cq?.data) {
+      await this.svc.handleCallback(cq.id, cq.data);
+    }
+    return { ok: true };
   }
 }

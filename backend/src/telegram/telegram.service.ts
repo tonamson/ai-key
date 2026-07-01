@@ -5,16 +5,16 @@ import { ConfigService } from '@nestjs/config';
 export class TelegramService {
   private readonly logger = new Logger(TelegramService.name);
   private readonly token: string | null;
-  private readonly chatId: string | null;
+  readonly chatId: string | null;
 
   constructor(config: ConfigService) {
     this.token  = config.get('TELEGRAM_BOT_TOKEN') ?? null;
     this.chatId = config.get('TELEGRAM_CHAT_ID')   ?? null;
   }
 
-  private get enabled() { return !!(this.token && this.chatId); }
+  get enabled() { return !!(this.token && this.chatId); }
 
-  private async call(method: string, body: object): Promise<any> {
+  async call(method: string, body: object): Promise<any> {
     if (!this.enabled) return null;
     try {
       const res = await fetch(`https://api.telegram.org/bot${this.token}/${method}`, {
@@ -31,12 +31,19 @@ export class TelegramService {
     }
   }
 
-  async sendMessage(text: string, parseMode: 'HTML' | 'Markdown' = 'HTML'): Promise<string | null> {
-    const result = await this.call('sendMessage', {
+  async sendMessage(text: string, opts: {
+    parseMode?: 'HTML' | 'Markdown';
+    inlineKeyboard?: { text: string; callback_data: string }[][];
+  } = {}): Promise<string | null> {
+    const body: any = {
       chat_id: this.chatId,
       text,
-      parse_mode: parseMode,
-    });
+      parse_mode: opts.parseMode ?? 'HTML',
+    };
+    if (opts.inlineKeyboard) {
+      body.reply_markup = { inline_keyboard: opts.inlineKeyboard };
+    }
+    const result = await this.call('sendMessage', body);
     return result?.message_id ? String(result.message_id) : null;
   }
 
@@ -47,12 +54,12 @@ export class TelegramService {
     });
   }
 
-  async editMessage(messageId: string, text: string): Promise<void> {
-    await this.call('editMessageText', {
-      chat_id: this.chatId,
-      message_id: parseInt(messageId),
-      text,
-      parse_mode: 'HTML',
-    });
+  async answerCallbackQuery(callbackQueryId: string, text?: string): Promise<void> {
+    await this.call('answerCallbackQuery', { callback_query_id: callbackQueryId, text });
+  }
+
+  /** Đăng ký webhook URL với Telegram */
+  async setWebhook(url: string): Promise<void> {
+    await this.call('setWebhook', { url });
   }
 }
