@@ -26,7 +26,7 @@ export class AuthService {
   }
 
   private makeTOTP(secret: string, email: string) {
-    return new OTPAuth.TOTP({ issuer: 'AI Key', label: email, secret, digits: 6, period: 30 });
+    return new OTPAuth.TOTP({ issuer: 'cheapaikey.store', label: email, secret, digits: 6, period: 30 });
   }
 
   async register(email: string, password: string, name: string, referredBy?: string) {
@@ -133,7 +133,7 @@ export class AuthService {
     const user = await this.users.findOneBy({ id: userId });
     if (!user) throw new UnauthorizedException();
     const secret = new OTPAuth.Secret({ size: 20 });
-    const totp = new OTPAuth.TOTP({ issuer: 'AI Key', label: user.email, secret, digits: 6, period: 30 });
+    const totp = new OTPAuth.TOTP({ issuer: 'cheapaikey.store', label: user.email, secret, digits: 6, period: 30 });
     await this.users.update(userId, { twoFactorSecret: secret.base32 });
     return { otpauthUrl: totp.toString() };
   }
