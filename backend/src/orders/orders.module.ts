@@ -9,6 +9,7 @@ import { CouponsModule } from '../coupons/coupons.module';
 import { ReferralModule } from '../referral/referral.module';
 import { NineRouterModule } from '../nine-router/nine-router.module';
 import { WalletModule } from '../wallet/wallet.module';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { WalletModule } from '../wallet/wallet.module';
     ReferralModule,
     NineRouterModule,
     WalletModule,
+    EmailModule,
   ],
   controllers: [OrdersController, OrdersAdminController],
   providers: [OrdersService],

@@ -10,6 +10,7 @@ import { CouponsService } from '../coupons/coupons.service';
 import { ReferralService } from '../referral/referral.service';
 import { NineRouterService } from '../nine-router/nine-router.service';
 import { WalletService } from '../wallet/wallet.service';
+import { EmailService } from '../email/email.service';
 import { DiscountType } from '../coupons/coupon.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 
@@ -27,6 +28,7 @@ export class OrdersService {
     private readonly referral: ReferralService,
     private readonly nineRouter: NineRouterService,
     private readonly wallet: WalletService,
+    private readonly email: EmailService,
   ) {}
 
   async createOrder(userId: string, dto: CreateOrderDto) {
@@ -176,6 +178,15 @@ export class OrdersService {
     if (order.user.referredBy && Number(order.finalPrice) > 0) {
       await this.referral.creditCommission(order.user.referredBy, Number(order.finalPrice), order.id, this.wallet).catch(() => {});
     }
+
+    this.email.sendOrderConfirmed(order.user.email, order.user.name, {
+      planName: order.plan.name,
+      apiKey: order.nineRouterKey!,
+      expiresAt: order.renewSubscriptionId
+        ? undefined
+        : new Date(order.paidAt!.getTime() + order.plan.durationDays * 86400000),
+      isRenewal: !!order.renewSubscriptionId,
+    }).catch(() => {});
 
     return order;
   }
