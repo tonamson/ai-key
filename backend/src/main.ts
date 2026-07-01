@@ -10,10 +10,10 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bodyParser: true,
   });
-  // ponytail: unlimited for claude proxy — Claude API enforces its own context limits
-  app.use('/claude', require('express').json({ limit: '100mb' }));
-  // Claude proxy: allow any origin — auth is enforced by API key, not CORS
-  app.use('/claude', (_req: any, res: any, next: any) => {
+  // ponytail: unlimited for /v1 proxy — upstream (9Router/Claude) enforces its own context limits
+  app.use('/v1', require('express').json({ limit: '100mb' }));
+  // /v1 proxy: allow any origin — auth is enforced by API key, not CORS
+  app.use('/v1', (_req: any, res: any, next: any) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', '*');

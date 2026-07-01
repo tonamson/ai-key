@@ -16,10 +16,10 @@ import {
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:2053"
 ).replace(/\/$/, "");
-// Claude Code tự ghép "/v1/messages" vào ANTHROPIC_BASE_URL → base phải dừng ở /claude.
-// curl/SDK tự ghép "/messages" → cần đủ /claude/v1. Hai client ghép khác nhau nên tách 2 biến.
-const PROXY_BASE = `${API_BASE}/claude`;
-const PROXY_URL = `${PROXY_BASE}/v1`;
+// Chuẩn /v1 của 9router. Claude Code tự ghép "/v1/messages" vào ANTHROPIC_BASE_URL → dùng base gốc.
+// curl/OpenAI SDK ghép "/chat/completions" hoặc "/messages" → cần đủ base + /v1.
+const PROXY_BASE = API_BASE;
+const PROXY_URL = `${API_BASE}/v1`;
 
 type RouterModel = {
   provider: string;
@@ -262,10 +262,10 @@ export default function GuidePage() {
                 bằng key thật của bạn.
               </p>
               <p className="text-sm text-amber-600 dark:text-amber-500">
-                Lưu ý: <code className="font-mono text-xs">ANTHROPIC_BASE_URL</code> kết thúc ở{" "}
-                <code className="font-mono text-xs">/claude</code> — KHÔNG thêm{" "}
-                <code className="font-mono text-xs">/v1</code> (Claude Code tự nối{" "}
-                <code className="font-mono text-xs">/v1/messages</code>).
+                Lưu ý: <code className="font-mono text-xs">ANTHROPIC_BASE_URL</code> dùng URL gốc{" "}
+                (KHÔNG thêm <code className="font-mono text-xs">/v1</code>) — Claude Code tự nối{" "}
+                <code className="font-mono text-xs">/v1/messages</code>. Client OpenAI-compatible thì dùng{" "}
+                <code className="font-mono text-xs">{PROXY_URL}</code>.
               </p>
               <CodeBlock code={SETTINGS_JSON} language="json" />
             </div>

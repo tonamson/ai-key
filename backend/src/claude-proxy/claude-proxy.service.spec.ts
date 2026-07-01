@@ -87,61 +87,67 @@ describe('ClaudeProxyService', () => {
     expect(mockSubs.deductTokens).not.toHaveBeenCalled();
   });
 
-  // Kiểm chứng: khi client xin non-stream, proxy ép stream:true rồi gom SSE thành JSON.
-  // Phải giữ NGUYÊN tool_use.name và ráp đúng input từ các input_json_delta bị chia nhỏ —
-  // không đổi tên (vd thêm hậu tố), không nuốt mất tham số.
-  it('assembly path preserves tool_use name + reassembles split input_json_delta', async () => {
+  // Pure passthrough: non-stream JSON trả VERBATIM (raw string), chỉ đọc usage để trừ token.
+  it('non-stream returns raw body verbatim + deducts tokens from usage (anthropic)', async () => {
     mockSubs.findActiveByKey.mockResolvedValue({
-      id: '1', expiresAt: new Date(Date.now() + 86400000),
+      id: '1', userId: 'u1', expiresAt: new Date(Date.now() + 86400000),
     });
     mockSubs.deductTokens.mockResolvedValue(mockQuota);
 
-    // SSE thật từ Anthropic: tool_use có input JSON bị chia thành nhiều partial_json chunk.
-    const sse = [
-      'data: {"type":"message_start","message":{"id":"m1","role":"assistant","model":"x","content":[],"usage":{"input_tokens":40,"output_tokens":1}}}',
-      'data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_1","name":"Bash_ide","input":{}}}',
-      'data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\\"comm"}}',
-      'data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"and\\":\\"ls\\"}"}}',
-      'data: {"type":"content_block_stop","index":0}',
-      'data: {"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":12}}',
-      'data: [DONE]',
-    ].join('\n');
+    const raw = JSON.stringify({
+      id: 'm1', role: 'assistant',
+      content: [{ type: 'tool_use', name: 'Bash_ide', input: { command: 'ls' } }],
+      usage: { input_tokens: 40, output_tokens: 12 },
+    });
 
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
-      headers: { get: () => 'application/json' }, // non-stream → nhánh assembly
-      text: async () => sse,
+      headers: { get: () => 'application/json' },
+      text: async () => raw,
     }) as any;
 
-    // body.stream khác true → client xin non-stream
-    const result = await service.forward('key', '/messages', 'POST', { stream: false, tools: [{ name: 'Bash' }] });
+    const result = await service.forward('key', '/messages', 'POST', { stream: false });
 
     expect(result.isStream).toBe(false);
-    const tool = result.body.content.find((b: any) => b.type === 'tool_use');
-    expect(tool).toBeDefined();
-    expect(tool.name).toBe('Bash');           // hậu tố "_ide" do upstream chèn đã được bóc
-    expect(tool.input).toEqual({ command: 'ls' }); // input ráp đúng, không rỗng
+    expect(result.body).toBe(raw); // byte y chang — KHÔNG transform (name "_ide" giữ nguyên)
     expect(mockSubs.deductTokens).toHaveBeenCalledWith('1', 40, 12);
   });
 
-  describe('stripInjectedToolSuffix', () => {
-    const valid = new Set(['get_weather', 'Bash']);
+  // OpenAI shape: usage dùng prompt_tokens/completion_tokens.
+  it('non-stream deducts tokens from OpenAI-style usage', async () => {
+    mockSubs.findActiveByKey.mockResolvedValue({
+      id: '1', userId: 'u1', expiresAt: new Date(Date.now() + 86400000),
+    });
+    mockSubs.deductTokens.mockResolvedValue(mockQuota);
 
-    it('strips _ide only when stripped name matches a client tool', () => {
-      const line = 'data: {"type":"tool_use","name":"get_weather_ide","input":{}}';
-      expect(service.stripInjectedToolSuffix(line, valid))
-        .toContain('"name":"get_weather"');
+    const raw = JSON.stringify({
+      id: 'c1', object: 'chat.completion',
+      choices: [{ message: { role: 'assistant', content: 'hi' } }],
+      usage: { prompt_tokens: 100, completion_tokens: 20 },
     });
 
-    it('leaves real tool names ending in _ide untouched', () => {
-      // "open_ide" -> base "open" không nằm trong valid -> giữ nguyên
-      const line = 'data: {"name":"open_ide"}';
-      expect(service.stripInjectedToolSuffix(line, valid)).toBe(line);
-    });
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      headers: { get: () => 'application/json' },
+      text: async () => raw,
+    }) as any;
 
-    it('is a no-op when no tools / no _ide present', () => {
-      expect(service.stripInjectedToolSuffix('hello', new Set())).toBe('hello');
-      expect(service.stripInjectedToolSuffix('{"name":"Bash"}', valid)).toBe('{"name":"Bash"}');
+    const result = await service.forward('key', '/chat/completions', 'POST', {});
+    expect(result.body).toBe(raw);
+    expect(mockSubs.deductTokens).toHaveBeenCalledWith('1', 100, 20);
+  });
+
+  // Stream: proxy trả Response gốc để controller bơm verbatim, KHÔNG trừ token ở forward().
+  it('stream response is passed through without deducting in forward()', async () => {
+    mockSubs.findActiveByKey.mockResolvedValue({
+      id: '1', userId: 'u1', expiresAt: new Date(Date.now() + 86400000),
     });
+    const upstream = { ok: true, headers: { get: () => 'text/event-stream' } };
+    global.fetch = jest.fn().mockResolvedValue(upstream) as any;
+
+    const result = await service.forward('key', '/messages', 'POST', { stream: true });
+    expect(result.isStream).toBe(true);
+    expect(result.body).toBe(upstream);
+    expect(mockSubs.deductTokens).not.toHaveBeenCalled();
   });
 });

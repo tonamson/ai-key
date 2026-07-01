@@ -1,17 +1,17 @@
-import { All, Controller, Get, Headers, HttpCode, Post, Req, Res } from '@nestjs/common';
+import { All, Controller, Headers, HttpCode, Post, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ClaudeProxyService } from './claude-proxy.service';
 import { Public } from '../auth/decorators/public.decorator';
 import type { QuotaInfo } from '../subscriptions/subscriptions.service';
 
 @Public()
-@Controller('claude/v1')
+@Controller('v1')
 export class ClaudeProxyController {
   constructor(private readonly service: ClaudeProxyService) {}
 
-  // Explicit routes needed — NestJS wildcard @All('*') doesn't catch all POST paths reliably
+  // Explicit POST routes — NestJS wildcard @All('*') doesn't catch all POST paths reliably.
   @Post('chat/completions')
-  @HttpCode(200) // NestJS defaults POST to 201; Anthropic/Claude CLI expect 200 or it retries
+  @HttpCode(200) // Anthropic/Claude CLI expect 200 (NestJS defaults POST to 201 → client retries)
   chatCompletions(@Req() req: Request, @Res() res: Response, @Headers('x-api-key') apiKey: string) {
     return this.handle(req, res, apiKey, '/chat/completions');
   }
@@ -28,20 +28,7 @@ export class ClaudeProxyController {
     return this.handle(req, res, apiKey, '/messages/count_tokens');
   }
 
-  @Get('models')
-  models(@Res() res: Response) {
-    // 9router doesn't support /models — return static list so Claude CLI doesn't 405
-    res.json({
-      object: 'list',
-      data: [
-        { id: 'cc/claude-opus-4-8', object: 'model', created: 1749600000, owned_by: 'anthropic' },
-        { id: 'cc/claude-sonnet-4-6', object: 'model', created: 1749600000, owned_by: 'anthropic' },
-        { id: 'cc/claude-haiku-4-5-20251001', object: 'model', created: 1749600000, owned_by: 'anthropic' },
-      ],
-    });
-  }
-
-  // Catch-all for other paths
+  // Catch-all — forward mọi path còn lại (models, responses, embeddings, ...) verbatim lên 9Router.
   @All('*path')
   catchAll(@Req() req: Request, @Res() res: Response, @Headers('x-api-key') apiKey: string) {
     const path = '/' + ((req.params as any)['path'] ?? '');
@@ -57,22 +44,17 @@ export class ClaudeProxyController {
     this.setQuotaHeaders(res, result.quota);
 
     if (result.isStream) {
-      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Content-Type', result.contentType || 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
       res.setHeader('X-Accel-Buffering', 'no'); // tell nginx not to buffer SSE
       (res as any).flushHeaders?.();
       const reader = (result.body as { body: ReadableStream }).body.getReader();
       const decoder = new TextDecoder();
-      // Bóc hậu tố "_ide" upstream chèn vào tool name. SSE phân tách theo dòng và name luôn
-      // nằm gọn trong một dòng `data:`, nên buffer theo dòng rồi strip từng dòng hoàn chỉnh.
-      const validNames = new Set<string>(
-        (Array.isArray(body?.tools) ? body.tools : []).map((t: any) => t?.name).filter(Boolean));
-      let captured = '';
-      let buf = '';
-      let finalized = false;
       // Trừ token dựa trên những gì ĐÃ nhận từ upstream, kể cả khi client ngắt giữa chừng.
       // Không finalize = 9Router đã tốn tiền thật nhưng user xài free → token leak.
+      let captured = '';
+      let finalized = false;
       const finalize = async () => {
         if (finalized) return;
         finalized = true;
@@ -84,24 +66,19 @@ export class ClaudeProxyController {
           if (done) break;
           const chunk = decoder.decode(value, { stream: true });
           captured += chunk;
-          buf += chunk;
-          const nl = buf.lastIndexOf('\n');
-          if (nl === -1) continue;
-          const ready = buf.slice(0, nl + 1);
-          buf = buf.slice(nl + 1);
-          res.write(this.service.stripInjectedToolSuffix(ready, validNames));
+          res.write(chunk); // verbatim — không transform
         }
-        if (buf) res.write(this.service.stripInjectedToolSuffix(buf, validNames));
         await finalize();
         res.end();
       };
-      // Client ngắt kết nối giữa stream → vẫn trừ token theo phần upstream đã trả.
       res.on('close', () => { reader.cancel().catch(() => {}); finalize(); });
       pump().catch(async () => { await finalize(); res.end(); });
       return;
     }
 
-    res.json(result.body);
+    // Non-stream: echo body verbatim với đúng Content-Type upstream.
+    if (result.contentType) res.setHeader('Content-Type', result.contentType);
+    res.send(result.body);
   }
 
   private setQuotaHeaders(res: Response, q: QuotaInfo) {
