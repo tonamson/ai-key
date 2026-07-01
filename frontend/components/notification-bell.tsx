@@ -84,7 +84,7 @@ export function NotificationBell() {
               onClick={() => { if (!n.isRead) markOne(n.id); if (n.link) window.location.href = n.link; }}
             >
               <div className="flex w-full items-center gap-2">
-                {!n.isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-blue-500" />}
+                {!n.isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />}
                 <span className={`text-sm ${!n.isRead ? 'font-medium' : 'text-muted-foreground'}`}>{n.title}</span>
               </div>
               {n.body && <span className="text-xs text-muted-foreground pl-4 line-clamp-2">{n.body}</span>}

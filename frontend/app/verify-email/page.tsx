@@ -16,8 +16,8 @@ function AuthLeft() {
         <ArrowLeft className="size-4" /> cheapaikey.store
       </Link>
       <div className="space-y-8">
-        <div className="size-14 rounded-2xl bg-[#1485FF]/20 flex items-center justify-center dark:shadow-[0_0_30px_rgba(20,133,255,0.35)]">
-          <Key className="size-7 text-[#1485FF]" />
+        <div className="size-14 rounded-2xl bg-primary/15 flex items-center justify-center dark:shadow-[0_0_30px_rgba(255,107,0,0.35)]">
+          <Key className="size-7 text-primary" />
         </div>
         <div>
           <h1 className="text-3xl font-bold text-white mb-3">Xác thực email</h1>

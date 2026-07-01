@@ -156,7 +156,7 @@ export default function AdminSubscriptionsPage() {
                   <TableCell>
                     <div className="text-sm tabular-nums">{fmtN(Number(s.tokenUsedPeriod))} / {fmtN(Math.floor(Number(s.tokenQuota) / 144))}</div>
                     <div className="h-1.5 w-28 rounded-full bg-muted overflow-hidden mt-1">
-                      <div className={`h-full rounded-full ${periodPct >= 90 ? 'bg-destructive' : 'bg-cyan-500'}`}
+                      <div className={`h-full rounded-full ${periodPct >= 90 ? 'bg-destructive' : 'bg-primary'}`}
                         style={{ width: `${periodPct}%` }} />
                     </div>
                     <div className="text-xs text-muted-foreground mt-0.5">Reset lúc {new Date(new Date(s.periodStartsAt).getTime() + 18000000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</div>
@@ -180,7 +180,7 @@ export default function AdminSubscriptionsPage() {
                       <Button variant="ghost" size="icon" className="size-8" title="Chỉnh sửa" onClick={() => openEdit(s)}>
                         <Pencil className="size-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="size-8 text-cyan-600 hover:text-cyan-600" title="Reset countdown quota" onClick={() => setResetTarget(s)}>
+                      <Button variant="ghost" size="icon" className="size-8 text-primary hover:text-primary" title="Reset countdown quota" onClick={() => setResetTarget(s)}>
                         <RefreshCw className="size-3.5" />
                       </Button>
                     </div>

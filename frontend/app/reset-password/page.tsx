@@ -19,8 +19,8 @@ function AuthLeft() {
         <ArrowLeft className="size-4" /> cheapaikey.store
       </Link>
       <div className="space-y-8">
-        <div className="size-14 rounded-2xl bg-[#1485FF]/20 flex items-center justify-center dark:shadow-[0_0_30px_rgba(20,133,255,0.35)]">
-          <Key className="size-7 text-[#1485FF]" />
+        <div className="size-14 rounded-2xl bg-primary/15 flex items-center justify-center dark:shadow-[0_0_30px_rgba(255,107,0,0.35)]">
+          <Key className="size-7 text-primary" />
         </div>
         <div>
           <h1 className="text-3xl font-bold text-white mb-3">Mật khẩu mới</h1>
@@ -130,7 +130,7 @@ export default function ResetPasswordPage() {
             <h2 className="text-2xl font-bold">Đặt lại mật khẩu</h2>
             <p className="text-muted-foreground text-sm">Nhập mật khẩu mới cho tài khoản của bạn</p>
           </div>
-          <div className="bg-card border border-border rounded-2xl p-6 dark:shadow-[0_0_20px_rgba(20,133,255,0.08)]">
+          <div className="bg-card border border-border rounded-2xl p-6 dark:shadow-[0_0_20px_rgba(255,107,0,0.08)]">
             <Suspense fallback={<div className="text-center text-sm text-muted-foreground">Đang tải...</div>}>
               <ResetPasswordForm />
             </Suspense>

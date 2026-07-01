@@ -142,9 +142,9 @@ export default function StatsPage() {
           sub={summary ? `${fmt(summary.orders)} đơn` : undefined}
           icon={DollarSign} color="bg-emerald-500" />
         <StatCard label="Số đơn" value={summary ? fmt(summary.orders) : '—'}
-          icon={ShoppingCart} color="bg-blue-500" />
+          icon={ShoppingCart} color="bg-primary" />
         <StatCard label="Token Input" value={summary ? fmtK(summary.inputTokens) : '—'}
-          icon={Zap} color="bg-violet-500" />
+          icon={Zap} color="bg-amber-500" />
         <StatCard label="Token Output" value={summary ? fmtK(summary.outputTokens) : '—'}
           sub={summary ? `Tổng: ${fmtK(summary.inputTokens + summary.outputTokens)}` : undefined}
           icon={TrendingUp} color="bg-orange-500" />

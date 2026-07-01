@@ -98,7 +98,7 @@ function NavItem({
         render={<Link href={href} />}
         isActive={active}
         tooltip={label}
-        className={active ? 'dark:shadow-[0_0_10px_rgba(20,133,255,0.2)]' : ''}
+        className={active ? 'shadow-[0_0_8px_rgba(232,85,0,0.15)]' : ''}
       >
         <Icon />
         <span>{label}</span>
@@ -120,27 +120,25 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="px-3 py-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton render={<Link href="/dashboard" />} size="lg">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary/10 text-primary dark:shadow-[0_0_10px_rgba(20,133,255,0.25)]">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary/15 text-primary shadow-[0_0_10px_rgba(232,85,0,0.2)]">
                 <Key className="size-4" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
                 <span className="font-semibold text-sm">cheapaikey<span className="text-muted-foreground">.store</span></span>
-                <span className="text-xs text-muted-foreground">
-                  Affordable AI API Keys
-                </span>
+                <span className="text-xs text-muted-foreground">Affordable AI API Keys</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-[11px] uppercase tracking-widest font-semibold text-muted-foreground/70">Tổng quan</SidebarGroupLabel>
+      <SidebarContent className="px-1 py-2 gap-4">
+        <SidebarGroup className="p-0">
+          <SidebarGroupLabel className="px-3 mb-1 text-[10px] uppercase tracking-widest font-semibold text-muted-foreground/60">Menu</SidebarGroupLabel>
           <SidebarMenu>
             {MAIN_NAV.map((item) => (
               <NavItem key={item.href} {...item} />
@@ -149,8 +147,8 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {canAccessAdmin(user?.roleKey ?? null) && ADMIN_NAV_GROUPS.map((group) => (
-          <SidebarGroup key={group.label}>
-            <SidebarGroupLabel className="text-[11px] uppercase tracking-widest font-semibold text-muted-foreground/70">{group.label}</SidebarGroupLabel>
+          <SidebarGroup key={group.label} className="p-0">
+            <SidebarGroupLabel className="px-3 mb-1 text-[10px] uppercase tracking-widest font-semibold text-muted-foreground/60">{group.label}</SidebarGroupLabel>
             <SidebarMenu>
               {group.items.map((item) => (
                 <NavItem key={item.href} {...item} />
@@ -160,7 +158,7 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="px-3 py-3 border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>

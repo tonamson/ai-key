@@ -50,6 +50,7 @@ function KeyCard({ sub }: { sub: any }) {
   const days = daysLeft(sub.expiresAt);
   const usedPct = sub.tokenUsedPct ?? 0;
   const remainingPct = sub.tokenRemainingPct ?? 100;
+  const urgentLeft = days <= 3 ? 'border-l-destructive' : days <= 7 ? 'border-l-orange-400' : 'border-l-transparent';
 
   function copy() {
     navigator.clipboard.writeText(sub.nineRouterKey);
@@ -58,52 +59,45 @@ function KeyCard({ sub }: { sub: any }) {
   }
 
   return (
-    <div className="rounded-2xl border bg-card overflow-hidden">
-      {/* Header stripe */}
-      <div className={`h-1 w-full ${days <= 3 ? 'bg-destructive' : days <= 7 ? 'bg-orange-500' : 'bg-primary'}`} />
-      <div className="p-5 space-y-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="font-semibold">{sub.order?.plan?.name ?? 'API Key'}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Hết hạn {fmtDate(sub.expiresAt)} · còn {days} ngày
-            </p>
+    <div className={`rounded-xl border bg-card border-l-2 ${urgentLeft} p-5 space-y-4`}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-semibold">{sub.order?.plan?.name ?? 'API Key'}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Hết hạn {fmtDate(sub.expiresAt)} · còn {days} ngày
+          </p>
+        </div>
+        <div className="flex gap-1.5 shrink-0">
+          {days <= 7 && <Badge variant={days <= 3 ? 'destructive' : 'outline'} className={days > 3 ? 'text-orange-600 border-orange-300' : ''}>{days}d</Badge>}
+          <Badge variant={sub.isActive ? 'default' : 'secondary'}>{sub.isActive ? 'Active' : 'Off'}</Badge>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2.5">
+        <code className="flex-1 text-xs font-mono text-muted-foreground truncate">
+          {show ? sub.nineRouterKey : (sub.nineRouterKeyMasked ?? sub.nineRouterKey?.slice(0, 14) + '•••')}
+        </code>
+        <button onClick={() => setShow(s => !s)} className="p-1 rounded hover:bg-background transition-colors text-muted-foreground hover:text-foreground shrink-0">
+          {show ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+        </button>
+        <button onClick={copy} className="p-1 rounded hover:bg-background transition-colors text-muted-foreground hover:text-foreground shrink-0">
+          {copied ? <CheckCircle2 className="size-3.5 text-green-500" /> : <Copy className="size-3.5" />}
+        </button>
+      </div>
+
+      <TokenBar pct={usedPct} />
+
+      <div className="grid grid-cols-3 gap-3 pt-1">
+        {[
+          { label: 'Đã dùng', value: `${usedPct}%` },
+          { label: 'Còn lại', value: `${remainingPct}%` },
+          { label: 'Trạng thái', value: usedPct >= 100 ? 'Hết' : usedPct >= 90 ? 'Gần hết' : 'Còn' },
+        ].map(({ label, value }) => (
+          <div key={label} className="text-center">
+            <p className="text-xs text-muted-foreground">{label}</p>
+            <p className="text-sm font-semibold mt-0.5 tabular-nums">{value}</p>
           </div>
-          <div className="flex gap-1.5 shrink-0">
-            {days <= 7 && <Badge variant={days <= 3 ? 'destructive' : 'outline'} className={days > 3 ? 'text-orange-600 border-orange-300' : ''}>{days}d</Badge>}
-            <Badge variant={sub.isActive ? 'default' : 'secondary'}>{sub.isActive ? 'Active' : 'Off'}</Badge>
-          </div>
-        </div>
-
-        {/* API Key row */}
-        <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2.5">
-          <code className="flex-1 text-xs font-mono text-muted-foreground truncate">
-            {show ? sub.nineRouterKey : (sub.nineRouterKeyMasked ?? sub.nineRouterKey?.slice(0, 14) + '•••')}
-          </code>
-          <button onClick={() => setShow(s => !s)} className="p-1 rounded hover:bg-background transition-colors text-muted-foreground hover:text-foreground shrink-0">
-            {show ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
-          </button>
-          <button onClick={copy} className="p-1 rounded hover:bg-background transition-colors text-muted-foreground hover:text-foreground shrink-0">
-            {copied ? <CheckCircle2 className="size-3.5 text-green-500" /> : <Copy className="size-3.5" />}
-          </button>
-        </div>
-
-        {/* Token usage */}
-        <TokenBar pct={usedPct} />
-
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-3 pt-1">
-          {[
-            { label: 'Đã dùng', value: `${usedPct}%` },
-            { label: 'Còn lại', value: `${remainingPct}%` },
-            { label: 'Trạng thái', value: usedPct >= 100 ? 'Hết' : usedPct >= 90 ? 'Gần hết' : 'Còn' },
-          ].map(({ label, value }) => (
-            <div key={label} className="text-center">
-              <p className="text-xs text-muted-foreground">{label}</p>
-              <p className="text-sm font-semibold mt-0.5 tabular-nums">{value}</p>
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   );
@@ -187,13 +181,13 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {adminStats ? [
-              { label: 'Người dùng', value: fmtN(adminStats.totalUsers), icon: Users, sub: 'Tổng tài khoản', c: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50' },
+              { label: 'Người dùng', value: fmtN(adminStats.totalUsers), icon: Users, sub: 'Tổng tài khoản', c: 'text-primary bg-primary/10 dark:bg-primary/15' },
               { label: 'Doanh thu', value: fmtVND(adminStats.totalRevenue), icon: TrendingUp, sub: `${adminStats.paidOrders} đơn thành công`, c: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50' },
-              { label: 'Đơn hàng', value: fmtN(adminStats.totalOrders), icon: ShoppingCart, sub: `${adminStats.pendingOrders} chờ xác nhận`, c: adminStats.pendingOrders > 0 ? 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50' : 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/50' },
+              { label: 'Đơn hàng', value: fmtN(adminStats.totalOrders), icon: ShoppingCart, sub: `${adminStats.pendingOrders} chờ xác nhận`, c: adminStats.pendingOrders > 0 ? 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50' : 'text-primary bg-primary/10 dark:bg-primary/15' },
               { label: 'Key active', value: fmtN(adminStats.activeSubs), icon: Key, sub: 'Subscription đang dùng', c: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50' },
             ].map(({ label, value, icon: Icon, sub, c }) => (
-              <div key={label} className="rounded-2xl border bg-card p-4 flex items-start gap-3">
-                <div className={`size-9 rounded-xl flex items-center justify-center shrink-0 ${c}`}>
+              <div key={label} className="rounded-xl border bg-card p-4 flex items-start gap-3">
+                <div className={`size-9 rounded-lg flex items-center justify-center shrink-0 ${c}`}>
                   <Icon className="size-4" />
                 </div>
                 <div className="min-w-0">
@@ -202,12 +196,12 @@ export default function DashboardPage() {
                   <p className="text-[11px] text-muted-foreground mt-0.5">{sub}</p>
                 </div>
               </div>
-            )) : Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
+            )) : Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
           </div>
 
           {/* System token bar */}
           {adminStats && adminStats.totalTokenQuota > 0 && (
-            <div className="rounded-2xl border bg-card p-4 space-y-3">
+            <div className="rounded-xl border bg-card p-5 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Zap className="size-4 text-primary" />
@@ -222,14 +216,14 @@ export default function DashboardPage() {
           {/* 2-col: recent orders + quick links */}
           <div className="grid gap-4 lg:grid-cols-5">
             {/* Recent orders */}
-            <div className="lg:col-span-3 rounded-2xl border bg-card">
-              <div className="flex items-center justify-between px-5 py-3.5 border-b">
+            <div className="lg:col-span-3 rounded-xl border bg-card overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4">
                 <div className="flex items-center gap-2 text-sm font-semibold">
                   <Activity className="size-4 text-muted-foreground" />Đơn hàng gần đây
                 </div>
                 <Link href="/admin/orders" className="text-xs text-primary hover:underline">Xem tất cả</Link>
               </div>
-              <div className="divide-y">
+              <div className="divide-y divide-border">
                 {!adminStats && Array(4).fill(0).map((_, i) => (
                   <div key={i} className="px-5 py-3.5 flex items-center gap-3">
                     <Skeleton className="size-8 rounded-full" />
@@ -242,7 +236,7 @@ export default function DashboardPage() {
                 )}
                 {adminStats?.recentOrders.map((o: any) => (
                   <div key={o.id} className="flex items-center gap-3 px-5 py-3">
-                    <div className={`size-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${o.status === 'paid' ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400' : o.status === 'pending' ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400' : 'bg-muted text-muted-foreground'}`}>
+                    <div className={`size-8 rounded-lg flex items-center justify-center shrink-0 ${o.status === 'paid' ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400' : o.status === 'pending' ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400' : 'bg-muted text-muted-foreground'}`}>
                       {o.status === 'paid' ? <CheckCircle2 className="size-4" /> : o.status === 'pending' ? <Clock className="size-4" /> : <AlertTriangle className="size-4" />}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -261,11 +255,11 @@ export default function DashboardPage() {
             </div>
 
             {/* Quick nav */}
-            <div className="lg:col-span-2 rounded-2xl border bg-card">
-              <div className="flex items-center gap-2 px-5 py-3.5 border-b text-sm font-semibold">
+            <div className="lg:col-span-2 rounded-xl border bg-card overflow-hidden">
+              <div className="flex items-center gap-2 px-5 py-4 text-sm font-semibold">
                 <ScrollText className="size-4 text-muted-foreground" />Quản lý
               </div>
-              <nav className="p-2 space-y-0.5">
+              <nav className="px-2 pb-2 space-y-0.5">
                 {[
                   { href: '/admin/orders', icon: CreditCard, label: 'Đơn hàng', badge: adminStats?.pendingOrders > 0 ? adminStats.pendingOrders : null },
                   { href: '/admin/subscriptions', icon: KeyRound, label: 'API Keys' },
@@ -336,7 +330,7 @@ export default function DashboardPage() {
                 { label: 'Token đã dùng', value: fmtN(totalUsed) },
                 { label: 'Token còn lại', value: fmtN(Math.max(0, totalQuota - totalUsed)) },
               ].map(({ label, value }) => (
-                <div key={label} className="rounded-xl border bg-card px-4 py-3 text-center">
+                <div key={label} className="rounded-xl border bg-card px-4 py-4 text-center">
                   <p className="text-xs text-muted-foreground">{label}</p>
                   <p className="text-lg font-bold mt-1 tabular-nums">{value}</p>
                 </div>
@@ -360,7 +354,7 @@ export default function DashboardPage() {
             { href: '/dashboard/profile', icon: ShieldCheck, label: 'Bảo mật', desc: 'Đổi mật khẩu, bật 2FA' },
           ].map(({ href, icon: Icon, label, desc }) => (
             <Link key={href} href={href}
-              className="group flex items-center gap-3 rounded-xl border bg-card p-4 hover:border-primary/40 hover:bg-muted/30 transition-all">
+              className="group flex items-center gap-3 rounded-xl border bg-card p-5 hover:border-primary/40 hover:bg-muted/30 transition-all">
               <div className="size-9 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
                 <Icon className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
@@ -377,22 +371,22 @@ export default function DashboardPage() {
       {/* ── Referral ── */}
       {/* Ví */}
       {walletBalance > 0 && (
-        <Link href="/dashboard/buy" className="rounded-2xl border bg-card p-5 flex items-center justify-between hover:shadow-md transition-shadow">
+        <Link href="/dashboard/buy" className="rounded-xl border bg-card p-5 flex items-center justify-between hover:border-primary/40 transition-colors">
           <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <Wallet className="size-5 text-blue-600 dark:text-blue-400" />
+            <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Wallet className="size-4 text-primary" />
             </div>
             <div>
               <p className="text-sm font-semibold">Số dư ví</p>
               <p className="text-xs text-muted-foreground">Dùng để mua key</p>
             </div>
           </div>
-          <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{fmtVND(walletBalance)}</p>
+          <p className="text-xl font-bold text-primary">{fmtVND(walletBalance)}</p>
         </Link>
       )}
 
       {referral && (
-        <section className="rounded-2xl border bg-card p-5 flex items-center gap-4">
+        <div className="rounded-xl border bg-card p-5 flex items-center gap-4">
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold">Mã giới thiệu</p>
             <p className="text-xs text-muted-foreground mt-0.5">Chia sẻ để nhận hoa hồng 10% mỗi đơn thành công</p>
@@ -408,7 +402,7 @@ export default function DashboardPage() {
               {copiedRef ? 'Đã copy!' : 'Copy mã'}
             </button>
           </div>
-        </section>
+        </div>
       )}
     </div>
   );

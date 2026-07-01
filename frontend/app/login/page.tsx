@@ -16,7 +16,7 @@ function AuthLeft() {
   return (
     <div className="hidden lg:flex flex-col justify-between p-12
       bg-gradient-to-br from-[#E85500] to-[#C94000]
-      dark:from-[#0D0800] dark:to-[#2E1A00]">
+      dark:from-[#100900] dark:to-[#3A2200]">
       <Link href="/" className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm">
         <ArrowLeft className="size-4" /> cheapaikey.store
       </Link>
@@ -112,7 +112,7 @@ export default function LoginPage() {
               <h2 className="text-2xl font-bold">Xác thực 2 bước</h2>
               <p className="text-muted-foreground text-sm">Nhập mã 6 số từ ứng dụng xác thực</p>
             </div>
-            <div className="bg-card border border-border rounded-2xl p-6 dark:shadow-[0_0_20px_rgba(20,133,255,0.08)]">
+            <div className="bg-card border border-border rounded-2xl p-6 dark:shadow-[0_0_20px_rgba(255,107,0,0.08)]">
               <form onSubmit={handleOtp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="otp">Mã xác thực</Label>
@@ -152,7 +152,7 @@ export default function LoginPage() {
             <h2 className="text-2xl font-bold">Đăng nhập</h2>
             <p className="text-muted-foreground text-sm">Nhập email và mật khẩu để tiếp tục</p>
           </div>
-          <div className="bg-card border border-border rounded-2xl p-6 dark:shadow-[0_0_20px_rgba(20,133,255,0.08)]">
+          <div className="bg-card border border-border rounded-2xl p-6 dark:shadow-[0_0_20px_rgba(255,107,0,0.08)]">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>

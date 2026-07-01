@@ -47,14 +47,14 @@ const CC_MODELS = [
 
 const TIER_COLOR: Record<string, string> = {
   "Mạnh nhất":
-    "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800",
+    "bg-primary/10 text-primary border-primary/30 dark:bg-primary/15 dark:text-primary dark:border-primary/40",
   "Khuyên dùng":
-    "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800",
-  Opus: "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-300 dark:border-indigo-800",
+    "bg-primary/10 text-primary border-primary/30 dark:bg-primary/15 dark:text-primary dark:border-primary/40",
+  Opus: "bg-primary/10 text-primary border-primary/30 dark:bg-primary/15 dark:text-primary dark:border-primary/40",
   Sonnet:
-    "bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-800",
+    "bg-muted text-muted-foreground border-border dark:bg-muted dark:text-muted-foreground dark:border-border",
   "Nhanh/Rẻ":
-    "bg-green-100 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800",
+    "bg-muted text-muted-foreground border-border dark:bg-muted dark:text-muted-foreground dark:border-border",
 };
 
 const SETTINGS_JSON = JSON.stringify(

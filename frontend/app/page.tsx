@@ -146,7 +146,7 @@ export default async function LandingPage() {
             </Link>
             <Link href="/register"
               className="text-sm bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium transition-all
-                dark:shadow-[0_0_16px_rgba(20,133,255,0.4)] hover:dark:shadow-[0_0_24px_rgba(20,133,255,0.6)]">
+                dark:shadow-[0_0_16px_rgba(255,107,0,0.4)] hover:dark:shadow-[0_0_24px_rgba(255,107,0,0.6)]">
               Đăng ký miễn phí
             </Link>
           </div>
@@ -161,12 +161,12 @@ export default async function LandingPage() {
           <div className="dark:block hidden absolute inset-0 grid-bg opacity-100" />
           {/* dark: glow orbs */}
           <div className="dark:block hidden absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px]
-            bg-[radial-gradient(ellipse_at_center,_rgba(20,133,255,0.12)_0%,_transparent_70%)]" />
+            bg-[radial-gradient(ellipse_at_center,_rgba(255,107,0,0.12)_0%,_transparent_70%)]" />
           <div className="dark:block hidden absolute -bottom-20 right-0 w-[500px] h-[400px]
             bg-[radial-gradient(ellipse_at_center,_rgba(120,228,226,0.06)_0%,_transparent_70%)]" />
           {/* light: subtle mesh */}
           <div className="dark:hidden block absolute inset-0
-            bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(20,133,255,0.08),transparent)]" />
+            bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(255,107,0,0.08),transparent)]" />
         </div>
 
         <div className="relative max-w-6xl mx-auto">
@@ -202,8 +202,8 @@ export default async function LandingPage() {
                   className="group inline-flex items-center justify-center gap-2
                     bg-primary hover:bg-primary/90 text-white px-7 py-3.5 rounded-xl
                     font-semibold text-base transition-all
-                    dark:shadow-[0_0_30px_rgba(20,133,255,0.45)]
-                    hover:dark:shadow-[0_0_40px_rgba(20,133,255,0.65)]
+                    dark:shadow-[0_0_30px_rgba(255,107,0,0.45)]
+                    hover:dark:shadow-[0_0_40px_rgba(255,107,0,0.65)]
                     hover:-translate-y-0.5">
                   Bắt đầu miễn phí
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -238,7 +238,7 @@ export default async function LandingPage() {
             <div className="hidden lg:flex justify-center items-center">
               <div className="animate-float w-full max-w-[480px]
                 rounded-2xl border border-border overflow-hidden
-                dark:shadow-[0_0_60px_rgba(20,133,255,0.15),0_0_120px_rgba(20,133,255,0.06)]
+                dark:shadow-[0_0_60px_rgba(255,107,0,0.15),0_0_120px_rgba(255,107,0,0.06)]
                 shadow-[0_8px_60px_rgba(0,0,0,0.12)]
                 bg-[#F6F8FA] dark:bg-[#0D1117]">
                 {/* window chrome */}
@@ -293,7 +293,7 @@ export default async function LandingPage() {
                     <span className="text-muted-foreground">= </span>
                     <span className="text-[#0969DA] dark:text-[#79C0FF]">Anthropic</span>
                     <span className="text-muted-foreground">()</span>
-                    <span className="animate-blink text-[#1485FF] ml-0.5">▋</span>
+                    <span className="animate-blink text-[#FF6B00] ml-0.5">▋</span>
                   </div>
                 </div>
 
@@ -352,9 +352,9 @@ export default async function LandingPage() {
             <div className="lg:col-span-2 relative overflow-hidden rounded-2xl border border-border
               bg-card p-8 group hover:border-primary/40 transition-all">
               <div className="absolute top-0 right-0 w-64 h-64 pointer-events-none
-                dark:bg-[radial-gradient(ellipse_at_top_right,rgba(20,133,255,0.08),transparent)]" />
+                dark:bg-[radial-gradient(ellipse_at_top_right,rgba(255,107,0,0.08),transparent)]" />
               <div className="w-12 h-12 rounded-2xl bg-primary/10 dark:bg-primary/15 flex items-center
-                justify-center mb-6 dark:shadow-[0_0_20px_rgba(20,133,255,0.2)]">
+                justify-center mb-6 dark:shadow-[0_0_20px_rgba(255,107,0,0.2)]">
                 <Zap className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-3">Kích hoạt tức thì</h3>
@@ -540,7 +540,7 @@ export default async function LandingPage() {
 
           {/* code card */}
           <div className="mt-16 rounded-2xl border border-border overflow-hidden
-            dark:shadow-[0_0_40px_rgba(20,133,255,0.08)]">
+            dark:shadow-[0_0_40px_rgba(255,107,0,0.08)]">
             <div className="flex items-center gap-2 px-5 py-3.5 border-b border-border bg-muted/50">
               <div className="flex gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
@@ -595,7 +595,7 @@ export default async function LandingPage() {
               <Link href="/register"
                 className="inline-flex items-center gap-2 mt-8 bg-primary hover:bg-primary/90
                   text-white px-6 py-3 rounded-xl font-semibold text-sm transition-all
-                  dark:shadow-[0_0_20px_rgba(20,133,255,0.35)]">
+                  dark:shadow-[0_0_20px_rgba(255,107,0,0.35)]">
                 Đăng ký ngay <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -717,7 +717,7 @@ export default async function LandingPage() {
       {/* ── Pricing ──────────────────────────────────────────────────────────── */}
       <section id="pricing" className="py-24 px-5 border-t border-border/40 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none
-          dark:bg-[radial-gradient(ellipse_70%_40%_at_50%_50%,rgba(20,133,255,0.05),transparent)]" />
+          dark:bg-[radial-gradient(ellipse_70%_40%_at_50%_50%,rgba(255,107,0,0.05),transparent)]" />
 
         <div className="relative max-w-6xl mx-auto">
           <div className="text-center mb-14">
@@ -749,20 +749,20 @@ export default async function LandingPage() {
                     className={`relative flex flex-col rounded-2xl w-full max-w-[320px]
                       border transition-all duration-300 ${
                       isPopular
-                        ? 'border-primary bg-card dark:shadow-[0_0_40px_rgba(20,133,255,0.25),0_0_80px_rgba(20,133,255,0.1)] -translate-y-2'
+                        ? 'border-primary bg-card dark:shadow-[0_0_40px_rgba(255,107,0,0.25),0_0_80px_rgba(255,107,0,0.1)] -translate-y-2'
                         : 'border-border bg-card hover:border-primary/40 hover:-translate-y-1'
                     }`}>
 
                     {isPopular && (
                       <div className="absolute -top-px inset-x-0 h-[2px] rounded-t-2xl
-                        bg-gradient-to-r from-[#1485FF] via-[#78E4E2] to-[#1485FF]" />
+                        bg-gradient-to-r from-[#FF6B00] via-[#78E4E2] to-[#FF6B00]" />
                     )}
                     {isPopular && (
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                         <span className="inline-flex items-center gap-1.5
-                          bg-gradient-to-r from-[#1485FF] to-[#78E4E2]
+                          bg-gradient-to-r from-[#FF6B00] to-[#78E4E2]
                           text-white text-xs font-bold px-4 py-1.5 rounded-full
-                          shadow-[0_4px_16px_rgba(20,133,255,0.4)]">
+                          shadow-[0_4px_16px_rgba(255,107,0,0.4)]">
                           <Star className="w-3 h-3 fill-white" /> Phổ biến nhất
                         </span>
                       </div>
@@ -795,7 +795,7 @@ export default async function LandingPage() {
                         <p className="text-2xl font-bold text-[#F4D22B] mb-2">{fmtTokens(plan.tokenQuota)}</p>
                         <div className="h-1.5 rounded-full bg-muted-foreground/20 overflow-hidden">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-[#1485FF] to-[#78E4E2]"
+                            className="h-full rounded-full bg-gradient-to-r from-[#FF6B00] to-[#78E4E2]"
                             style={{ width: `${tokenPct}%` }} />
                         </div>
                       </div>
@@ -822,7 +822,7 @@ export default async function LandingPage() {
                         className={`flex items-center justify-center gap-2 py-3.5 rounded-xl
                           font-semibold text-sm transition-all ${
                           isPopular
-                            ? 'bg-primary hover:bg-primary/90 text-white dark:shadow-[0_0_20px_rgba(20,133,255,0.35)]'
+                            ? 'bg-primary hover:bg-primary/90 text-white dark:shadow-[0_0_20px_rgba(255,107,0,0.35)]'
                             : 'bg-muted hover:bg-muted/70 border border-border hover:border-primary/50 text-foreground'
                         }`}>
                         Mua ngay <ArrowRight className="w-4 h-4" />
@@ -878,8 +878,8 @@ export default async function LandingPage() {
           <div className="dark:block hidden absolute inset-0 grid-bg opacity-50" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
             w-[700px] h-[400px]
-            dark:bg-[radial-gradient(ellipse_at_center,rgba(20,133,255,0.12),transparent)]
-            bg-[radial-gradient(ellipse_at_center,rgba(20,133,255,0.05),transparent)]" />
+            dark:bg-[radial-gradient(ellipse_at_center,rgba(255,107,0,0.12),transparent)]
+            bg-[radial-gradient(ellipse_at_center,rgba(255,107,0,0.05),transparent)]" />
         </div>
 
         <div className="relative max-w-2xl mx-auto text-center">
@@ -903,8 +903,8 @@ export default async function LandingPage() {
               className="group inline-flex items-center justify-center gap-2
                 bg-primary hover:bg-primary/90 text-white
                 px-10 py-4 rounded-xl font-semibold text-base transition-all
-                dark:shadow-[0_0_40px_rgba(20,133,255,0.45)]
-                hover:dark:shadow-[0_0_50px_rgba(20,133,255,0.65)]
+                dark:shadow-[0_0_40px_rgba(255,107,0,0.45)]
+                hover:dark:shadow-[0_0_50px_rgba(255,107,0,0.65)]
                 hover:-translate-y-0.5">
               Tạo tài khoản miễn phí
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
