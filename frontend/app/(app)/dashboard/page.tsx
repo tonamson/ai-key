@@ -26,14 +26,13 @@ function Skeleton({ className }: { className?: string }) {
 }
 
 /* ─── Token progress bar ─── */
-function TokenBar({ used, quota, showLabel = true }: { used: number; quota: number; showLabel?: boolean }) {
-  const pct = quota > 0 ? Math.min(100, Math.round(used / quota * 100)) : 0;
+function TokenBar({ pct, showLabel = true }: { pct: number; showLabel?: boolean }) {
   const color = pct >= 90 ? 'bg-destructive' : pct >= 70 ? 'bg-orange-500' : 'bg-primary';
   return (
     <div className="space-y-1.5">
       {showLabel && (
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{fmtN(used)} / {fmtN(quota)} tokens</span>
+          <span>Đã dùng {pct}%</span>
           <span className={pct >= 90 ? 'text-destructive font-semibold' : ''}>{pct}%</span>
         </div>
       )}
@@ -49,8 +48,8 @@ function KeyCard({ sub }: { sub: any }) {
   const [show, setShow] = useState(false);
   const [copied, setCopied] = useState(false);
   const days = daysLeft(sub.expiresAt);
-  const used = Number(sub.tokenUsed);
-  const quota = Number(sub.tokenQuota);
+  const usedPct = sub.tokenUsedPct ?? 0;
+  const remainingPct = sub.tokenRemainingPct ?? 100;
 
   function copy() {
     navigator.clipboard.writeText(sub.nineRouterKey);
@@ -90,14 +89,14 @@ function KeyCard({ sub }: { sub: any }) {
         </div>
 
         {/* Token usage */}
-        <TokenBar used={used} quota={quota} />
+        <TokenBar pct={usedPct} />
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3 pt-1">
           {[
-            { label: 'Đã dùng', value: fmtN(used) },
-            { label: 'Còn lại', value: fmtN(Math.max(0, quota - used)) },
-            { label: 'Quota', value: fmtN(quota) },
+            { label: 'Đã dùng', value: `${usedPct}%` },
+            { label: 'Còn lại', value: `${remainingPct}%` },
+            { label: 'Trạng thái', value: usedPct >= 100 ? 'Hết' : usedPct >= 90 ? 'Gần hết' : 'Còn' },
           ].map(({ label, value }) => (
             <div key={label} className="text-center">
               <p className="text-xs text-muted-foreground">{label}</p>
@@ -216,7 +215,7 @@ export default function DashboardPage() {
                 </div>
                 <Link href="/admin/subscriptions" className="text-xs text-primary hover:underline">Chi tiết</Link>
               </div>
-              <TokenBar used={adminStats.totalTokenUsed} quota={adminStats.totalTokenQuota} />
+              <TokenBar pct={adminStats.totalTokenQuota > 0 ? Math.min(100, Math.round(adminStats.totalTokenUsed / adminStats.totalTokenQuota * 100)) : 0} />
             </div>
           )}
 
