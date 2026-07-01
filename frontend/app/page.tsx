@@ -280,7 +280,7 @@ export default async function LandingPage() {
         <div className="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {[
             { icon: Zap,    color: '#F4D22B', title: 'Kích hoạt tức thì',    desc: 'Nhận key ngay sau thanh toán, hệ thống tự động — không cần chờ duyệt thủ công' },
-            { icon: Shield, color: '#78E4E2', title: 'Key riêng tư tuyệt đối', desc: 'Mỗi người dùng một key độc lập, mã hoá, chỉ bạn thấy được trong dashboard' },
+            { icon: Shield, color: '#78E4E2', title: 'Key riêng của bạn', desc: 'Mỗi tài khoản được cấp một API Key riêng biệt, chỉ bạn mới thấy và sử dụng' },
             { icon: Clock,  color: '#1485FF', title: 'Thanh toán nội địa',    desc: 'Chuyển khoản Vietcombank, Techcombank, MB... — không cần thẻ nước ngoài' },
             { icon: Globe,  color: '#78E4E2', title: 'Hỗ trợ mọi app',       desc: 'Claude Code, Cursor, Continue, OpenRouter, API trực tiếp — dùng được ở bất kỳ đâu' },
           ].map(({ icon: Icon, color, title, desc }) => (
