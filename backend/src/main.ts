@@ -12,6 +12,14 @@ async function bootstrap() {
   });
   // ponytail: unlimited for claude proxy — Claude API enforces its own context limits
   app.use('/claude', require('express').json({ limit: '100mb' }));
+  // Claude proxy: allow any origin — auth is enforced by API key, not CORS
+  app.use('/claude', (_req: any, res: any, next: any) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    if (_req.method === 'OPTIONS') return res.sendStatus(204);
+    next();
+  });
   app.use(require('express').json({ limit: '10mb' }));
   app.use(require('express').urlencoded({ limit: '10mb', extended: true }));
 
