@@ -25,7 +25,7 @@ export class AuthController {
   async register(@Body() dto: RegisterDto) {
     await this.recaptcha.verify(dto.recaptchaToken, 'register');
     const result = await this.auth.register(dto.email, dto.password, dto.name, dto.referredBy);
-    const appUrl = this.config.get('APP_URL') ?? 'https://moneynote.store';
+    const appUrl = this.config.get('APP_URL') ?? 'https://cheapaikey.store';
     const verifyUrl = `${appUrl}/verify-email?token=${result.emailVerifyToken}`;
     this.email.sendEmailVerify(result.email, result.name, verifyUrl);
     return { message: 'Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.' };
@@ -42,7 +42,7 @@ export class AuthController {
   async resendVerifyEmail(@Body() dto: { email: string }) {
     const result = await this.auth.resendVerifyEmail(dto.email);
     if (result) {
-      const appUrl = this.config.get('APP_URL') ?? 'https://moneynote.store';
+      const appUrl = this.config.get('APP_URL') ?? 'https://cheapaikey.store';
       const verifyUrl = `${appUrl}/verify-email?token=${result.token}`;
       this.email.sendEmailVerify(dto.email, result.name, verifyUrl);
     }
@@ -61,7 +61,7 @@ export class AuthController {
   async forgotPassword(@Body() dto: { email: string }) {
     const result = await this.auth.forgotPassword(dto.email);
     if (result) {
-      const appUrl = this.config.get('APP_URL') ?? 'https://moneynote.store';
+      const appUrl = this.config.get('APP_URL') ?? 'https://cheapaikey.store';
       const resetUrl = `${appUrl}/reset-password?token=${result.token}`;
       this.email.sendPasswordReset(dto.email, result.name, resetUrl);
     }
