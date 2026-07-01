@@ -4,6 +4,7 @@ import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, LessThan, Repository } from 'typeorm';
 import { Order, OrderStatus } from './order.entity';
+import { User } from '../users/user.entity';
 import { KeySubscription } from '../subscriptions/key-subscription.entity';
 import { PlansService } from '../plans/plans.service';
 import { CouponsService } from '../coupons/coupons.service';
@@ -102,9 +103,7 @@ export class OrdersService {
     }
 
     // Gửi Telegram thông báo chờ thanh toán
-    const user = await this.orderRepo.manager.findOne(
-      (await import('../users/user.entity')).User, { where: { id: userId } }
-    );
+    const user = await this.orderRepo.manager.findOne(User, { where: { id: userId } });
     const expiresAt = order.expiresAt!;
     const fmtExp = expiresAt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' });
     const text = [
