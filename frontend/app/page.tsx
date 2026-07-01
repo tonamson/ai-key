@@ -33,18 +33,18 @@ function fmtTokens(t: number) {
 
 function SectionTag({ children }: { children: React.ReactNode }) {
   return (
-    <div className="inline-flex items-center gap-2 bg-[#0B1F3A] border border-[#14485F] rounded-full px-4 py-1.5 text-sm text-[#78E4E2] mb-5">
+    <div className="inline-flex items-center gap-2 bg-muted border border-border rounded-full px-4 py-1.5 text-sm text-accent dark:text-accent mb-5">
       {children}
     </div>
   );
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-3xl sm:text-4xl font-bold text-[#EEF4FF] mb-4">{children}</h2>;
+  return <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">{children}</h2>;
 }
 
 function SectionSub({ children }: { children: React.ReactNode }) {
-  return <p className="text-[#78A8B8] text-lg leading-relaxed">{children}</p>;
+  return <p className="text-muted-foreground text-lg leading-relaxed">{children}</p>;
 }
 
 // ─── FAQ data ────────────────────────────────────────────────────────────────
@@ -82,25 +82,25 @@ export default async function LandingPage() {
   const plans: any[] = await getPlans();
 
   return (
-    <div className="min-h-screen bg-[#06090F] text-[#EEF4FF] overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Suspense><RefHandler /></Suspense>
 
       {/* ── Nav ─────────────────────────────────────────────────────────── */}
-      <nav className="fixed top-0 inset-x-0 z-50 border-b border-[#14485F]/60 bg-[#06090F]/80 backdrop-blur-md">
+      <nav className="fixed top-0 inset-x-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <img src="/banner.png" alt="cheapaikey.store" className="h-8 w-auto" />
-          <div className="hidden sm:flex items-center gap-6 text-sm text-[#78A8B8]">
-            <a href="#features" className="hover:text-[#EEF4FF] transition-colors">Tính năng</a>
-            <a href="#how" className="hover:text-[#EEF4FF] transition-colors">Cách dùng</a>
-            <a href="#pricing" className="hover:text-[#EEF4FF] transition-colors">Bảng giá</a>
-            <a href="#faq" className="hover:text-[#EEF4FF] transition-colors">FAQ</a>
+          <div className="hidden sm:flex items-center gap-6 text-sm text-muted-foreground">
+            <a href="#features" className="hover:text-foreground transition-colors">Tính năng</a>
+            <a href="#how" className="hover:text-foreground transition-colors">Cách dùng</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">Bảng giá</a>
+            <a href="#faq" className="hover:text-foreground transition-colors">FAQ</a>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm text-[#78A8B8] hover:text-[#EEF4FF] transition-colors px-3 py-2">
+            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2">
               Đăng nhập
             </Link>
             <Link href="/register"
-              className="text-sm bg-[#1485FF] hover:bg-[#0B6FD4] text-white px-4 py-2 rounded-lg font-medium transition-colors">
+              className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-medium transition-colors">
               Đăng ký miễn phí
             </Link>
           </div>
@@ -108,38 +108,43 @@ export default async function LandingPage() {
       </nav>
 
       {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <section className="pt-36 pb-24 px-6 text-center relative overflow-hidden">
+      <section className="pt-36 pb-24 px-6 text-center relative overflow-hidden
+        bg-[radial-gradient(ellipse_at_center,_#0D1F3C_0%,_#080B0F_70%)]
+        dark:bg-[radial-gradient(ellipse_at_center,_#0D1F3C_0%,_#080B0F_70%)]
+        light:bg-white">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-[#1485FF]/6 rounded-full blur-[130px]" />
-          <div className="absolute top-1/3 right-1/4 w-[350px] h-[350px] bg-[#78E4E2]/4 rounded-full blur-[100px]" />
-          {/* grid lines */}
-          <div className="absolute inset-0 opacity-[0.03]"
-            style={{ backgroundImage: 'linear-gradient(#78E4E2 1px,transparent 1px),linear-gradient(90deg,#78E4E2 1px,transparent 1px)', backgroundSize: '60px 60px' }} />
+          <div className="hidden dark:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-[#1485FF]/6 rounded-full blur-[130px]" />
+          <div className="hidden dark:block absolute top-1/3 right-1/4 w-[350px] h-[350px] bg-[#78E4E2]/4 rounded-full blur-[100px]" />
+          {/* dot grid overlay — dark only */}
+          <div className="hidden dark:block absolute inset-0 opacity-[0.03]"
+            style={{ backgroundImage: 'radial-gradient(#78E4E2 1px,transparent 1px)', backgroundSize: '32px 32px' }} />
+          {/* light mode: subtle blue accent band */}
+          <div className="dark:hidden absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#1485FF]/8 to-transparent" />
         </div>
 
         <div className="relative max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-[#0B1F3A] border border-[#14485F] rounded-full px-4 py-1.5 text-sm text-[#78E4E2] mb-8">
-            <span className="w-2 h-2 rounded-full bg-[#78E4E2] animate-pulse" />
+          <div className="inline-flex items-center gap-2 bg-muted border border-border rounded-full px-4 py-1.5 text-sm text-accent mb-8">
+            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
             API Key Claude chính thức · Thanh toán nội địa Việt Nam
           </div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6 text-foreground">
             Dùng <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1485FF] to-[#78E4E2]">Claude AI</span><br />
             không giới hạn
           </h1>
 
-          <p className="text-xl text-[#78A8B8] max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             API Key Claude giá rẻ, kích hoạt tức thì, thanh toán qua ngân hàng Việt Nam.
-            Tương thích 100% với <strong className="text-[#EEF4FF]">Claude Code</strong>, Cursor và mọi tool AI.
+            Tương thích 100% với <strong className="text-foreground">Claude Code</strong>, Cursor và mọi tool AI.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-14">
             <Link href="/register"
-              className="inline-flex items-center justify-center gap-2 bg-[#1485FF] hover:bg-[#0B6FD4] text-white px-8 py-4 rounded-xl font-semibold text-base transition-colors shadow-[0_0_32px_#1485FF30]">
+              className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-xl font-semibold text-base transition-colors dark:shadow-[0_0_30px_rgba(20,133,255,0.5)]">
               Bắt đầu miễn phí <ArrowRight className="w-4 h-4" />
             </Link>
             <a href="#pricing"
-              className="inline-flex items-center justify-center gap-2 bg-[#0B1F3A] hover:bg-[#0D2540] border border-[#14485F] text-[#EEF4FF] px-8 py-4 rounded-xl font-semibold text-base transition-colors">
+              className="inline-flex items-center justify-center gap-2 bg-muted hover:bg-muted/80 border border-border text-foreground px-8 py-4 rounded-xl font-semibold text-base transition-colors">
               Xem bảng giá <ChevronDown className="w-4 h-4" />
             </a>
           </div>
@@ -151,9 +156,9 @@ export default async function LandingPage() {
               { val: '< 5s', label: 'kích hoạt key' },
               { val: '24/7', label: 'hoạt động liên tục' },
             ].map(({ val, label }) => (
-              <div key={label} className="bg-[#0B1F3A]/60 border border-[#14485F]/60 rounded-xl py-4 px-3">
-                <p className="text-2xl font-bold text-[#78E4E2]">{val}</p>
-                <p className="text-xs text-[#78A8B8] mt-1 leading-snug">{label}</p>
+              <div key={label} className="bg-card/60 border border-border/60 rounded-xl py-4 px-3">
+                <p className="text-2xl font-bold text-accent">{val}</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-snug">{label}</p>
               </div>
             ))}
           </div>
@@ -161,7 +166,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Use cases ───────────────────────────────────────────────────── */}
-      <section className="py-20 px-6 border-t border-[#14485F]/40">
+      <section className="py-20 px-6 border-t border-border/40">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <SectionTag><Brain className="w-3.5 h-3.5" /> Bạn dùng Claude để làm gì?</SectionTag>
@@ -209,16 +214,16 @@ export default async function LandingPage() {
               },
             ].map(({ icon: Icon, color, title, desc, tags }) => (
               <div key={title}
-                className="group bg-[#0B1F3A] border border-[#14485F] hover:border-[#1485FF]/50 rounded-2xl p-7 transition-all hover:bg-[#0D2540]">
+                className="group bg-card border border-border hover:border-primary/50 rounded-2xl p-7 transition-all hover:bg-muted/30">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-all"
                   style={{ background: `${color}15` }}>
                   <Icon className="w-6 h-6" style={{ color }} />
                 </div>
-                <h3 className="font-bold text-[#EEF4FF] mb-3 text-lg">{title}</h3>
-                <p className="text-sm text-[#78A8B8] leading-relaxed mb-5">{desc}</p>
+                <h3 className="font-bold text-foreground mb-3 text-lg">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5">{desc}</p>
                 <div className="flex flex-wrap gap-2">
                   {tags.map(t => (
-                    <span key={t} className="text-xs bg-[#060D1A] border border-[#14485F] text-[#4D9AAA] px-2.5 py-1 rounded-full">
+                    <span key={t} className="text-xs bg-muted border border-border text-muted-foreground px-2.5 py-1 rounded-full">
                       {t}
                     </span>
                   ))}
@@ -230,7 +235,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Why us ──────────────────────────────────────────────────────── */}
-      <section id="features" className="py-20 px-6 border-t border-[#14485F]/40">
+      <section id="features" className="py-20 px-6 border-t border-border/40">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -243,13 +248,13 @@ export default async function LandingPage() {
             </div>
 
             {/* comparison table */}
-            <div className="rounded-2xl overflow-hidden border border-[#14485F]">
+            <div className="rounded-2xl overflow-hidden border border-border">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-[#060D1A]">
-                    <th className="text-left px-5 py-4 text-[#4D7A8A] font-medium">Tiêu chí</th>
-                    <th className="px-5 py-4 text-[#78E4E2] font-semibold text-center">cheapaikey.store</th>
-                    <th className="px-5 py-4 text-[#4D7A8A] font-medium text-center">Anthropic trực tiếp</th>
+                  <tr className="bg-muted">
+                    <th className="text-left px-5 py-4 text-muted-foreground font-medium">Tiêu chí</th>
+                    <th className="px-5 py-4 text-accent font-semibold text-center">cheapaikey.store</th>
+                    <th className="px-5 py-4 text-muted-foreground font-medium text-center">Anthropic trực tiếp</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -262,10 +267,10 @@ export default async function LandingPage() {
                     ['Hỗ trợ gia hạn tự động', '✓ Có', '✓ Có'],
                     ['Tương thích Claude Code', '✓ 100%', '✓ 100%'],
                   ].map(([criteria, us, them], i) => (
-                    <tr key={criteria} className={i % 2 === 0 ? 'bg-[#0B1F3A]' : 'bg-[#0D2540]'}>
-                      <td className="px-5 py-3.5 text-[#8BA8B8]">{criteria}</td>
-                      <td className="px-5 py-3.5 text-center text-[#78E4E2] font-medium">{us}</td>
-                      <td className="px-5 py-3.5 text-center text-[#4D7A8A]">{them}</td>
+                    <tr key={criteria} className={i % 2 === 0 ? 'bg-card' : 'bg-muted/50'}>
+                      <td className="px-5 py-3.5 text-muted-foreground">{criteria}</td>
+                      <td className="px-5 py-3.5 text-center text-accent font-medium">{us}</td>
+                      <td className="px-5 py-3.5 text-center text-muted-foreground">{them}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -276,7 +281,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Authenticity guarantee ──────────────────────────────────────── */}
-      <section className="py-20 px-6 border-t border-[#14485F]/40">
+      <section className="py-20 px-6 border-t border-border/40">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <SectionTag><BadgeCheck className="w-3.5 h-3.5" /> Cam kết chính hãng</SectionTag>
@@ -289,8 +294,8 @@ export default async function LandingPage() {
 
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             {/* Left — how it works */}
-            <div className="bg-[#0B1F3A] border border-[#14485F] rounded-2xl p-8 space-y-5">
-              <h3 className="font-bold text-[#EEF4FF] text-lg">Request của bạn đi qua đâu?</h3>
+            <div className="bg-card border border-border rounded-2xl p-8 space-y-5">
+              <h3 className="font-bold text-foreground text-lg">Request của bạn đi qua đâu?</h3>
               {[
                 { step: '1', color: '#1485FF', label: 'Ứng dụng của bạn', desc: 'Claude Code, Cursor, SDK... gửi request với API Key của bạn' },
                 { step: '2', color: '#78E4E2', label: 'cheapaikey.store proxy', desc: '9Router — chỉ xác thực key và chuyển tiếp, không đọc nội dung' },
@@ -298,15 +303,15 @@ export default async function LandingPage() {
               ].map(({ step, color, label, desc }, i) => (
                 <div key={step} className="flex gap-4 items-start">
                   <div className="flex flex-col items-center gap-1 shrink-0">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-[#06090F]"
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-background"
                       style={{ background: color }}>
                       {step}
                     </div>
-                    {i < 2 && <div className="w-px h-8 bg-[#14485F]" />}
+                    {i < 2 && <div className="w-px h-8 bg-border" />}
                   </div>
                   <div className="pt-1">
-                    <p className="font-semibold text-[#EEF4FF] text-sm">{label}</p>
-                    <p className="text-xs text-[#78A8B8] mt-0.5">{desc}</p>
+                    <p className="font-semibold text-foreground text-sm">{label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
                   </div>
                 </div>
               ))}
@@ -315,32 +320,16 @@ export default async function LandingPage() {
             {/* Right — guarantees */}
             <div className="space-y-4">
               {[
-                {
-                  icon: '🔐', color: '#1485FF',
-                  title: 'Kết nối thẳng Anthropic',
-                  desc: 'Mọi request đều đến trực tiếp api.anthropic.com. 9Router chỉ là lớp proxy xác thực key — không thay đổi model hay nội dung phản hồi.',
-                },
-                {
-                  icon: '🧠', color: '#78E4E2',
-                  title: 'Đúng model, đúng phiên bản',
-                  desc: 'Claude Opus 4, Sonnet 4, Haiku 4 — chính xác model bạn chỉ định. Không swap sang model rẻ hơn phía sau.',
-                },
-                {
-                  icon: '✅', color: '#F4D22B',
-                  title: 'Tự kiểm chứng được',
-                  desc: 'Dùng Claude Code với key của chúng tôi rồi chạy /model — bạn sẽ thấy đúng model Anthropic, không phải model giả mạo nào.',
-                },
-                {
-                  icon: '🚫', color: '#1485FF',
-                  title: 'Không log nội dung chat',
-                  desc: 'Proxy chỉ đọc header xác thực. Nội dung conversation đi thẳng đến Anthropic, không bị lưu hay đọc trung gian.',
-                },
+                { icon: '🔐', color: '#1485FF', title: 'Kết nối thẳng Anthropic', desc: 'Mọi request đều đến trực tiếp api.anthropic.com. 9Router chỉ là lớp proxy xác thực key — không thay đổi model hay nội dung phản hồi.' },
+                { icon: '🧠', color: '#78E4E2', title: 'Đúng model, đúng phiên bản', desc: 'Claude Opus 4, Sonnet 4, Haiku 4 — chính xác model bạn chỉ định. Không swap sang model rẻ hơn phía sau.' },
+                { icon: '✅', color: '#F4D22B', title: 'Tự kiểm chứng được', desc: 'Dùng Claude Code với key của chúng tôi rồi chạy /model — bạn sẽ thấy đúng model Anthropic, không phải model giả mạo nào.' },
+                { icon: '🚫', color: '#1485FF', title: 'Không log nội dung chat', desc: 'Proxy chỉ đọc header xác thực. Nội dung conversation đi thẳng đến Anthropic, không bị lưu hay đọc trung gian.' },
               ].map(({ icon, color, title, desc }) => (
-                <div key={title} className="flex gap-4 bg-[#0B1F3A] border border-[#14485F] hover:border-[#1485FF]/40 rounded-xl p-5 transition-all">
+                <div key={title} className="flex gap-4 bg-card border border-border hover:border-primary/40 rounded-xl p-5 transition-all">
                   <span className="text-2xl shrink-0">{icon}</span>
                   <div>
-                    <p className="font-semibold text-[#EEF4FF] text-sm mb-1">{title}</p>
-                    <p className="text-xs text-[#78A8B8] leading-relaxed">{desc}</p>
+                    <p className="font-semibold text-foreground text-sm mb-1">{title}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
                   </div>
                 </div>
               ))}
@@ -349,13 +338,13 @@ export default async function LandingPage() {
 
           {/* Bottom badge */}
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
-            <div className="flex items-center gap-2 bg-[#0B1F3A] border border-[#1485FF]/40 rounded-full px-5 py-2.5">
-              <BadgeCheck className="w-4 h-4 text-[#1485FF]" />
-              <span className="text-[#EEF4FF]">Powered by <strong>Anthropic API</strong> chính thức</span>
+            <div className="flex items-center gap-2 bg-card border border-primary/40 rounded-full px-5 py-2.5">
+              <BadgeCheck className="w-4 h-4 text-primary" />
+              <span className="text-foreground">Powered by <strong>Anthropic API</strong> chính thức</span>
             </div>
-            <div className="flex items-center gap-2 bg-[#0B1F3A] border border-[#78E4E2]/40 rounded-full px-5 py-2.5">
-              <BadgeCheck className="w-4 h-4 text-[#78E4E2]" />
-              <span className="text-[#EEF4FF]">Proxy bởi <strong>9Router</strong> — mã nguồn mở, minh bạch</span>
+            <div className="flex items-center gap-2 bg-card border border-accent/40 rounded-full px-5 py-2.5">
+              <BadgeCheck className="w-4 h-4 text-accent" />
+              <span className="text-foreground">Proxy bởi <strong>9Router</strong> — mã nguồn mở, minh bạch</span>
             </div>
           </div>
         </div>
@@ -370,19 +359,19 @@ export default async function LandingPage() {
             { icon: Clock,  color: '#1485FF', title: 'Thanh toán nội địa',    desc: 'Chuyển khoản Vietcombank, Techcombank, MB... — không cần thẻ nước ngoài' },
             { icon: Globe,  color: '#78E4E2', title: 'Hỗ trợ mọi app',       desc: 'Claude Code, Cursor, Continue, OpenRouter, API trực tiếp — dùng được ở bất kỳ đâu' },
           ].map(({ icon: Icon, color, title, desc }) => (
-            <div key={title} className="bg-[#0B1F3A] border border-[#14485F] hover:border-[#1485FF]/40 rounded-xl p-6 transition-all">
+            <div key={title} className="bg-card border border-border hover:border-primary/40 rounded-xl p-6 transition-all">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4" style={{ background: `${color}18` }}>
                 <Icon className="w-5 h-5" style={{ color }} />
               </div>
-              <h3 className="font-semibold text-[#EEF4FF] mb-2">{title}</h3>
-              <p className="text-sm text-[#78A8B8] leading-relaxed">{desc}</p>
+              <h3 className="font-semibold text-foreground mb-2">{title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── How it works ────────────────────────────────────────────────── */}
-      <section id="how" className="py-24 px-6 border-t border-[#14485F]/40">
+      <section id="how" className="py-24 px-6 border-t border-border/40">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <SectionTag><Rocket className="w-3.5 h-3.5" /> Bắt đầu cực nhanh</SectionTag>
@@ -391,7 +380,7 @@ export default async function LandingPage() {
           </div>
 
           <div className="grid sm:grid-cols-4 gap-6 relative">
-            <div className="hidden sm:block absolute top-10 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-transparent via-[#1485FF]/30 to-transparent" />
+            <div className="hidden sm:block absolute top-10 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
             {[
               { step: '01', icon: Users,    color: '#1485FF', title: 'Tạo tài khoản',        desc: 'Đăng ký miễn phí bằng email. Không cần thẻ, không cần điền nhiều thông tin.' },
               { step: '02', icon: Cpu,      color: '#78E4E2', title: 'Chọn gói phù hợp',     desc: 'Xem bảng giá, chọn gói phù hợp với nhu cầu. Mua gói 30 ngày hoặc lâu hơn.' },
@@ -399,48 +388,48 @@ export default async function LandingPage() {
               { step: '04', icon: Terminal, color: '#1485FF', title: 'Copy Key & dùng ngay', desc: 'Nhận key trong dashboard, set ANTHROPIC_API_KEY và bắt đầu ngay lập tức.' },
             ].map(({ step, icon: Icon, color, title, desc }) => (
               <div key={step} className="flex flex-col items-center gap-3 relative z-10 text-center">
-                <div className="w-20 h-20 rounded-2xl flex items-center justify-center border border-[#14485F] bg-[#0B1F3A] relative"
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center border border-border bg-card relative"
                   style={{ boxShadow: `0 0 30px ${color}18` }}>
                   <Icon className="w-8 h-8" style={{ color }} />
-                  <span className="absolute -top-2.5 -right-2.5 text-[10px] font-mono bg-[#060D1A] border border-[#14485F] text-[#4D7A8A] px-1.5 py-0.5 rounded-full">
+                  <span className="absolute -top-2.5 -right-2.5 text-[10px] font-mono bg-background border border-border text-muted-foreground px-1.5 py-0.5 rounded-full">
                     {step}
                   </span>
                 </div>
-                <h3 className="font-bold text-[#EEF4FF] text-base">{title}</h3>
-                <p className="text-sm text-[#78A8B8] leading-relaxed">{desc}</p>
+                <h3 className="font-bold text-foreground text-base">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
 
           {/* code snippet */}
-          <div className="mt-16 bg-[#060D1A] border border-[#14485F] rounded-2xl overflow-hidden">
-            <div className="flex items-center gap-2 px-5 py-3.5 border-b border-[#14485F] bg-[#0B1F3A]">
+          <div className="mt-16 bg-muted border border-border rounded-2xl overflow-hidden">
+            <div className="flex items-center gap-2 px-5 py-3.5 border-b border-border bg-card">
               <div className="flex gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-[#FF5F57]" />
                 <span className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
                 <span className="w-3 h-3 rounded-full bg-[#28C840]" />
               </div>
-              <span className="text-xs text-[#4D7A8A] ml-2 font-mono">Terminal — Tích hợp Claude Code</span>
+              <span className="text-xs text-muted-foreground ml-2 font-mono">Terminal — Tích hợp Claude Code</span>
             </div>
             <pre className="px-6 py-5 text-sm font-mono leading-7 overflow-x-auto">
               <code>
-                <span className="text-[#4D7A8A]"># 1. Export API key từ cheapaikey.store</span>{'\n'}
-                <span className="text-[#78E4E2]">export</span>{' '}
-                <span className="text-[#EEF4FF]">ANTHROPIC_API_KEY</span>
-                <span className="text-[#78A8B8]">=</span>
-                <span className="text-[#F4D22B]">"sk-ant-xxxxxxxx..."</span>{'\n\n'}
-                <span className="text-[#4D7A8A]"># 2. Chạy Claude Code như bình thường</span>{'\n'}
-                <span className="text-[#1485FF]">claude</span>
-                <span className="text-[#EEF4FF]"> "Giúp tôi refactor file này"</span>{'\n\n'}
-                <span className="text-[#4D7A8A]"># 3. Hoặc dùng Anthropic SDK trong code</span>{'\n'}
-                <span className="text-[#78E4E2]">from</span>
-                <span className="text-[#EEF4FF]"> anthropic </span>
-                <span className="text-[#78E4E2]">import</span>
-                <span className="text-[#EEF4FF]"> Anthropic</span>{'\n'}
-                <span className="text-[#EEF4FF]">client </span>
-                <span className="text-[#78A8B8]">=</span>
-                <span className="text-[#EEF4FF]"> Anthropic()  </span>
-                <span className="text-[#4D7A8A]"># tự đọc ANTHROPIC_API_KEY</span>
+                <span className="text-muted-foreground"># 1. Export API key từ cheapaikey.store</span>{'\n'}
+                <span className="text-accent">export</span>{' '}
+                <span className="text-foreground">ANTHROPIC_API_KEY</span>
+                <span className="text-muted-foreground">=</span>
+                <span className="text-[#F4D22B]">&quot;sk-ant-xxxxxxxx...&quot;</span>{'\n\n'}
+                <span className="text-muted-foreground"># 2. Chạy Claude Code như bình thường</span>{'\n'}
+                <span className="text-primary">claude</span>
+                <span className="text-foreground"> &quot;Giúp tôi refactor file này&quot;</span>{'\n\n'}
+                <span className="text-muted-foreground"># 3. Hoặc dùng Anthropic SDK trong code</span>{'\n'}
+                <span className="text-accent">from</span>
+                <span className="text-foreground"> anthropic </span>
+                <span className="text-accent">import</span>
+                <span className="text-foreground"> Anthropic</span>{'\n'}
+                <span className="text-foreground">client </span>
+                <span className="text-muted-foreground">=</span>
+                <span className="text-foreground"> Anthropic()  </span>
+                <span className="text-muted-foreground"># tự đọc ANTHROPIC_API_KEY</span>
               </code>
             </pre>
           </div>
@@ -448,7 +437,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Pricing ─────────────────────────────────────────────────────── */}
-      <section id="pricing" className="py-24 px-6 border-t border-[#14485F]/40">
+      <section id="pricing" className="py-24 px-6 border-t border-border/40">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <SectionTag><Star className="w-3.5 h-3.5" /> Bảng giá</SectionTag>
@@ -457,7 +446,7 @@ export default async function LandingPage() {
           </div>
 
           {plans.length === 0 ? (
-            <p className="text-center text-[#4D7A8A] py-12">Đang tải gói dịch vụ...</p>
+            <p className="text-center text-muted-foreground py-12">Đang tải gói dịch vụ...</p>
           ) : (
             <div className="flex flex-wrap justify-center gap-6">
               {plans.map((plan: any, i: number) => {
@@ -466,28 +455,28 @@ export default async function LandingPage() {
                   <div key={plan.id}
                     className={`relative flex flex-col rounded-2xl p-8 border w-full max-w-sm transition-all ${
                       isPopular
-                        ? 'bg-gradient-to-b from-[#0D2B50] to-[#0B1F3A] border-[#1485FF] shadow-[0_0_60px_#1485FF15]'
-                        : 'bg-[#0B1F3A] border-[#14485F] hover:border-[#1485FF]/40'
+                        ? 'bg-gradient-to-b from-card to-card/80 border-primary dark:shadow-[0_0_25px_rgba(20,133,255,0.3)]'
+                        : 'bg-card border-border hover:border-primary/40'
                     }`}>
                     {isPopular && (
-                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#1485FF] to-[#0B6FD4] text-white text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap shadow-lg">
+                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#1485FF] to-[#78E4E2] text-white text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap shadow-lg">
                         ⭐ Phổ biến nhất
                       </div>
                     )}
 
                     <div className="mb-2">
-                      <span className="text-sm font-semibold text-[#78E4E2] uppercase tracking-wider">{plan.name}</span>
+                      <span className="text-sm font-semibold text-accent uppercase tracking-wider">{plan.name}</span>
                     </div>
 
                     <div className="flex items-end gap-1 mt-2 mb-1">
-                      <span className="text-5xl font-bold text-[#EEF4FF]">{fmtPrice(plan.price)}</span>
+                      <span className="text-5xl font-bold text-foreground">{fmtPrice(plan.price)}</span>
                     </div>
-                    <p className="text-sm text-[#78A8B8] mb-2">/ {plan.durationDays} ngày</p>
+                    <p className="text-sm text-muted-foreground mb-2">/ {plan.durationDays} ngày</p>
 
                     {/* quota highlight */}
-                    <div className="bg-[#060D1A] border border-[#14485F] rounded-xl px-4 py-3 mb-6 text-center">
+                    <div className="bg-muted border border-border rounded-xl px-4 py-3 mb-6 text-center">
                       <span className="text-2xl font-bold text-[#F4D22B]">{fmtTokens(plan.tokenQuota)}</span>
-                      <span className="text-sm text-[#78A8B8] ml-1">tokens</span>
+                      <span className="text-sm text-muted-foreground ml-1">tokens</span>
                     </div>
 
                     <ul className="flex flex-col gap-3 mb-8">
@@ -499,8 +488,8 @@ export default async function LandingPage() {
                         'Gia hạn — quota cộng dồn',
                         'Dashboard quản lý đầy đủ',
                       ].map(feat => (
-                        <li key={feat} className="flex items-start gap-2.5 text-sm text-[#8BA8B8]">
-                          <CheckCircle2 className="w-4 h-4 shrink-0 text-[#78E4E2] mt-0.5" />
+                        <li key={feat} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                          <CheckCircle2 className="w-4 h-4 shrink-0 text-accent mt-0.5" />
                           {feat}
                         </li>
                       ))}
@@ -509,8 +498,8 @@ export default async function LandingPage() {
                     <Link href="/register"
                       className={`mt-auto flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl font-semibold text-sm transition-colors ${
                         isPopular
-                          ? 'bg-[#1485FF] hover:bg-[#0B6FD4] text-white shadow-[0_0_24px_#1485FF30]'
-                          : 'bg-[#0D2540] hover:bg-[#142A4A] border border-[#14485F] hover:border-[#1485FF]/60 text-[#EEF4FF]'
+                          ? 'bg-primary hover:bg-primary/90 text-primary-foreground dark:shadow-[0_0_20px_rgba(20,133,255,0.3)]'
+                          : 'bg-muted hover:bg-muted/80 border border-border hover:border-primary/60 text-foreground'
                       }`}>
                       Mua ngay <ArrowRight className="w-4 h-4" />
                     </Link>
@@ -520,14 +509,14 @@ export default async function LandingPage() {
             </div>
           )}
 
-          <p className="text-center text-sm text-[#4D7A8A] mt-8">
-            Cần số lượng lớn hoặc gói doanh nghiệp? <Link href="/login" className="text-[#78E4E2] hover:underline">Liên hệ chúng tôi</Link>
+          <p className="text-center text-sm text-muted-foreground mt-8">
+            Cần số lượng lớn hoặc gói doanh nghiệp? <Link href="/login" className="text-accent hover:underline">Liên hệ chúng tôi</Link>
           </p>
         </div>
       </section>
 
       {/* ── FAQ ─────────────────────────────────────────────────────────── */}
-      <section id="faq" className="py-24 px-6 border-t border-[#14485F]/40">
+      <section id="faq" className="py-24 px-6 border-t border-border/40">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-14">
             <SectionTag><MessageSquare className="w-3.5 h-3.5" /> Câu hỏi thường gặp</SectionTag>
@@ -536,12 +525,12 @@ export default async function LandingPage() {
 
           <div className="flex flex-col gap-4">
             {FAQS.map(({ q, a }) => (
-              <div key={q} className="bg-[#0B1F3A] border border-[#14485F] rounded-xl p-6">
-                <h3 className="font-semibold text-[#EEF4FF] mb-3 flex items-start gap-3">
-                  <span className="text-[#1485FF] shrink-0 mt-0.5">Q.</span>
+              <div key={q} className="bg-card border border-border rounded-xl p-6">
+                <h3 className="font-semibold text-foreground mb-3 flex items-start gap-3">
+                  <span className="text-primary shrink-0 mt-0.5">Q.</span>
                   {q}
                 </h3>
-                <p className="text-sm text-[#78A8B8] leading-relaxed pl-6">{a}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed pl-6">{a}</p>
               </div>
             ))}
           </div>
@@ -549,27 +538,27 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Final CTA ───────────────────────────────────────────────────── */}
-      <section className="py-28 px-6 border-t border-[#14485F]/40 relative overflow-hidden">
+      <section className="py-28 px-6 border-t border-border/40 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#1485FF]/8 rounded-full blur-[100px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/8 rounded-full blur-[100px]" />
         </div>
         <div className="relative max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-5xl font-bold mb-5 leading-tight">
+          <h2 className="text-3xl sm:text-5xl font-bold mb-5 leading-tight text-foreground">
             Dùng Claude AI ngay hôm nay<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1485FF] to-[#78E4E2]">
               với giá tốt nhất Việt Nam
             </span>
           </h2>
-          <p className="text-[#78A8B8] mb-10 text-lg">
+          <p className="text-muted-foreground mb-10 text-lg">
             Đăng ký miễn phí · Kích hoạt trong 5 phút · Thanh toán nội địa
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/register"
-              className="inline-flex items-center justify-center gap-2 bg-[#1485FF] hover:bg-[#0B6FD4] text-white px-10 py-4 rounded-xl font-semibold text-base transition-colors shadow-[0_0_40px_#1485FF30]">
+              className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-4 rounded-xl font-semibold text-base transition-colors dark:shadow-[0_0_40px_rgba(20,133,255,0.4)]">
               Tạo tài khoản miễn phí <ArrowRight className="w-4 h-4" />
             </Link>
             <Link href="/login"
-              className="inline-flex items-center justify-center gap-2 bg-[#0B1F3A] border border-[#14485F] hover:border-[#1485FF]/60 text-[#EEF4FF] px-8 py-4 rounded-xl font-semibold text-base transition-colors">
+              className="inline-flex items-center justify-center gap-2 bg-card border border-border hover:border-primary/60 text-foreground px-8 py-4 rounded-xl font-semibold text-base transition-colors">
               Đã có tài khoản
             </Link>
           </div>
@@ -577,16 +566,16 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Footer ──────────────────────────────────────────────────────── */}
-      <footer className="border-t border-[#14485F]/40 py-10 px-6">
+      <footer className="border-t border-border/40 py-10 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <img src="/banner.png" alt="cheapaikey.store" className="h-7 w-auto" />
-          <div className="flex gap-6 text-sm text-[#4D7A8A]">
-            <a href="#features" className="hover:text-[#78A8B8] transition-colors">Tính năng</a>
-            <a href="#pricing" className="hover:text-[#78A8B8] transition-colors">Bảng giá</a>
-            <a href="#faq" className="hover:text-[#78A8B8] transition-colors">FAQ</a>
-            <Link href="/login" className="hover:text-[#78A8B8] transition-colors">Đăng nhập</Link>
+          <div className="flex gap-6 text-sm text-muted-foreground">
+            <a href="#features" className="hover:text-foreground transition-colors">Tính năng</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">Bảng giá</a>
+            <a href="#faq" className="hover:text-foreground transition-colors">FAQ</a>
+            <Link href="/login" className="hover:text-foreground transition-colors">Đăng nhập</Link>
           </div>
-          <p className="text-sm text-[#4D7A8A]">© 2025 cheapaikey.store</p>
+          <p className="text-sm text-muted-foreground">© 2025 cheapaikey.store</p>
         </div>
       </footer>
     </div>
