@@ -754,13 +754,9 @@ export default async function LandingPage() {
                     }`}>
 
                     {isPopular && (
-                      <div className="absolute -top-px inset-x-0 h-[2px] rounded-t-2xl
-                        bg-gradient-to-r from-[#FF6B00] via-[#78E4E2] to-[#FF6B00]" />
-                    )}
-                    {isPopular && (
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                         <span className="inline-flex items-center gap-1.5
-                          bg-gradient-to-r from-[#FF6B00] to-[#78E4E2]
+                          bg-gradient-to-r from-[#E85500] to-[#FF6B00]
                           text-white text-xs font-bold px-4 py-1.5 rounded-full
                           shadow-[0_4px_16px_rgba(255,107,0,0.4)]">
                           <Star className="w-3 h-3 fill-white" /> Phổ biến nhất
