@@ -25,13 +25,17 @@ function StatusBadge({ days, isActive, expired }: { days: number; isActive: bool
   return <Badge className="gap-1 bg-green-600 hover:bg-green-600 text-white"><CheckCircle2 className="size-3" />Đã kích hoạt · {days} ngày</Badge>;
 }
 
-function TokenBar({ used, quota }: { used: number; quota: number }) {
+function TokenBar({ used, quota, label, suffix }: { used: number; quota: number; label?: string; suffix?: string }) {
   const pct = Math.min(100, Math.round((used / quota) * 100));
   const color = pct >= 90 ? 'bg-destructive' : pct >= 70 ? 'bg-orange-500' : 'bg-primary';
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between text-xs text-muted-foreground">
-        <span className="flex items-center gap-1"><Coins className="size-3" />Token đã dùng</span>
+        <span className="flex items-center gap-1">
+          {label ? <Clock className="size-3" /> : <Coins className="size-3" />}
+          {label ?? 'Token đã dùng'}
+          {suffix && <span className="opacity-60 ml-1">{suffix}</span>}
+        </span>
         <span className="tabular-nums">{f(used)} / {f(quota)} <span className="opacity-60">({pct}%)</span></span>
       </div>
       <div className="h-1.5 rounded-full bg-muted overflow-hidden">
@@ -118,15 +122,12 @@ function KeyCard({ sub, onRefreshed, confirm }: { sub: KeySubscription; onRefres
 
       {/* Quota 5h */}
       {sub.limitPeriod != null && (
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><Clock className="size-3" />Quota 5 tiếng</span>
-            <span className="tabular-nums">{f(sub.remainingPeriod ?? 0)} / {f(sub.limitPeriod)} còn lại</span>
-          </div>
-          {sub.resetAt && (
-            <p className="text-xs text-muted-foreground">Reset lúc {new Date(sub.resetAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</p>
-          )}
-        </div>
+        <TokenBar
+          used={(sub.limitPeriod) - (sub.remainingPeriod ?? 0)}
+          quota={sub.limitPeriod}
+          label="Quota 5 tiếng"
+          suffix={sub.resetAt ? `· Reset ${new Date(sub.resetAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}` : undefined}
+        />
       )}
 
       {/* Hết hạn → gia hạn đúng key này (giữ key cũ); còn hạn → đổi key */}
