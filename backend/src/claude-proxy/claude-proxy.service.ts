@@ -37,16 +37,15 @@ export class ClaudeProxyService {
     if (pre.remainingTotal <= 0) throw new HttpException('Quota đã hết', 429);
     if (pre.remainingPeriod <= 0) throw new HttpException('Đã đạt giới hạn token theo giờ', 429);
 
-    // Forward client identity headers so 9Router detects the real client (clientDetector.js).
-    const fwd = (k: string) => clientHeaders[k] ?? clientHeaders[k.toLowerCase()];
-    const passHeaders: Record<string, string> = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${nineRouterKey}`,
-    };
-    for (const h of ['user-agent', 'x-app', 'anthropic-version', 'anthropic-beta', 'x-stainless-lang']) {
-      const v = fwd(h);
-      if (v) passHeaders[h] = String(v);
+    // Pure passthrough: forward TẤT CẢ header client gửi (trừ hop-by-hop / host / auth do ta tự set)
+    // để 9Router + upstream nhận đúng identity. Whitelist trước đây làm sót header → 403.
+    const DROP = new Set(['host', 'content-length', 'connection', 'authorization', 'x-api-key', 'accept-encoding']);
+    const passHeaders: Record<string, string> = { Authorization: `Bearer ${nineRouterKey}` };
+    for (const [k, v] of Object.entries(clientHeaders)) {
+      if (v == null || DROP.has(k.toLowerCase())) continue;
+      passHeaders[k] = Array.isArray(v) ? v.join(',') : String(v);
     }
+    if (!passHeaders['content-type'] && !passHeaders['Content-Type']) passHeaders['Content-Type'] = 'application/json';
 
     // 2 tweak request tối thiểu (bắt buộc, không phải "transform response"):
     // 1) Strip context_management: Claude Code gửi strategy clear_thinking_20251015 đòi thinking
