@@ -15,7 +15,7 @@ import { Key, CheckCircle2, Zap, Shield, ArrowLeft } from "lucide-react";
 function AuthLeft() {
   return (
     <div className="hidden lg:flex flex-col justify-between p-12
-      bg-gradient-to-br from-[#E85500] to-[#C94000]
+      bg-gradient-to-br from-[#1A0A00] to-[#2C1200]
       dark:from-[#0F0F11] dark:to-[#1E1A10]">
       <Link href="/" className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm">
         <ArrowLeft className="size-4" /> cheapaikey.store
@@ -41,7 +41,7 @@ function AuthLeft() {
           ))}
         </ul>
       </div>
-      <p className="text-white/30 text-xs">© 2025 cheapaikey.store</p>
+      <p className="text-white/30 text-xs">© 2026 cheapaikey.store</p>
     </div>
   );
 }

@@ -70,7 +70,7 @@ const ADMIN_NAV_GROUPS = [
   {
     label: "Hệ thống",
     items: [
-      { href: "/admin/master-keys", label: "Master Keys (9Router)", icon: KeyRound },
+      { href: "/admin/master-keys", label: "Master Keys", icon: KeyRound },
       { href: "/admin/notifications", label: "Thông báo", icon: Bell },
       { href: "/admin/stats", label: "Thống kê & Doanh thu", icon: BarChart2 },
       { href: "/admin/activity-logs", label: "Nhật ký hoạt động", icon: ScrollText },

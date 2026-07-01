@@ -307,7 +307,7 @@ export default async function LandingPage() {
                     <span className="text-muted-foreground/50">|</span>
                     <span className="text-muted-foreground">model: claude-sonnet-4-5</span>
                   </div>
-                  <span className="text-[11px] text-muted-foreground font-mono">9Router proxy</span>
+                  <span className="text-[11px] text-muted-foreground font-mono">cheapaikey proxy</span>
                 </div>
               </div>
             </div>
@@ -658,7 +658,7 @@ export default async function LandingPage() {
               <h3 className="font-bold text-foreground text-base mb-6">Request của bạn đi qua đâu?</h3>
               {[
                 { step: '1', accent: '#1485FF', label: 'Ứng dụng của bạn',      desc: 'Claude Code, Cursor, SDK... gửi request với API Key' },
-                { step: '2', accent: '#78E4E2', label: 'cheapaikey.store proxy', desc: '9Router — chỉ xác thực key và chuyển tiếp, không đọc nội dung' },
+                { step: '2', accent: '#78E4E2', label: 'cheapaikey.store proxy', desc: 'Chỉ xác thực key và chuyển tiếp, không đọc nội dung' },
                 { step: '3', accent: '#F4D22B', label: 'Anthropic API',          desc: 'api.anthropic.com — server chính thức của Anthropic, Claude thật' },
               ].map(({ step, accent, label, desc }, i) => (
                 <div key={step} className="flex gap-4 items-start">
@@ -681,7 +681,7 @@ export default async function LandingPage() {
             {/* Guarantees */}
             <div className="space-y-3">
               {[
-                { icon: '🔐', accent: '#1485FF', title: 'Kết nối thẳng Anthropic',    desc: 'Mọi request đều đến trực tiếp api.anthropic.com. 9Router chỉ là lớp proxy xác thực key — không thay đổi model hay nội dung phản hồi.' },
+                { icon: '🔐', accent: '#1485FF', title: 'Kết nối thẳng Anthropic',    desc: 'Mọi request đều đến trực tiếp api.anthropic.com. Proxy chỉ xác thực key — không thay đổi model hay nội dung phản hồi.' },
                 { icon: '🧠', accent: '#78E4E2', title: 'Đúng model, đúng phiên bản', desc: 'Claude Opus 4, Sonnet 4, Haiku 4 — chính xác model bạn chỉ định. Không swap sang model rẻ hơn phía sau.' },
                 { icon: '✅', accent: '#F4D22B', title: 'Tự kiểm chứng được',          desc: 'Dùng Claude Code với key của chúng tôi rồi chạy /model — bạn sẽ thấy đúng model Anthropic, không phải model giả mạo nào.' },
                 { icon: '🚫', accent: '#1485FF', title: 'Không log nội dung chat',     desc: 'Proxy chỉ đọc header xác thực. Nội dung conversation đi thẳng đến Anthropic, không bị lưu hay đọc trung gian.' },
@@ -708,7 +708,7 @@ export default async function LandingPage() {
             <div className="flex items-center gap-2 bg-card border border-[#78E4E2]/30
               rounded-full px-5 py-2.5 text-sm">
               <BadgeCheck className="w-4 h-4 text-[#78E4E2]" />
-              <span>Proxy bởi <strong className="text-foreground">9Router</strong> — minh bạch</span>
+              <span>Proxy <strong className="text-foreground">minh bạch</strong> — không log nội dung</span>
             </div>
           </div>
         </div>
@@ -930,7 +930,7 @@ export default async function LandingPage() {
             <Link href="/register" className="hover:text-foreground transition-colors">Đăng ký</Link>
           </div>
 
-          <p className="text-sm text-muted-foreground">© 2025 cheapaikey.store</p>
+          <p className="text-sm text-muted-foreground">© 2026 cheapaikey.store</p>
         </div>
       </footer>
     </div>
