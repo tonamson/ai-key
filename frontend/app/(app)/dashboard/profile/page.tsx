@@ -33,6 +33,8 @@ export default function ProfilePage() {
   const [active, setActive] = useState<Section>('info');
   const [referral, setReferral] = useState<{ id: string; code: string; totalEarned: number; commissionPercent: number } | null>(null);
   const [wallet, setWallet] = useState<{ balance: number; history: WalletTransaction[] } | null>(null);
+  const [topupQr, setTopupQr] = useState<{ qrUrl: string; memo: string } | null>(null);
+  const [topupAmount, setTopupAmount] = useState('');
   const [refCopied, setRefCopied] = useState<'code' | 'link' | null>(null);
 
   useEffect(() => {
@@ -297,50 +299,132 @@ export default function ProfilePage() {
           )}
 
           {active === 'wallet' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center justify-between">
-                  <span>Ví của tôi</span>
-                  <span className="text-primary font-bold text-lg">{f(wallet?.balance ?? 0)}đ</span>
-                </CardTitle>
-                <CardDescription>Lịch sử giao dịch ví — hoa hồng & chi tiêu</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {!wallet || wallet.history.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">Chưa có giao dịch nào</p>
-                ) : (
-                  <div className="divide-y">
-                    {wallet.history.map(tx => {
-                      const isCredit = Number(tx.amount) > 0;
-                      const typeLabel: Record<string, string> = {
-                        commission: 'Hoa hồng giới thiệu',
-                        spend: 'Thanh toán mua key',
-                        admin_add: 'Admin nạp',
-                        admin_sub: 'Admin trừ',
-                      };
-                      return (
-                        <div key={tx.id} className="flex items-center justify-between py-3 gap-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`size-8 rounded-full flex items-center justify-center shrink-0 ${isCredit ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
-                              {isCredit
-                                ? <ArrowDownLeft className="size-4 text-green-600 dark:text-green-400" />
-                                : <ArrowUpRight className="size-4 text-red-500" />}
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">{typeLabel[tx.type] ?? tx.type}</p>
-                              <p className="text-xs text-muted-foreground">{new Date(tx.createdAt).toLocaleString('vi-VN')}</p>
+            <div className="space-y-4">
+              {/* Số dư */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center justify-between">
+                    <span>Số dư ví</span>
+                    <span className="text-primary font-bold text-xl">{f(wallet?.balance ?? 0)}đ</span>
+                  </CardTitle>
+                  <CardDescription>Số dư dùng để thanh toán tự động khi gia hạn key</CardDescription>
+                </CardHeader>
+              </Card>
+
+              {/* Nạp tiền */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Nạp tiền vào ví</CardTitle>
+                  <CardDescription>Chuyển khoản ngân hàng — hệ thống xác nhận và cộng ví tự động</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      placeholder="Số tiền muốn nạp (VD: 100000)"
+                      value={topupAmount}
+                      onChange={e => setTopupAmount(e.target.value)}
+                      min={10000}
+                      step={10000}
+                    />
+                    <Button
+                      onClick={async () => {
+                        const amt = topupAmount ? parseInt(topupAmount) : undefined;
+                        const qr = await walletApi.getTopupQr(amt);
+                        setTopupQr(qr);
+                      }}
+                    >
+                      Lấy mã QR
+                    </Button>
+                  </div>
+
+                  {topupQr && (
+                    <div className="rounded-xl border bg-muted/30 p-5 space-y-4">
+                      <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
+                        <img src={topupQr.qrUrl} alt="VietQR" className="w-44 h-44 rounded-lg border" />
+                        <div className="space-y-3 text-sm flex-1">
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Ngân hàng</p>
+                            <p className="font-semibold">Techcombank</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Số tài khoản</p>
+                            <p className="font-mono font-semibold">19032009391010</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Nội dung chuyển khoản <span className="text-destructive font-semibold">*bắt buộc*</span></p>
+                            <div className="flex items-center gap-2">
+                              <code className="bg-background border rounded px-2 py-1 font-mono font-bold tracking-widest text-primary">
+                                {topupQr.memo}
+                              </code>
+                              <button
+                                onClick={() => navigator.clipboard.writeText(topupQr.memo).then(() => toast.success('Đã copy nội dung CK'))}
+                                className="text-xs text-muted-foreground hover:text-foreground underline"
+                              >
+                                Copy
+                              </button>
                             </div>
                           </div>
-                          <span className={`text-sm font-semibold tabular-nums ${isCredit ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
-                            {isCredit ? '+' : ''}{f(Number(tx.amount))}đ
-                          </span>
+                          {topupAmount && (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">Số tiền</p>
+                              <p className="font-bold text-base">{f(parseInt(topupAmount))}đ</p>
+                            </div>
+                          )}
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      </div>
+                      <p className="text-xs text-muted-foreground bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800/40 rounded-lg px-3 py-2">
+                        ⚠️ Nhập <strong>đúng nội dung chuyển khoản</strong> để hệ thống tự động xác nhận. Nếu quên, liên hệ admin để xử lý thủ công.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Lịch sử */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Lịch sử giao dịch</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {!wallet || wallet.history.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">Chưa có giao dịch nào</p>
+                  ) : (
+                    <div className="divide-y">
+                      {wallet.history.map(tx => {
+                        const isCredit = Number(tx.amount) > 0;
+                        const typeLabel: Record<string, string> = {
+                          commission: 'Hoa hồng giới thiệu',
+                          spend: 'Thanh toán mua key',
+                          admin_add: 'Nạp tiền',
+                          admin_sub: 'Admin trừ',
+                          refund: 'Hoàn tiền',
+                        };
+                        return (
+                          <div key={tx.id} className="flex items-center justify-between py-3 gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className={`size-8 rounded-full flex items-center justify-center shrink-0 ${isCredit ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+                                {isCredit
+                                  ? <ArrowDownLeft className="size-4 text-green-600 dark:text-green-400" />
+                                  : <ArrowUpRight className="size-4 text-red-500" />}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{typeLabel[tx.type] ?? tx.type}</p>
+                                {tx.description && <p className="text-xs text-muted-foreground">{tx.description}</p>}
+                                <p className="text-xs text-muted-foreground">{new Date(tx.createdAt).toLocaleString('vi-VN')}</p>
+                              </div>
+                            </div>
+                            <span className={`text-sm font-semibold tabular-nums ${isCredit ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                              {isCredit ? '+' : ''}{f(Number(tx.amount))}đ
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           )}
 
           {active === 'referral' && (

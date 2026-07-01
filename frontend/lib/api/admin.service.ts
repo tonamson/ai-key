@@ -113,6 +113,7 @@ export interface WalletTransaction { id: string; amount: number; type: string; d
 
 export const walletApi = {
   getMe: () => apiClient.get<{ balance: number; history: WalletTransaction[] }>('/wallet/me').then(r => r.data),
+  getTopupQr: (amount?: number) => apiClient.get<{ qrUrl: string; memo: string }>('/wallet/topup-qr', { params: amount ? { amount } : {} }).then(r => r.data),
   adminHistory: (userId: string) => apiClient.get<WalletTransaction[]>(`/admin/wallet/${userId}/history`).then(r => r.data),
 };
 
