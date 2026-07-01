@@ -1,34 +1,35 @@
-# AI Key
+# cheapaikey.store
 
-Hệ thống bán và quản lý API key Claude qua proxy NestJS → 9Router.
+Hệ thống bán và quản lý API Key Claude giá rẻ — thanh toán chuyển khoản ngân hàng Việt Nam, kích hoạt tức thì.
 
 ## Kiến trúc
 
 ```
-User → Cloudflare → Nginx → Backend (NestJS) → nine-router (Docker internal)
-                          → Frontend (Next.js)
+User → Cloudflare → Nginx (essicode) → Nginx (ai-key:8443) → Backend NestJS → 9Router
+                                                             → Frontend Next.js
 ```
 
-- `api.cheapaikey.store` → backend proxy Claude API
-- `cheapaikey.store` → frontend dashboard
-- `9router.cheapaikey.store` → giao diện 9Router (có mật khẩu)
+| Domain | Dịch vụ |
+|--------|---------|
+| `cheapaikey.store` | Landing page + Dashboard (Next.js) |
+| `api.cheapaikey.store` | Backend API (NestJS) |
+| `9router.cheapaikey.store` | Giao diện 9Router (Basic Auth) |
 
 ---
 
-## Deploy nhanh
+## Deploy
 
 ### 1. Clone và chuẩn bị env
 
 ```bash
 git clone <repo> && cd ai-key
-
 cp backend/.env.example backend/.env.production
 cp frontend/.env.example frontend/.env.production
 ```
 
-Điền các giá trị vào hai file `.env.production` (xem phần **Biến môi trường** bên dưới).
+Điền các giá trị vào hai file `.env.production`.
 
-### 2. Chạy
+### 2. Build và chạy
 
 ```bash
 docker compose up -d --build
@@ -38,6 +39,13 @@ docker compose up -d --build
 
 ```bash
 docker compose exec backend npm run seed
+```
+
+### 4. Đăng ký Telegram webhook (sau khi deploy)
+
+```bash
+curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
+  -d "url=https://api.cheapaikey.store/telegram/webhook"
 ```
 
 ---
@@ -60,6 +68,8 @@ docker compose exec backend npm run seed
 | `RESEND_FROM` | Email gửi, ví dụ `noreply@cheapaikey.store` |
 | `APP_URL` | URL frontend, ví dụ `https://cheapaikey.store` |
 | `RECAPTCHA_SECRET_KEY` | Secret key Google reCAPTCHA v3 |
+| `TELEGRAM_BOT_TOKEN` | Token bot Telegram (tạo tại @BotFather) |
+| `TELEGRAM_CHAT_ID` | Chat ID nhóm nhận thông báo nạp tiền |
 
 ### Frontend (`frontend/.env.production`)
 
@@ -67,31 +77,29 @@ docker compose exec backend npm run seed
 |------|-------|
 | `NEXT_PUBLIC_API_URL` | URL backend, ví dụ `https://api.cheapaikey.store` |
 | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | Site key Google reCAPTCHA v3 |
+| `NEXT_PUBLIC_SUPPORT_URL` | Link hỗ trợ Telegram, ví dụ `https://t.me/username` |
 
 ---
 
-## Mật khẩu & tài khoản
+## Flow nạp tiền ví
 
-| Dịch vụ | URL | Tài khoản |
-|---------|-----|-----------|
-| 9Router dashboard | `https://9router.cheapaikey.store` | `admin` / `adminkanni@123` |
-| 9Router admin (trong app) | — | Dùng `NINE_ROUTER_PASSWORD` trong env |
-
-> **Lưu ý:** Đổi mật khẩu Basic Auth bằng cách sửa `nginx/.htpasswd`.
-> Tạo hash mới: `openssl passwd -apr1 'mật_khẩu_mới'`
+1. User tạo đơn nạp trong dashboard → hệ thống sinh mã `NAPxxxxxx` duy nhất
+2. Bot Telegram gửi thông báo vào group kèm nút **✅ Duyệt** / **❌ Từ chối**
+3. Admin bấm nút → hệ thống cộng ví tự động + xóa message khỏi group
+4. Đơn chưa xử lý sau **30 phút** → tự hết hạn + xóa message Telegram
 
 ---
 
-## Cấu hình Claude Code (dùng thử)
+## Cấu hình Claude Code
 
-Thêm vào `~/.claude/settings.json` của user:
+Thêm vào `~/.claude/settings.json`:
 
 ```json
 {
   "env": {
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "ANTHROPIC_BASE_URL": "https://api.cheapaikey.store/claude",
-    "ANTHROPIC_API_KEY": "sk-...",
+    "ANTHROPIC_API_KEY": "<api-key-của-bạn>",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "cc/claude-opus-4-8",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "cc/claude-sonnet-4-6",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "cc/claude-haiku-4-5-20251001"
@@ -99,10 +107,24 @@ Thêm vào `~/.claude/settings.json` của user:
 }
 ```
 
-> Dùng `ANTHROPIC_API_KEY` (không phải `ANTHROPIC_AUTH_TOKEN`) để gửi đúng header `x-api-key`.
-
 ---
 
 ## SSL
 
-Đặt cert vào `nginx/ssl/cert.pem` và `nginx/ssl/key.pem` trước khi chạy.
+Đặt cert vào `nginx/ssl/cert_chain.pem` và `nginx/ssl/key.pem` trước khi chạy.
+
+```bash
+# Tạo/gia hạn cert qua Cloudflare Origin CA rồi copy vào:
+cp fullchain.pem nginx/ssl/cert_chain.pem
+cp privkey.pem   nginx/ssl/key.pem
+```
+
+---
+
+## 9Router Basic Auth
+
+```bash
+# Đổi mật khẩu nginx/.htpasswd
+openssl passwd -apr1 'mật_khẩu_mới'
+# Paste hash vào nginx/.htpasswd theo format: admin:<hash>
+```
