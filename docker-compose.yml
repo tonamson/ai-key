@@ -14,7 +14,9 @@ services:
       retries: 5
 
   nine-router:
-    image: decolua/9router:latest
+    build:
+      context: ./nine-router
+      dockerfile: Dockerfile
     restart: unless-stopped
     environment:
       - DATA_DIR=/app/data
