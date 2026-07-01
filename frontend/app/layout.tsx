@@ -10,8 +10,8 @@ const fontSans = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "AI Key",
-  description: "Hệ thống quản lý AI Key",
+  title: "cheapaikey.store",
+  description: "Affordable AI API Keys — cheapaikey.store",
 };
 
 export default function RootLayout({
@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}>
+    <html lang="vi" className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased dark`}>
       <body className="min-h-screen bg-background">
         {children}
         <Toaster richColors position="top-right" />

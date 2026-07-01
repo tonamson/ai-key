@@ -128,9 +128,9 @@ export function AppSidebar() {
                 <LayoutDashboard className="size-4" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-semibold text-sm">AI Key</span>
+                <span className="font-semibold text-sm">cheapaikey.store</span>
                 <span className="text-xs text-muted-foreground">
-                  Quản lý API Key
+                  Affordable AI API Keys
                 </span>
               </div>
             </SidebarMenuButton>
