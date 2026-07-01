@@ -238,14 +238,15 @@ export class OrdersService {
 
   /** Huỷ đơn PENDING: nhả coupon + hoàn ví trong 1 transaction. Dùng cho user huỷ tay & cron. */
   async cancelOrder(orderId: string, opts: { userId?: string } = {}): Promise<void> {
-    let order: Order | null = null;
+    let telegramMessageId: string | null = null;
 
     await this.orderRepo.manager.transaction(async (em: EntityManager) => {
       const where: any = { id: orderId, status: OrderStatus.PENDING };
       if (opts.userId) where.userId = opts.userId;
-      order = await em.findOne(Order, { where });
+      const order = await em.findOne(Order, { where });
       if (!order) throw new BadRequestException('Đơn không thể huỷ (đã thanh toán hoặc không tồn tại)');
 
+      telegramMessageId = order.telegramMessageId;
       if (order.couponId) await this.coupons.releaseUse(order.couponId);
       if (Number(order.walletUsed) > 0) {
         await this.wallet.refund(order.userId, Number(order.walletUsed), order.id, em);
@@ -253,9 +254,8 @@ export class OrdersService {
       await em.delete(Order, { id: orderId });
     });
 
-    // Xóa message Telegram sau khi xóa DB (ngoài transaction tránh delay)
-    if (order?.telegramMessageId) {
-      await this.telegram.deleteMessage(order.telegramMessageId).catch(() => {});
+    if (telegramMessageId) {
+      await this.telegram.deleteMessage(telegramMessageId).catch(() => {});
     }
   }
 
