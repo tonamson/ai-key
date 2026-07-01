@@ -108,17 +108,10 @@ export class ClaudeProxyService {
    */
   private readUsage(u: any): { input: number; output: number } | null {
     if (!u || typeof u !== 'object') return null;
-    // Tính input theo TRỌNG SỐ GIÁ của Anthropic (quy về "input token thường"):
-    //  - cache_read rẻ 10x  → nhân 0.1
-    //  - cache_creation đắt 1.25x → nhân 1.25
-    // Cộng full cache_read khiến 1 request Claude Code (~245k cache_read) trừ sạch quota
-    // dù thực tế chỉ tốn ~1/10 → "reset xong lại vọt về như cũ".
-    const base = u.input_tokens ?? u.prompt_tokens ?? 0;
-    const input = Math.round(
-      base +
-      (u.cache_creation_input_tokens ?? 0) * 1.25 +
-      (u.cache_read_input_tokens ?? 0) * 0.1,
-    );
+    // Tạm KHÔNG tính cache token — chỉ đếm input thường. Cache read ~245k/request Claude Code
+    // làm quota vọt lên khó kiểm soát. Bật lại (theo trọng số giá) khi cần tính phí sát hơn:
+    //   + (u.cache_creation_input_tokens ?? 0) * 1.25 + (u.cache_read_input_tokens ?? 0) * 0.1
+    const input = u.input_tokens ?? u.prompt_tokens ?? 0;
     const output = u.output_tokens ?? u.completion_tokens ?? 0;
     if (input === 0 && output === 0 && u.input_tokens === undefined && u.prompt_tokens === undefined) return null;
     return { input, output };
